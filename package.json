@@ -1,0 +1,25 @@
+{
+  "name": "aws-credentials-provider",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "node_modules/.bin/tsc",
+    "clean": "rm -rf ./dist",
+    "clean-build": "npm run clean && npm ci && npm run build",
+    "lint": "./node_modules/.bin/eslint ./src",
+    "lint-fix": "./node_modules/.bin/eslint --fix ./src",
+    "lint-tests": "./node_modules/.bin/eslint --config .eslintrc.test.json ./test",
+    "lint-fix-tests": "./node_modules/.bin/eslint --config .eslintrc.test.json --fix ./test",
+    "setup-test-lint": "node ./scripts/setup-test-lint.js",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "eslint": "^8.33.0",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "@aws-sdk/credential-providers": "^3.263.0",
+    "@tinystacks/ops-model": "file:../ops-model",
+    "aws-sdk": "^2.1307.0"
+  }
+}

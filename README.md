@@ -1,1 +1,1 @@
-# aws-credentials-manager
+# aws-credentials-provider
