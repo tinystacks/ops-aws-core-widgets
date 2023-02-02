@@ -81,6 +81,7 @@ class AwsAssumedRole implements AwsCredentialsType {
       const genericCreds = this.mapStsCredsToGenericCreds();
       return genericCreds;
     }
+    // TODO: figure out how not to reconstruct the master STS client on each call to getV2Credentials
     if (this.masterCredentials) {
       const creds = await this.masterCredentials.getV2Credentials();
       this.stsClient = new AWS.STS({
