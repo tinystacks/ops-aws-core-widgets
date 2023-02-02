@@ -12,7 +12,7 @@ class AwsAssumedRole implements AwsCredentialsType {
   duration?: number;
   masterCredentials?: AwsCredentialsTypeV2 | AwsCredentialsType;
   private stsClient: AWS.STS;
-  private creds: AWS.STS.Credentials;
+  private stsCreds: AWS.STS.Credentials;
 
   constructor(args: {
     roleArn: string,
@@ -54,37 +54,39 @@ class AwsAssumedRole implements AwsCredentialsType {
   }
 
   private credsWillExpireInSession() {
-    const credsExist = !!this.creds;
+    const credsExist = !!this.stsCreds;
     if (!credsExist) {
       return true;
     }
     // TODO: simplify the statements below
-    const timeSinceCredsWereSet = this.creds.Expiration.getTime() - new Date().getTime();
+    const timeSinceCredsWereSet = this.stsCreds.Expiration.getTime() - new Date().getTime();
     const serviceCredsWillExpireInSession = timeSinceCredsWereSet < this.duration * 1000
     return serviceCredsWillExpireInSession;
   }
 
+  private mapStsCredsToGenericCreds() {
+    if (!this.stsCreds) {
+      throw new Error('STS creds do not exist!');
+    }
+    return new AWS.Credentials({
+      accessKeyId: this.stsCreds.AccessKeyId,
+      secretAccessKey: this.stsCreds.SecretAccessKey,
+      sessionToken: this.stsCreds.SessionToken
+    })
+  }
+
   async getV2Credentials() {
-    // if sts creds exist and have not expired, return them
+    // if sts creds exist and have not expired, return them as generic creds
     if (!this.credsWillExpireInSession()) {
-      return this.creds;
+      const genericCreds = this.mapStsCredsToGenericCreds();
+      return genericCreds;
     }
     if (this.masterCredentials) {
       const creds = await this.masterCredentials.getV2Credentials();
-      let accessKeyId, secretAccessKey, sessionToken;
-      if (creds instanceof AWS.Credentials) {
-        accessKeyId = creds.accessKeyId,
-        secretAccessKey = creds.secretAccessKey,
-        sessionToken = creds.sessionToken
-      } else {
-        accessKeyId = creds.AccessKeyId,
-        secretAccessKey = creds.SecretAccessKey,
-        sessionToken = creds.SessionToken
-      }
       this.stsClient = new AWS.STS({
-        accessKeyId,
-        secretAccessKey,
-        sessionToken,
+        accessKeyId: creds.accessKeyId,
+        secretAccessKey: creds.secretAccessKey,
+        sessionToken: creds.sessionToken,
         region: this.region
       });
     }
@@ -93,7 +95,9 @@ class AwsAssumedRole implements AwsCredentialsType {
       RoleSessionName: this.sessionName,
       DurationSeconds: this.duration
     }).promise();
-    return res.Credentials;
+    this.stsCreds = res.Credentials;
+    const genericCreds = this.mapStsCredsToGenericCreds()
+    return genericCreds;
   }
 
   getV3Credentials() {
