@@ -11,7 +11,8 @@
     "lint-tests": "./node_modules/.bin/eslint --config .eslintrc.test.json ./test",
     "lint-fix-tests": "./node_modules/.bin/eslint --config .eslintrc.test.json --fix ./test",
     "setup-test-lint": "node ./scripts/setup-test-lint.js",
-    "test": "jest"
+    "test": "jest",
+    "test-cov": "jest --coverage"
   },
   "devDependencies": {
     "eslint": "^8.33.0",
