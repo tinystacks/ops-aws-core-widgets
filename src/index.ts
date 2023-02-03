@@ -1,26 +1,28 @@
-import AwsAssumedRole from './credential-types/aws-assumed-role';
-import AwsKeys from './credential-types/aws-keys';
-import LocalAwsProfile from './credential-types/local-aws-profile';
+import AwsAssumedRole from './credential-providers/aws-assumed-role';
+import AwsKeys from './credential-providers/aws-keys';
+import LocalAwsProfile from './credential-providers/local-aws-profile';
 
 // TODO: Consolidate Provider interface
 class AwsCredentialsProvider {
+  id: string;
   credentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
 
   constructor(
-    // id: string,
+    id: string,
     credentials: AwsAssumedRole | AwsKeys | LocalAwsProfile
   ) {
     // super(id);
+    this.id = id;
     this.credentials = credentials;
   }
 
   static fromObject(object: AwsCredentialsProvider): AwsCredentialsProvider {
     const {
-      // id,
+      id,
       credentials
     } = object;
     return new AwsCredentialsProvider(
-      // id,
+      id,
       credentials
     );
   }

@@ -1,7 +1,7 @@
 // import { AwsKeys as AwsKeysType } from '@tinystacks/ops-model';
 
 import AWS from "aws-sdk";
-import AwsCredentialsTypeV2 from "../credential-providers/aws-credentials-type-v2";
+import AwsCredentialsTypeV2 from "../credential-types/aws-credentials-type-v2";
 
 class AwsKeys implements AwsCredentialsTypeV2 {
   AwsAccessKeyId: string;

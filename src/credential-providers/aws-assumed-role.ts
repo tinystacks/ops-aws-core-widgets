@@ -1,7 +1,8 @@
 import AWS from 'aws-sdk';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
-import AwsCredentialsType from '../credential-providers/aws-credentials-type';
-import AwsCredentialsTypeV2 from '../credential-providers/aws-credentials-type-v2';
+import { AwsCredentialIdentityProvider } from '@aws-sdk/types';
+import AwsCredentialsType from '../credential-types/aws-credentials-type';
+import AwsCredentialsTypeV2 from '../credential-types/aws-credentials-type-v2';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 
@@ -10,7 +11,7 @@ class AwsAssumedRole implements AwsCredentialsType {
   sessionName: string;
   region: string;
   duration?: number;
-  masterCredentials?: AwsCredentialsTypeV2 | AwsCredentialsType;
+  primaryCredentials?: AwsCredentialsTypeV2 | AwsCredentialsType;
   private stsClient: AWS.STS;
   private stsCreds: AWS.STS.Credentials;
 
@@ -19,21 +20,21 @@ class AwsAssumedRole implements AwsCredentialsType {
     sessionName: string,
     region: string,
     duration?: number,
-    masterCredentials?: AwsCredentialsTypeV2 | AwsCredentialsType;
+    primaryCredentials?: AwsCredentialsTypeV2 | AwsCredentialsType;
   }) {
     const {
       roleArn,
       sessionName,
       region,
       duration,
-      masterCredentials
+      primaryCredentials
     } = args;
     this.roleArn = roleArn;
     this.sessionName = sessionName;
     this.duration = duration || ROLE_SESSION_DURATION_SECONDS;
     this.region = region;
     this.stsClient = new AWS.STS({ region });
-    this.masterCredentials = masterCredentials;
+    this.primaryCredentials = primaryCredentials;
   }
 
   static fromObject(object: AwsAssumedRole): AwsAssumedRole {
@@ -42,14 +43,14 @@ class AwsAssumedRole implements AwsCredentialsType {
       sessionName,
       region,
       duration,
-      masterCredentials
+      primaryCredentials
     } = object;
     return new AwsAssumedRole({
       roleArn,
       sessionName,
       region,
       duration,
-      masterCredentials
+      primaryCredentials
     });
   }
 
@@ -82,8 +83,8 @@ class AwsAssumedRole implements AwsCredentialsType {
       return genericCreds;
     }
     // TODO: figure out how not to reconstruct the master STS client on each call to getV2Credentials
-    if (this.masterCredentials) {
-      const creds = await this.masterCredentials.getV2Credentials();
+    if (this.primaryCredentials) {
+      const creds = await this.primaryCredentials.getV2Credentials();
       this.stsClient = new AWS.STS({
         accessKeyId: creds.accessKeyId,
         secretAccessKey: creds.secretAccessKey,
@@ -102,12 +103,15 @@ class AwsAssumedRole implements AwsCredentialsType {
   }
 
   getV3Credentials() {
-    let creds;
-    if (this.masterCredentials as AwsCredentialsType) {
-      creds = (this.masterCredentials as AwsCredentialsType).getV3Credentials();
-    } else {
-      throw new Error('Failed to get V3 credentials for the provided masterCredentials. V3 credentials are not supported by all credential types');
+    let creds: AwsCredentialIdentityProvider;
+    try {
+      if (!!this.primaryCredentials) {
+        creds = (this.primaryCredentials as AwsCredentialsType).getV3Credentials();
+      }
+    } catch (error) {
+      throw new Error('Failed to get V3 credentials for the provided primaryCredentials. V3 credentials are not supported by all credential types');
     }
+   
     return fromTemporaryCredentials({
       params: {
         RoleArn: this.roleArn,

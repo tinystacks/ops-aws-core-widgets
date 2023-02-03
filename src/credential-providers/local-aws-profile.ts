@@ -2,7 +2,7 @@
 
 import { fromIni } from "@aws-sdk/credential-providers";
 import AWS from "aws-sdk";
-import AwsCredentialsType from "../credential-providers/aws-credentials-type";
+import AwsCredentialsType from "../credential-types/aws-credentials-type";
 
 class LocalAwsProfile implements AwsCredentialsType {
   profileName: string;
