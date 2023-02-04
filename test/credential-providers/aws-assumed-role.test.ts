@@ -1,10 +1,10 @@
 const mockAssumeRole = jest.fn();
 
 import AWS from 'aws-sdk';
+import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import AwsAssumedRole from '../../src/credential-providers/aws-assumed-role';
 import AwsKeys from '../../src/credential-providers/aws-keys';
 import LocalAwsProfile from '../../src/credential-providers/local-aws-profile';
-import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 
 jest.useFakeTimers().setSystemTime(new Date('2023-02-02').getTime());
 
@@ -71,9 +71,9 @@ describe('getV2Credentials', () => {
   it('sts creds have expired and has AwsAssumedRole primaryCredentials', async () => {
     mockAssumeRole.mockResolvedValueOnce({
       Credentials: {
-        AccessKeyId: 'test-master-access-key',
-        SecretAccessKey: 'test-master-secret-key',
-        SessionToken: 'test-master-session-token'
+        AccessKeyId: 'test-primary-access-key',
+        SecretAccessKey: 'test-primary-secret-key',
+        SessionToken: 'test-primary-session-token'
       }
     });
     mockAssumeRole.mockResolvedValueOnce({
@@ -89,8 +89,8 @@ describe('getV2Credentials', () => {
       sessionName: 'test-session-name',
       region: 'us-east-1',
       primaryCredentials: new AwsAssumedRole({
-        roleArn: 'test-master-role-arn',
-        sessionName: 'test-master-session-name',
+        roleArn: 'test-primary-role-arn',
+        sessionName: 'test-primary-session-name',
         region: 'us-east-1'
       })
     });
@@ -99,8 +99,8 @@ describe('getV2Credentials', () => {
     expect(awsAssumedRole.primaryCredentials).toBeInstanceOf(AwsAssumedRole);
     expect(mockAssumeRole).toBeCalledTimes(2);
     expect(mockAssumeRole).toBeCalledWith({
-      RoleArn: 'test-master-role-arn',
-      RoleSessionName: 'test-master-session-name',
+      RoleArn: 'test-primary-role-arn',
+      RoleSessionName: 'test-primary-session-name',
       DurationSeconds: ROLE_SESSION_DURATION_SECONDS
     });
     expect(mockAssumeRole).toBeCalledWith({
@@ -123,7 +123,7 @@ describe('getV2Credentials', () => {
       roleArn: 'test-role-arn',
       sessionName: 'test-session-name',
       region: 'us-east-1',
-      primaryCredentials: new AwsKeys('test-master-access-key', 'test-master-secret-key', 'test-master-session-token')
+      primaryCredentials: new AwsKeys('test-primary-access-key', 'test-primary-secret-key', 'test-primary-session-token')
     });
 
     const result = await awsAssumedRole.getV2Credentials();
@@ -232,8 +232,8 @@ describe('getV3Credentials', () => {
       sessionName: 'test-session-name',
       region: 'us-east-1',
       primaryCredentials: new AwsAssumedRole({
-        roleArn: 'test-master-role-arn',
-        sessionName: 'test-master-session-name',
+        roleArn: 'test-primary-role-arn',
+        sessionName: 'test-primary-session-name',
         region: 'us-east-1'
       })
     });
