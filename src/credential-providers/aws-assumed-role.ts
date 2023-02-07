@@ -1,17 +1,20 @@
 import AWS from 'aws-sdk';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { AwsCredentialIdentityProvider } from '@aws-sdk/types';
-import AwsCredentialsType from '../credential-types/aws-credentials-type';
-import AwsCredentialsTypeV2 from '../credential-types/aws-credentials-type-v2';
+import { AwsCredentialsType, AwsSdkVersionEnum, getVersionedCredentials } from '../credential-types/aws-credentials-type';
+import { AwsAssumedRole as AwsAssumedRoleType } from '@tinystacks/ops-model';
+import AwsKeys from './aws-keys';
+import LocalAwsProfile from './local-aws-profile';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
+const DEFAULT_REGION = 'us-east-1';
 
-class AwsAssumedRole implements AwsCredentialsType {
+class AwsAssumedRole implements AwsAssumedRoleType, AwsCredentialsType {
   roleArn: string;
   sessionName: string;
   region: string;
   duration?: number;
-  primaryCredentials?: AwsCredentialsTypeV2 | AwsCredentialsType;
+  primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
   private stsClient: AWS.STS;
   private stsCreds: AWS.STS.Credentials;
 
@@ -19,8 +22,8 @@ class AwsAssumedRole implements AwsCredentialsType {
     roleArn: string,
     sessionName: string,
     region: string,
-    duration?: number,
-    primaryCredentials?: AwsCredentialsTypeV2 | AwsCredentialsType;
+    primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
+    duration?: number
   }) {
     const {
       roleArn,
@@ -31,10 +34,9 @@ class AwsAssumedRole implements AwsCredentialsType {
     } = args;
     this.roleArn = roleArn;
     this.sessionName = sessionName;
-    this.duration = duration || ROLE_SESSION_DURATION_SECONDS;
-    this.region = region;
-    this.stsClient = new AWS.STS({ region });
+    this.region = region || DEFAULT_REGION;
     this.primaryCredentials = primaryCredentials;
+    this.duration = duration || ROLE_SESSION_DURATION_SECONDS;
   }
 
   static fromObject (object: AwsAssumedRole): AwsAssumedRole {
@@ -42,15 +44,15 @@ class AwsAssumedRole implements AwsCredentialsType {
       roleArn,
       sessionName,
       region,
-      duration,
-      primaryCredentials
+      primaryCredentials,
+      duration
     } = object;
     return new AwsAssumedRole({
       roleArn,
       sessionName,
       region,
-      duration,
-      primaryCredentials
+      primaryCredentials,
+      duration
     });
   }
 
@@ -65,32 +67,31 @@ class AwsAssumedRole implements AwsCredentialsType {
     return serviceCredsWillExpireInSession;
   }
 
-  private mapStsCredsToGenericCreds () {
+  private mapStsCredsToGenericCreds() {
     if (!this.stsCreds) {
       throw new Error('STS creds do not exist!');
     }
-    return new AWS.Credentials({
+    return {
       accessKeyId: this.stsCreds.AccessKeyId,
       secretAccessKey: this.stsCreds.SecretAccessKey,
       sessionToken: this.stsCreds.SessionToken
-    });
+    };
   }
 
-  async getV2Credentials () {
+  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V2) {
     // if sts creds exist and have not expired, return them as generic creds
     if (!this.credsWillExpireInSession()) {
       const genericCreds = this.mapStsCredsToGenericCreds();
       return genericCreds;
     }
-    if (this.primaryCredentials) {
-      const creds = await this.primaryCredentials.getV2Credentials();
-      this.stsClient = new AWS.STS({
-        accessKeyId: creds.accessKeyId,
-        secretAccessKey: creds.secretAccessKey,
-        sessionToken: creds.sessionToken,
-        region: this.region
-      });
-    }
+    const creds = await this.primaryCredentials.getCredentials(awsSdkVersion);
+    this.stsClient = new AWS.STS({
+      accessKeyId: creds.accessKeyId,
+      secretAccessKey: creds.secretAccessKey,
+      sessionToken: creds.sessionToken,
+      region: this.region
+    });
+    
     const res = await this.stsClient.assumeRole({
       RoleArn: this.roleArn,
       RoleSessionName: this.sessionName,
@@ -98,31 +99,31 @@ class AwsAssumedRole implements AwsCredentialsType {
     }).promise();
     this.stsCreds = res.Credentials;
     const genericCreds = this.mapStsCredsToGenericCreds();
-    return genericCreds;
+    return getVersionedCredentials(awsSdkVersion, genericCreds);
   }
 
-  getV3Credentials () {
-    let creds: AwsCredentialIdentityProvider;
-    try {
-      if (this.primaryCredentials) {
-        creds = (this.primaryCredentials as AwsCredentialsType).getV3Credentials();
-      }
-    } catch (error) {
-      throw new Error('Failed to get V3 credentials for the provided primaryCredentials. V3 credentials are not supported by all credential types');
-    }
+  // async getV3Credentials () {
+  //   let creds: AwsCredentialIdentityProvider;
+  //   try {
+  //     if (this.primaryCredentials) {
+  //       creds = (this.primaryCredentials as AwsCredentialsType).getV3Credentials();
+  //     }
+  //   } catch (error) {
+  //     throw new Error('Failed to get V3 credentials for the provided primaryCredentials. V3 credentials are not supported by all credential types');
+  //   }
    
-    return fromTemporaryCredentials({
-      params: {
-        RoleArn: this.roleArn,
-        RoleSessionName: this.sessionName,
-        DurationSeconds: this.duration
-      },
-      clientConfig: {
-        region: this.region
-      },
-      ...(creds && { masterCredentials: creds })
-    });
-  }
+  //   return fromTemporaryCredentials({
+  //     params: {
+  //       RoleArn: this.roleArn,
+  //       RoleSessionName: this.sessionName,
+  //       DurationSeconds: this.duration
+  //     },
+  //     clientConfig: {
+  //       region: this.region
+  //     },
+  //     ...(creds && { masterCredentials: creds })
+  //   });
+  // }
 }
 
 export default AwsAssumedRole;

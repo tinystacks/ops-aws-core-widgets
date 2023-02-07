@@ -1,15 +1,16 @@
 // import { LocalAwsProfile as LocalAwsProfileType } from '@tinystacks/ops-model';
 
-import { fromIni } from '@aws-sdk/credential-providers';
+import { fromIni, fromNodeProviderChain } from '@aws-sdk/credential-providers';
 import AWS from 'aws-sdk';
-import AwsCredentialsType from '../credential-types/aws-credentials-type';
+import { AwsCredentialsType, AwsSdkVersionEnum, getVersionedCredentials } from '../credential-types/aws-credentials-type';
 
 class LocalAwsProfile implements AwsCredentialsType {
   profileName: string;
 
-  constructor (
+  constructor (args: {
     profileName: string
-  ) {
+  }) {
+    const { profileName } = args;
     this.profileName = profileName;
   }
 
@@ -17,23 +18,32 @@ class LocalAwsProfile implements AwsCredentialsType {
     const {
       profileName
     } = object;
-    return new LocalAwsProfile(
+    return new LocalAwsProfile({
       profileName
-    );
+    });
   }
 
-  async getV2Credentials () {
+  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V2) {
     const sharedCreds = new AWS.SharedIniFileCredentials({
       profile: this.profileName
     });
-    return sharedCreds as AWS.Credentials;
+    return getVersionedCredentials(
+      awsSdkVersion, 
+      {
+        accessKeyId: sharedCreds.accessKeyId,
+        secretAccessKey: sharedCreds.secretAccessKey,
+        sessionToken: sharedCreds.sessionToken
+      }
+    );
   }
 
-  getV3Credentials () {
-    return fromIni({
-      profile: this.profileName
-    });
-  }
+  // async getV3Credentials () {
+  //   const credentials =
+
+  //   return fromIni({
+  //     profile: this.profileName
+  //   });
+  // }
 }
 
 export default LocalAwsProfile;

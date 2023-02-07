@@ -1,8 +1,30 @@
-import { AwsCredentialIdentityProvider } from '@aws-sdk/types';
-import AwsCredentialsTypeV2 from './aws-credentials-type-v2';
+import AWS from 'aws-sdk';
+import { AwsCredentialIdentity } from '@aws-sdk/types';
 
-interface AwsCredentialsType extends AwsCredentialsTypeV2 {
-  getV3Credentials(): AwsCredentialIdentityProvider;
+export type AwsCredentials = AWS.Credentials | AwsCredentialIdentity;
+export enum AwsSdkVersionEnum {
+  V2 = 'V2',
+  V3 = 'V3'
 }
 
-export default AwsCredentialsType;
+export function getVersionedCredentials(
+  awsSdkVersion: AwsSdkVersionEnum, 
+  creds: { 
+    accessKeyId: string, 
+    secretAccessKey: string, 
+    sessionToken?: string
+  }): AwsCredentials {
+
+  switch (awsSdkVersion) {
+    case AwsSdkVersionEnum.V2:
+      return new AWS.Credentials({...creds});
+    case AwsSdkVersionEnum.V3:
+      return creds as AwsCredentialIdentity;
+    default:
+      return new AWS.Credentials({...creds});
+  }
+}
+
+export interface AwsCredentialsType {
+  getCredentials(awsSdkVersion?: AwsSdkVersionEnum): Promise<AwsCredentials>;
+}

@@ -1,42 +1,50 @@
 // import { AwsKeys as AwsKeysType } from '@tinystacks/ops-model';
 
-import AWS from 'aws-sdk';
-import AwsCredentialsTypeV2 from '../credential-types/aws-credentials-type-v2';
+import { AwsCredentialsType, AwsSdkVersionEnum, getVersionedCredentials } from '../credential-types/aws-credentials-type';
+import { AwsKeys as AwsKeysType } from '@tinystacks/ops-model';
 
-class AwsKeys implements AwsCredentialsTypeV2 {
+class AwsKeys implements AwsKeysType, AwsCredentialsType {
   AwsAccessKeyId: string;
   AwsSecretAccessKey: string;
   AwsSessionToken?: string;
 
-  constructor (
+  constructor(args: {
     AwsAccessKeyId: string,
     AwsSecretAccessKey: string,
     AwsSessionToken?: string
-  ) {
+  }) {
+    const { 
+      AwsAccessKeyId,
+      AwsSecretAccessKey,
+      AwsSessionToken
+    } = args;
     this.AwsAccessKeyId = AwsAccessKeyId;
     this.AwsSecretAccessKey = AwsSecretAccessKey;
     this.AwsSessionToken = AwsSessionToken;
   }
 
-  static fromObject (object: AwsKeys): AwsKeys {
+  static fromObject(object: AwsKeys): AwsKeys {
     const {
       AwsAccessKeyId,
       AwsSecretAccessKey,
       AwsSessionToken
     } = object;
-    return new AwsKeys(
+    return new AwsKeys({
       AwsAccessKeyId,
       AwsSecretAccessKey,
       AwsSessionToken
-    );
+    });
   }
 
-  async getV2Credentials () {
-    return new AWS.Credentials({
-      accessKeyId: this.AwsAccessKeyId,
-      secretAccessKey: this.AwsSecretAccessKey,
-      sessionToken: this.AwsSessionToken
-    });
+  async getCredentials(awsSdkVersion = AwsSdkVersionEnum.V2) {
+    return getVersionedCredentials(
+      awsSdkVersion, 
+      {
+        accessKeyId: this.AwsAccessKeyId,
+        secretAccessKey: this.AwsSecretAccessKey,
+        sessionToken: this.AwsSessionToken
+      }
+    );
   }
 }
 
