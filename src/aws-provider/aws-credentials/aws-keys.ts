@@ -1,9 +1,13 @@
 // import { AwsKeys as AwsKeysType } from '@tinystacks/ops-model';
 
-import { AwsCredentialsType, AwsSdkVersionEnum, getVersionedCredentials } from '../credential-types/aws-credentials-type';
-import { AwsKeys as AwsKeysType } from '@tinystacks/ops-model';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
+import { 
+  AwsKeys as AwsKeysType,
+  AwsAssumedRole as AwsAssumedRoleType,
+  LocalAwsProfile as LocalAwsProfileType
+} from '@tinystacks/ops-model';
 
-class AwsKeys implements AwsKeysType, AwsCredentialsType {
+class AwsKeys extends AwsCredentialsType implements AwsKeysType {
   AwsAccessKeyId: string;
   AwsSecretAccessKey: string;
   AwsSessionToken?: string;
@@ -13,6 +17,7 @@ class AwsKeys implements AwsKeysType, AwsCredentialsType {
     AwsSecretAccessKey: string,
     AwsSessionToken?: string
   }) {
+    super();
     const { 
       AwsAccessKeyId,
       AwsSecretAccessKey,
@@ -23,7 +28,11 @@ class AwsKeys implements AwsKeysType, AwsCredentialsType {
     this.AwsSessionToken = AwsSessionToken;
   }
 
-  static fromObject(object: AwsKeys): AwsKeys {
+  static isAwsKeys (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType) {
+    return 'AwsAccessKeyId' in credentials;
+  }
+
+  static fromJSON(object: AwsKeysType): AwsKeys {
     const {
       AwsAccessKeyId,
       AwsSecretAccessKey,
@@ -37,7 +46,7 @@ class AwsKeys implements AwsKeysType, AwsCredentialsType {
   }
 
   async getCredentials(awsSdkVersion = AwsSdkVersionEnum.V2) {
-    return getVersionedCredentials(
+    return super.getVersionedCredentials(
       awsSdkVersion, 
       {
         accessKeyId: this.AwsAccessKeyId,

@@ -1,15 +1,19 @@
 import AWS from 'aws-sdk';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { AwsCredentialIdentityProvider } from '@aws-sdk/types';
-import { AwsCredentialsType, AwsSdkVersionEnum, getVersionedCredentials } from '../credential-types/aws-credentials-type';
-import { AwsAssumedRole as AwsAssumedRoleType } from '@tinystacks/ops-model';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
+import { 
+  AwsAssumedRole as AwsAssumedRoleType,
+  AwsKeys as AwsKeysType,
+  LocalAwsProfile as LocalAwsProfileType
+} from '@tinystacks/ops-model';
 import AwsKeys from './aws-keys';
 import LocalAwsProfile from './local-aws-profile';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 const DEFAULT_REGION = 'us-east-1';
 
-class AwsAssumedRole implements AwsAssumedRoleType, AwsCredentialsType {
+class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
   roleArn: string;
   sessionName: string;
   region: string;
@@ -25,6 +29,7 @@ class AwsAssumedRole implements AwsAssumedRoleType, AwsCredentialsType {
     primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
     duration?: number
   }) {
+    super();
     const {
       roleArn,
       sessionName,
@@ -39,7 +44,11 @@ class AwsAssumedRole implements AwsAssumedRoleType, AwsCredentialsType {
     this.duration = duration || ROLE_SESSION_DURATION_SECONDS;
   }
 
-  static fromObject (object: AwsAssumedRole): AwsAssumedRole {
+  static isAwsAssumedRole (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType) {
+    return 'roleArn' in credentials;
+  }
+
+  static fromJSON (object: AwsAssumedRoleType): AwsAssumedRole {
     const {
       roleArn,
       sessionName,
@@ -51,9 +60,19 @@ class AwsAssumedRole implements AwsAssumedRoleType, AwsCredentialsType {
       roleArn,
       sessionName,
       region,
-      primaryCredentials,
+      primaryCredentials: this.buildPrimaryCreds(primaryCredentials),
       duration
     });
+  }
+
+  private static buildPrimaryCreds (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType): AwsAssumedRole | AwsKeys | LocalAwsProfile {
+    if (AwsKeys.isAwsKeys(credentials)) {
+      return AwsKeys.fromJSON({...(credentials as AwsKeysType)})
+    } else if (LocalAwsProfile.isLocalAwsProfile(credentials)) {
+      return LocalAwsProfile.fromJSON({...(credentials as LocalAwsProfileType)});
+    } else {
+      return this.fromJSON({...(credentials as AwsAssumedRoleType)});
+    }
   }
 
   private credsWillExpireInSession () {
@@ -82,7 +101,7 @@ class AwsAssumedRole implements AwsAssumedRoleType, AwsCredentialsType {
     // if sts creds exist and have not expired, return them as generic creds
     if (!this.credsWillExpireInSession()) {
       const genericCreds = this.mapStsCredsToGenericCreds();
-      return genericCreds;
+      return super.getVersionedCredentials(awsSdkVersion, genericCreds);
     }
     const creds = await this.primaryCredentials.getCredentials(awsSdkVersion);
     this.stsClient = new AWS.STS({
@@ -99,7 +118,7 @@ class AwsAssumedRole implements AwsAssumedRoleType, AwsCredentialsType {
     }).promise();
     this.stsCreds = res.Credentials;
     const genericCreds = this.mapStsCredsToGenericCreds();
-    return getVersionedCredentials(awsSdkVersion, genericCreds);
+    return super.getVersionedCredentials(awsSdkVersion, genericCreds);
   }
 
   // async getV3Credentials () {
