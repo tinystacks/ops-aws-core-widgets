@@ -1,1 +1,1 @@
-# aws-credentials-provider
+# ops-aws-core-plugins
