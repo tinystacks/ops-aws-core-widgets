@@ -1,4 +1,5 @@
 import { Widget as WidgetType } from "@tinystacks/ops-model";
+// TODO: Add ops-core dependency, import from ops-core
 import Widget from "../../src/classes/widget";
 import { CloudWatch } from "@aws-sdk/client-cloudwatch";
 import dayjs, { ManipulateType } from "dayjs";
