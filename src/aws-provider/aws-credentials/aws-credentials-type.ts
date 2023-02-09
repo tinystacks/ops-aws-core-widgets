@@ -7,33 +7,11 @@ export enum AwsSdkVersionEnum {
   V3 = 'V3'
 }
 
-// export function getVersionedCredentials(
-//   awsSdkVersion: AwsSdkVersionEnum, 
-//   creds: { 
-//     accessKeyId: string, 
-//     secretAccessKey: string, 
-//     sessionToken?: string
-//   }): AwsCredentials {
-
-//   switch (awsSdkVersion) {
-//     case AwsSdkVersionEnum.V2:
-//       return new AWS.Credentials({...creds});
-//     case AwsSdkVersionEnum.V3:
-//       return creds as AwsCredentialIdentity;
-//     default:
-//       return new AWS.Credentials({...creds});
-//   }
-// }
-
-// export interface AwsCredentialsType {
-//   getCredentials(awsSdkVersion?: AwsSdkVersionEnum): Promise<AwsCredentials>;
-// }
-
 export abstract class AwsCredentialsType {
 
   abstract getCredentials(awsSdkVersion?: AwsSdkVersionEnum): Promise<AwsCredentials>;
 
-  getVersionedCredentials(
+  getVersionedCredentials (
     awsSdkVersion: AwsSdkVersionEnum, 
     creds: { 
       accessKeyId: string, 
@@ -43,11 +21,11 @@ export abstract class AwsCredentialsType {
   
     switch (awsSdkVersion) {
       case AwsSdkVersionEnum.V2:
-        return new AWS.Credentials({...creds});
+        return new AWS.Credentials({ ...creds });
       case AwsSdkVersionEnum.V3:
         return creds as AwsCredentialIdentity;
       default:
-        return new AWS.Credentials({...creds});
+        return new AWS.Credentials({ ...creds });
     }
   }
 }

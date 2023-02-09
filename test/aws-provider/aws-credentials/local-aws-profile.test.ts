@@ -1,8 +1,9 @@
 const mockSharedIniFileCredentials = jest.fn();
 
-import { fromIni } from "@aws-sdk/credential-providers";
+import { AwsCredentialIdentity } from "@aws-sdk/types";
 import AWS from "aws-sdk";
-import LocalAwsProfile from "../../src/credential-providers/local-aws-profile";
+import { AwsSdkVersionEnum } from "../../../src/aws-provider/aws-credentials/aws-credentials-type";
+import LocalAwsProfile from "../../../src/aws-provider/aws-credentials/local-aws-profile";
 
 jest.mock('aws-sdk', () => {
   const original = jest.requireActual('aws-sdk');
@@ -18,11 +19,13 @@ const mockV2Credentials = new AWS.Credentials({
   sessionToken: 'test-session-token'
 });
 
-const mockV3Credentials = fromIni({
-  profile: 'default'
-});
+const mockV3Credentials = {
+  accessKeyId: 'test-access-key',
+  secretAccessKey: 'test-secret-key',
+  sessionToken: 'test-session-token'
+} as AwsCredentialIdentity;
 
-describe('getV2Credentials', () => {
+describe('fromJSON', () => {
   afterEach(() => {
     // for mocks
     jest.clearAllMocks();
@@ -30,26 +33,83 @@ describe('getV2Credentials', () => {
     jest.restoreAllMocks();
   });
 
-  it('creates credentials', async () => {
-    mockSharedIniFileCredentials.mockReturnValue(mockV2Credentials);
+  it('creates LocalAwsProfile object', () => {
+    const mockFromJSONArgs = {
+      profileName: 'default'
+    };
+    const mockFromJSONResult = new LocalAwsProfile({
+      profileName: 'default'
+    });
 
-    const localAwsProfile = new LocalAwsProfile('default');
-    const result = await localAwsProfile.getV2Credentials();
+    const result = LocalAwsProfile.fromJSON(mockFromJSONArgs);
+    expect(result).toEqual(mockFromJSONResult);
+  });
+});
+
+describe('getCredentials', () => {
+  afterEach(() => {
+    // for mocks
+    jest.clearAllMocks();
+    // for spies
+    jest.restoreAllMocks();
+  });
+
+  it('reads profile successfully, v2 sdk', async () => {
+    mockSharedIniFileCredentials.mockReturnValue(new AWS.Credentials({
+      accessKeyId: 'test-access-key',
+      secretAccessKey: 'test-secret-key',
+      sessionToken: 'test-session-token'
+    }));
+
+    const localAwsProfile = new LocalAwsProfile({
+      profileName: 'default'
+    });
+    const result = await localAwsProfile.getCredentials(AwsSdkVersionEnum.V2);
     expect(result).toEqual(mockV2Credentials);
   });
-});
+  it('reads profile successfully, v3 sdk', async () => {
+    mockSharedIniFileCredentials.mockReturnValue(new AWS.Credentials({
+      accessKeyId: 'test-access-key',
+      secretAccessKey: 'test-secret-key',
+      sessionToken: 'test-session-token'
+    }));
 
-describe('getV3Credentials', () => {
-  afterEach(() => {
-    // for mocks
-    jest.clearAllMocks();
-    // for spies
-    jest.restoreAllMocks();
+    const localAwsProfile = new LocalAwsProfile({
+      profileName: 'default'
+    });
+    const result = await localAwsProfile.getCredentials(AwsSdkVersionEnum.V3);
+    expect(result).toEqual(mockV3Credentials);
   });
+  it('reads profile successfully, no args, defaults to v3 sdk', async () => {
+    mockSharedIniFileCredentials.mockReturnValue(new AWS.Credentials({
+      accessKeyId: 'test-access-key',
+      secretAccessKey: 'test-secret-key',
+      sessionToken: 'test-session-token'
+    }));
 
-  it('creates credential identity provider', async () => {
-    const localAwsProfile = new LocalAwsProfile('default');
-    const result = localAwsProfile.getV3Credentials();
-    expect(result.toString()).toBe(mockV3Credentials.toString());
+    const localAwsProfile = new LocalAwsProfile({
+      profileName: 'default'
+    });
+    const result = await localAwsProfile.getCredentials();
+    expect(result).toEqual(mockV2Credentials);
+  });
+  it('reads profile unsuccessfully', async () => {
+    mockSharedIniFileCredentials.mockImplementationOnce(() => {
+      throw new Error();
+    });
+
+    const localAwsProfile = new LocalAwsProfile({
+      profileName: 'default'
+    });
+
+    let thrownError;
+    try {
+      await localAwsProfile.getCredentials(AwsSdkVersionEnum.V2);
+    } catch (e) {
+      thrownError = e
+    } finally {
+      expect(thrownError).toBeDefined();
+      expect(thrownError).toEqual(new Error('Failed to read credentials from profile: default!. Ensure default exists in ~/.aws/credentials'));
+    }
   });
 });

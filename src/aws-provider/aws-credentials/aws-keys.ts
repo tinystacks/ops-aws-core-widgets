@@ -12,7 +12,7 @@ class AwsKeys extends AwsCredentialsType implements AwsKeysType {
   AwsSecretAccessKey: string;
   AwsSessionToken?: string;
 
-  constructor(args: {
+  constructor (args: {
     AwsAccessKeyId: string,
     AwsSecretAccessKey: string,
     AwsSessionToken?: string
@@ -32,7 +32,7 @@ class AwsKeys extends AwsCredentialsType implements AwsKeysType {
     return 'AwsAccessKeyId' in credentials;
   }
 
-  static fromJSON(object: AwsKeysType): AwsKeys {
+  static fromJSON (object: AwsKeysType): AwsKeys {
     const {
       AwsAccessKeyId,
       AwsSecretAccessKey,
@@ -45,7 +45,7 @@ class AwsKeys extends AwsCredentialsType implements AwsKeysType {
     });
   }
 
-  async getCredentials(awsSdkVersion = AwsSdkVersionEnum.V2) {
+  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V2) {
     return super.getVersionedCredentials(
       awsSdkVersion, 
       {
