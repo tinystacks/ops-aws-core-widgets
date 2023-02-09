@@ -31,6 +31,7 @@
     "@aws-sdk/types": "^3.257.0",
     "@tinystacks/ops-model": "file:../ops-model",
     "aws-sdk": "^2.1307.0",
-    "dayjs": "^1.11.7"
+    "dayjs": "^1.11.7",
+    "ops-api": "file:../ops-core/api"
   }
 }

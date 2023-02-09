@@ -2,12 +2,13 @@ import AwsAssumedRole from './aws-credentials/aws-assumed-role';
 import AwsKeys from './aws-credentials/aws-keys';
 import LocalAwsProfile from './aws-credentials/local-aws-profile';
 import { 
-  AwsProfileProvider as AwsProfileProviderType,
+  AwsCredentialsProvider as AwsCredentialsProviderType,
   AwsAssumedRole as AwsAssumedRoleType,
   AwsKeys as AwsKeysType,
   LocalAwsProfile as LocalAwsProfileType
 } from '@tinystacks/ops-model';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials/aws-credentials-type';
+// import Provider from './temporary-classes/provider';
 
 // TODO: Consolidate Provider interface
 class AwsCredentialsProvider {
@@ -24,7 +25,7 @@ class AwsCredentialsProvider {
     region?: string,
     id?: string,
   }) {
-    // super(id);
+    // super(type);
     const {
       type,
       credentials,
@@ -39,7 +40,7 @@ class AwsCredentialsProvider {
     this.id = id;
   }
 
-  static fromJSON (object: AwsProfileProviderType): AwsCredentialsProvider {
+  static fromJSON (object: AwsCredentialsProviderType): AwsCredentialsProvider {
     const {
       type,
       credentials,
