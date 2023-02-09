@@ -99,7 +99,7 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
     // if sts creds exist and have not expired, return them as generic creds
     if (!this.credsWillExpireInSession()) {
       const genericCreds = this.mapStsCredsToGenericCreds();
-      return super.getVersionedCredentials(awsSdkVersion, genericCreds);
+      return this.getVersionedCredentials(awsSdkVersion, genericCreds);
     }
     const creds = await this.primaryCredentials.getCredentials(awsSdkVersion);
     this.stsClient = new AWS.STS({
@@ -116,7 +116,7 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
     }).promise();
     this.stsCreds = res.Credentials;
     const genericCreds = this.mapStsCredsToGenericCreds();
-    return super.getVersionedCredentials(awsSdkVersion, genericCreds);
+    return this.getVersionedCredentials(awsSdkVersion, genericCreds);
   }
 }
 
