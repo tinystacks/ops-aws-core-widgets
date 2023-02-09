@@ -1,1 +1,1 @@
-# aws-credentials-manager
+# ops-aws-core-plugins
