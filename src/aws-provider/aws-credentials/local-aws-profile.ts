@@ -50,4 +50,6 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileType 
   }
 }
 
-export default LocalAwsProfile;
+export {
+  LocalAwsProfile
+};

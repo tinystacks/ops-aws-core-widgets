@@ -1,6 +1,6 @@
-import AwsAssumedRole from './aws-credentials/aws-assumed-role';
-import AwsKeys from './aws-credentials/aws-keys';
-import LocalAwsProfile from './aws-credentials/local-aws-profile';
+import { AwsAssumedRole } from './aws-credentials/aws-assumed-role';
+import { AwsKeys } from './aws-credentials/aws-keys';
+import { LocalAwsProfile } from './aws-credentials/local-aws-profile';
 import { 
   AwsCredentialsProvider as AwsCredentialsProviderType,
   AwsAssumedRole as AwsAssumedRoleType,
@@ -64,4 +64,6 @@ class AwsCredentialsProvider extends Provider {
   }
 }
 
-export default AwsCredentialsProvider;
+export { 
+  AwsCredentialsProvider
+};

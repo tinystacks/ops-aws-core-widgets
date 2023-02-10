@@ -1,7 +1,7 @@
 import { AwsCredentialIdentity } from "@aws-sdk/types";
 import AWS from "aws-sdk";
 import { AwsSdkVersionEnum } from "../../../src/aws-provider/aws-credentials/aws-credentials-type";
-import AwsKeys from "../../../src/aws-provider/aws-credentials/aws-keys";
+import { AwsKeys } from "../../../src/aws-provider/aws-credentials/aws-keys";
 
 const mockV2Credentials = new AWS.Credentials({
   accessKeyId: 'test-access-key',

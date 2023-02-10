@@ -1,11 +1,9 @@
-// import { AwsKeys as AwsKeysType } from '@tinystacks/ops-model';
-
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
 import { 
   AwsKeys as AwsKeysType,
   AwsAssumedRole as AwsAssumedRoleType,
   LocalAwsProfile as LocalAwsProfileType
 } from '@tinystacks/ops-model';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
 
 class AwsKeys extends AwsCredentialsType implements AwsKeysType {
   AwsAccessKeyId: string;
@@ -57,4 +55,6 @@ class AwsKeys extends AwsCredentialsType implements AwsKeysType {
   }
 }
 
-export default AwsKeys;
+export {
+  AwsKeys
+};

@@ -1,9 +1,9 @@
 const mockAssumeRole = jest.fn();
 
 import AWS from 'aws-sdk';
-import AwsAssumedRole from '../../../src/aws-provider/aws-credentials/aws-assumed-role';
-import AwsKeys from '../../../src/aws-provider/aws-credentials/aws-keys';
-import LocalAwsProfile from '../../../src/aws-provider/aws-credentials/local-aws-profile';
+import { AwsAssumedRole } from '../../../src/aws-provider/aws-credentials/aws-assumed-role';
+import { AwsKeys } from '../../../src/aws-provider/aws-credentials/aws-keys';
+import { LocalAwsProfile } from '../../../src/aws-provider/aws-credentials/local-aws-profile';
 import { AwsSdkVersionEnum } from '../../../src/aws-provider/aws-credentials/aws-credentials-type';
 import { AwsCredentialIdentity } from '@aws-sdk/types';
 

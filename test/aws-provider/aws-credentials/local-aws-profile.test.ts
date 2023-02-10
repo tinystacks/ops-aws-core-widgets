@@ -3,7 +3,7 @@ const mockSharedIniFileCredentials = jest.fn();
 import { AwsCredentialIdentity } from "@aws-sdk/types";
 import AWS from "aws-sdk";
 import { AwsSdkVersionEnum } from "../../../src/aws-provider/aws-credentials/aws-credentials-type";
-import LocalAwsProfile from "../../../src/aws-provider/aws-credentials/local-aws-profile";
+import { LocalAwsProfile } from "../../../src/aws-provider/aws-credentials/local-aws-profile";
 
 jest.mock('aws-sdk', () => {
   const original = jest.requireActual('aws-sdk');

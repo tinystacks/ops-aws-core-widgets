@@ -1,15 +1,8 @@
-const mockAssumeRole = jest.fn();
-const mockSharedIniFileCredentials = jest.fn();
-const mockAwsAssumedRoleGetCredentials = jest.fn();
-const mockAwsKeysGetCredentials = jest.fn();
-const mockLocalAwsProfileGetCredentials = jest.fn();
-
-import { fromIni, fromTemporaryCredentials } from "@aws-sdk/credential-providers";
 import AWS from "aws-sdk";
-import AwsAssumedRole from "../../src/aws-provider/aws-credentials/aws-assumed-role";
-import AwsKeys from "../../src/aws-provider/aws-credentials/aws-keys";
-import LocalAwsProfile from "../../src/aws-provider/aws-credentials/local-aws-profile";
-import AwsCredentialsProvider from "../../src/aws-provider/aws-credentials-provider";
+import { AwsAssumedRole } from "../../src/aws-provider/aws-credentials/aws-assumed-role";
+import { AwsKeys } from "../../src/aws-provider/aws-credentials/aws-keys";
+import { LocalAwsProfile } from "../../src/aws-provider/aws-credentials/local-aws-profile";
+import { AwsCredentialsProvider } from "../../src/aws-provider/aws-credentials-provider";
 import { AwsSdkVersionEnum } from "../../src/aws-provider/aws-credentials/aws-credentials-type";
 import { AwsCredentialIdentity } from "@aws-sdk/types";
 

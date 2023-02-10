@@ -5,8 +5,8 @@ import {
   AwsKeys as AwsKeysType,
   LocalAwsProfile as LocalAwsProfileType
 } from '@tinystacks/ops-model';
-import AwsKeys from './aws-keys';
-import LocalAwsProfile from './local-aws-profile';
+import { AwsKeys } from './aws-keys';
+import { LocalAwsProfile } from './local-aws-profile';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 const DEFAULT_REGION = 'us-east-1';
@@ -120,4 +120,6 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
   }
 }
 
-export default AwsAssumedRole;
+export {
+  AwsAssumedRole
+};
