@@ -15,12 +15,12 @@ class AwsKeys extends AwsCredentialsType implements AwsKeysType {
     AwsSecretAccessKey: string,
     AwsSessionToken?: string
   }) {
-    super();
     const { 
       AwsAccessKeyId,
       AwsSecretAccessKey,
       AwsSessionToken
     } = args;
+    super();
     this.AwsAccessKeyId = AwsAccessKeyId;
     this.AwsSecretAccessKey = AwsSecretAccessKey;
     this.AwsSessionToken = AwsSessionToken;

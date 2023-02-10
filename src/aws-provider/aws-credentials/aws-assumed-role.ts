@@ -27,7 +27,6 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
     primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
     duration?: number
   }) {
-    super();
     const {
       roleArn,
       sessionName,
@@ -35,6 +34,7 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
       primaryCredentials,
       duration
     } = args;
+    super();
     this.roleArn = roleArn;
     this.sessionName = sessionName;
     this.region = region || DEFAULT_REGION;
