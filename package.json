@@ -2,14 +2,17 @@
   "name": "ops-aws-core-plugins",
   "version": "1.0.0",
   "main": "dist/index.js",
+  "files": ["dist"],
   "scripts": {
     "build": "node_modules/.bin/tsc",
-    "clean": "rm -rf ./dist",
+    "clean": "rm -rf ./dist || true && rm *.tgz || true",
     "clean-build": "npm run clean && npm ci && npm run build",
     "lint": "./node_modules/.bin/eslint ./src",
     "lint-fix": "./node_modules/.bin/eslint --fix ./src",
     "lint-tests": "./node_modules/.bin/eslint --config .eslintrc.test.json ./test",
     "lint-fix-tests": "./node_modules/.bin/eslint --config .eslintrc.test.json --fix ./test",
+    "prerelease": "npm version prerelease --preid=local --no-git-tag-version",
+    "publish-local": "npm run prerelease; bash ./localNpmLogin.sh; npm publish --tag local --@tinystacks:registry=http://local-npm-registry:4873",
     "setup-test-lint": "node ./scripts/setup-test-lint.js",
     "test": "jest",
     "test-cov": "jest --coverage"
