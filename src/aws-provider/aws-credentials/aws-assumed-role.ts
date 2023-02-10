@@ -1,10 +1,10 @@
 import AWS from 'aws-sdk';
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
 import { 
   AwsAssumedRole as AwsAssumedRoleType,
   AwsKeys as AwsKeysType,
   LocalAwsProfile as LocalAwsProfileType
 } from '@tinystacks/ops-model';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
 import { AwsKeys } from './aws-keys';
 import { LocalAwsProfile } from './local-aws-profile';
 

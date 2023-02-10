@@ -1,12 +1,12 @@
-import { AwsAssumedRole } from './aws-credentials/aws-assumed-role';
-import { AwsKeys } from './aws-credentials/aws-keys';
-import { LocalAwsProfile } from './aws-credentials/local-aws-profile';
 import { 
   AwsCredentialsProvider as AwsCredentialsProviderType,
   AwsAssumedRole as AwsAssumedRoleType,
   AwsKeys as AwsKeysType,
   LocalAwsProfile as LocalAwsProfileType
 } from '@tinystacks/ops-model';
+import { AwsAssumedRole } from './aws-credentials/aws-assumed-role';
+import { AwsKeys } from './aws-credentials/aws-keys';
+import { LocalAwsProfile } from './aws-credentials/local-aws-profile';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials/aws-credentials-type';
 import Provider from './temporary-classes/provider';
 
