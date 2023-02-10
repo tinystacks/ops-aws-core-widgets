@@ -8,15 +8,12 @@ import {
   LocalAwsProfile as LocalAwsProfileType
 } from '@tinystacks/ops-model';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials/aws-credentials-type';
-// import Provider from './temporary-classes/provider';
+import Provider from './temporary-classes/provider';
 
-// TODO: Consolidate Provider interface
-class AwsCredentialsProvider {
-  type: string;
+class AwsCredentialsProvider extends Provider {
   credentials: AwsCredentialsType;
   accountId?: string;
   region?: string;
-  id?: string;
 
   constructor (args: {
     type: string,
@@ -25,7 +22,6 @@ class AwsCredentialsProvider {
     region?: string,
     id?: string,
   }) {
-    // super(type);
     const {
       type,
       credentials,
@@ -33,11 +29,10 @@ class AwsCredentialsProvider {
       region,
       id
     } = args;
-    this.type = type;
+    super(id, type);
     this.credentials = credentials;
     this.accountId = accountId;
     this.region = region;
-    this.id = id;
   }
 
   static fromJSON (object: AwsCredentialsProviderType): AwsCredentialsProvider {
