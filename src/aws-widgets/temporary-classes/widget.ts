@@ -11,7 +11,7 @@ abstract class Widget implements WidgetType {
   description?: string;
   showDescription?: boolean;
 
-  constructor(
+  constructor (
     id: string,
     displayName: string,
     type: string,
@@ -32,7 +32,7 @@ abstract class Widget implements WidgetType {
   /**
    * Override this to accept a json object that overlaps with your class's interface and returns an instance of itself.
    */
-  static fromJson(_object: WidgetType) {
+  static fromJson (_object: WidgetType) {
     throw new Error('Method not implemented.');
   }
 

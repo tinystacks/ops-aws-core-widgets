@@ -14,7 +14,7 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileType 
   }) {
     const { 
       profileName
-     } = args;
+    } = args;
     super();
     this.profileName = profileName;
   }

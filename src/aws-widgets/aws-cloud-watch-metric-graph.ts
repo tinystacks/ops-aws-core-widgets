@@ -1,19 +1,19 @@
-import { Widget as WidgetType } from "@tinystacks/ops-model";
+import { Widget as WidgetType } from '@tinystacks/ops-model';
 // TODO: Add ops-core dependency, import from ops-core
-import Widget from "./temporary-classes/widget";
-import { CloudWatch } from "@aws-sdk/client-cloudwatch";
-import dayjs, { ManipulateType } from "dayjs";
+import Widget from './temporary-classes/widget';
+import { CloudWatch } from '@aws-sdk/client-cloudwatch';
+import dayjs, { ManipulateType } from 'dayjs';
 
 enum TimeUnitEnum {
-  ns = "ns",
-  ms = "ms",
-  s = "s",
-  m = "m",
-  h = "h",
-  d = "d",
-  w = "w",
-  mo = "mo",
-  yr = "yr"
+  ns = 'ns',
+  ms = 'ms',
+  s = 's',
+  m = 'm',
+  h = 'h',
+  d = 'd',
+  w = 'w',
+  mo = 'mo',
+  yr = 'yr'
 }
 
 type KeyValuePair = {
@@ -69,10 +69,10 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
     showDisplayName?: boolean,
     description?: string,
     showDescription?: boolean,
-    statistic: string = "Average",
-    showTimeRangeSelector: boolean = true,
-    showStatisticSelector: boolean = true,
-    showPeriodSelector: boolean = true,
+    statistic = 'Average',
+    showTimeRangeSelector = true,
+    showStatisticSelector = true,
+    showPeriodSelector = true,
     metrics: Metric[] = [],
     timeRange: TimeRange | RelativeTime = {
       time: 5,
@@ -97,7 +97,7 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
   }
   additionalProperties?: any;
 
-  static fromJson(object: AwsCloudWatchMetricGraphType): AwsCloudWatchMetricGraph {
+  static fromJson (object: AwsCloudWatchMetricGraphType): AwsCloudWatchMetricGraph {
     const {
       id,
       displayName,
@@ -128,7 +128,7 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
     );
   }
 
-  toJson(): AwsCloudWatchMetricGraphType {
+  toJson (): AwsCloudWatchMetricGraphType {
     return {
       id: this.id,
       type: this.type,
@@ -146,7 +146,7 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
     };
   }
 
-  async getData(): Promise<void> {
+  async getData (): Promise<void> {
     const cwClient = new CloudWatch({});
     let startTime;
     let endTime;
@@ -189,4 +189,4 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
 
 export {
   AwsCloudWatchMetricGraph
-}
+};
