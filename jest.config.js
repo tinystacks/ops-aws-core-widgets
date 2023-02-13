@@ -10,9 +10,7 @@ module.exports = {
   collectCoverageFrom: [
     "src/**/*.ts"
   ],
-  coveragePathIgnorePatterns: [
-    'src/credential-providers/*'
-  ],
+  coveragePathIgnorePatterns: [],
   coverageThreshold: {
     global: {
       branches: 70,
