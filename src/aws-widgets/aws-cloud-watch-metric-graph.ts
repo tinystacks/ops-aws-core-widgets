@@ -1,7 +1,6 @@
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import dayjs, { ManipulateType } from 'dayjs';
 import { Widget as WidgetType } from '@tinystacks/ops-model';
-// TODO: Add ops-core dependency, import from ops-core
 import { Widget } from '@tinystacks/ops-core';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
 import { LocalAwsProfile } from '../aws-provider/aws-credentials/local-aws-profile';
