@@ -3,7 +3,11 @@ import dayjs, { ManipulateType } from 'dayjs';
 import { Widget as WidgetType } from '@tinystacks/ops-model';
 // TODO: Add ops-core dependency, import from ops-core
 import Widget from './temporary-classes/widget';
+import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
+import { LocalAwsProfile } from '../aws-provider/aws-credentials/local-aws-profile';
+import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 
+// eslint-disable-next-line no-shadow
 enum TimeUnitEnum {
   ns = 'ns',
   ms = 'ms',
@@ -51,6 +55,7 @@ type AwsCloudWatchMetricGraphType = WidgetType & {
   showPeriodSelector?: boolean;
   metrics: Metric[];
   timeRange?: TimeRange | RelativeTime;
+  region: string;
 }
 
 class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGraphType {
@@ -61,6 +66,7 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
   showPeriodSelector: boolean;
   metrics: Metric[];
   timeRange: TimeRange | RelativeTime;
+  region: string;
 
   constructor (
     id: string,
@@ -77,7 +83,8 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
     timeRange: TimeRange | RelativeTime = {
       time: 5,
       unit: TimeUnitEnum.m
-    }
+    },
+    region = 'us-east-1'
   ) {
     super (
       id,
@@ -94,6 +101,7 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
     this.showPeriodSelector = showPeriodSelector;
     this.metrics = metrics;
     this.timeRange = timeRange;
+    this.region = region;
   }
   additionalProperties?: any;
 
@@ -110,7 +118,8 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
       showStatisticSelector,
       showPeriodSelector,
       metrics,
-      timeRange
+      timeRange,
+      region
     } = object;
     return new AwsCloudWatchMetricGraph(
       id!,
@@ -124,7 +133,8 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
       showStatisticSelector,
       showPeriodSelector,
       metrics,
-      timeRange
+      timeRange,
+      region
     );
   }
 
@@ -142,12 +152,27 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
       showStatisticSelector: this.showStatisticSelector,
       showPeriodSelector: this.showPeriodSelector,
       metrics: this.metrics,
-      timeRange: this.timeRange
+      timeRange: this.timeRange,
+      region: this.region
     };
   }
 
   async getData (): Promise<void> {
-    const cwClient = new CloudWatch({});
+    // Start DELETEME
+    // Remove once provider plugin is integrated
+    const awsCredentialsProvider = this.provider as unknown as AwsCredentialsProvider;
+    const providerThatWorks = new AwsCredentialsProvider({
+      type: 'AwsCredentialsProvider',
+      id: awsCredentialsProvider.id, 
+      credentials: new LocalAwsProfile({ 
+        profileName: (awsCredentialsProvider.credentials as any).profileName 
+      })
+    });
+    // END DELETEME
+    const cwClient = new CloudWatch({
+      credentials: await providerThatWorks.getCredentials(AwsSdkVersionEnum.V3),
+      region: this.region
+    });
     let startTime;
     let endTime;
     const abosluteTimeRange = this.timeRange as TimeRange;
