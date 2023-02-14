@@ -57,7 +57,6 @@ describe('getCredentials', () => {
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: awsAssumedRole
     });
     const result = await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V2);
@@ -79,7 +78,6 @@ describe('getCredentials', () => {
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: awsAssumedRole
     });
     const result = await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3);
@@ -101,7 +99,6 @@ describe('getCredentials', () => {
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: awsAssumedRole
     });
     const result = await awsCredentialsProvider.getCredentials();
@@ -120,7 +117,6 @@ describe('getCredentials', () => {
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: awsKeys
     });
     const result = await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V2);
@@ -139,7 +135,6 @@ describe('getCredentials', () => {
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: awsKeys
     });
     const result = await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3);
@@ -158,7 +153,6 @@ describe('getCredentials', () => {
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: awsKeys
     });
     const result = await awsCredentialsProvider.getCredentials();
@@ -175,7 +169,6 @@ describe('getCredentials', () => {
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: localAwsProfile
     });
     const result = await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V2);
@@ -192,7 +185,6 @@ describe('getCredentials', () => {
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: localAwsProfile
     });
     const result = await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3);
@@ -209,7 +201,6 @@ describe('getCredentials', () => {
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: localAwsProfile
     });
     const result = await awsCredentialsProvider.getCredentials();
@@ -244,7 +235,6 @@ describe('fromJSON', () => {
     const result = AwsCredentialsProvider.fromJSON(mockFromJSONArgs);
     expect(spy).toBeCalled();
     expect(result).toEqual(new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: mockAwsAssumedRole
     }));
   });
@@ -262,7 +252,6 @@ describe('fromJSON', () => {
     const result = AwsCredentialsProvider.fromJSON(mockFromJSONArgs);
     expect(spy).toBeCalled();
     expect(result).toEqual(new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: mockAwsKeys
     }));
   });
@@ -278,7 +267,6 @@ describe('fromJSON', () => {
     const result = AwsCredentialsProvider.fromJSON(mockFromJSONArgs);
     expect(spy).toBeCalled();
     expect(result).toEqual(new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       credentials: mockLocalAwsProfile
     }));
   })

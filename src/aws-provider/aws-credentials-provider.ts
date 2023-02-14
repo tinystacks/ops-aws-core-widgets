@@ -11,25 +11,24 @@ import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials/aws-cre
 import Provider from './temporary-classes/provider';
 
 class AwsCredentialsProvider extends Provider {
+  static type = 'AwsCredentialsProvider';
   credentials: AwsCredentialsType;
   accountId?: string;
   region?: string;
 
   constructor (args: {
-    type: string,
     credentials: AwsCredentialsType,
     accountId?: string,
     region?: string,
     id?: string,
   }) {
     const {
-      type,
       credentials,
       accountId,
       region,
       id
     } = args;
-    super(id, type);
+    super(id, AwsCredentialsProvider.type);
     this.credentials = credentials;
     this.accountId = accountId;
     this.region = region;
@@ -37,7 +36,6 @@ class AwsCredentialsProvider extends Provider {
 
   static fromJSON (object: AwsCredentialsProviderType): AwsCredentialsProvider {
     const {
-      type,
       credentials,
       // accountId,
       // region,
@@ -53,7 +51,6 @@ class AwsCredentialsProvider extends Provider {
       creds = LocalAwsProfile.fromJSON({ ...(credentials as LocalAwsProfileType) });
     }
     return new AwsCredentialsProvider({
-      type,
       credentials: creds,
       id
     });

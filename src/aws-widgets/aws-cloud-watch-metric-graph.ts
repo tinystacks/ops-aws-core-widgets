@@ -162,7 +162,6 @@ class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGrap
     // Remove once provider plugin is integrated
     const awsCredentialsProvider = this.provider as unknown as AwsCredentialsProvider;
     const providerThatWorks = new AwsCredentialsProvider({
-      type: 'AwsCredentialsProvider',
       id: awsCredentialsProvider.id, 
       credentials: new LocalAwsProfile({ 
         profileName: (awsCredentialsProvider.credentials as any).profileName 
