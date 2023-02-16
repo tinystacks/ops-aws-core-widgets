@@ -46,7 +46,7 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
     return 'roleArn' in credentials;
   }
 
-  static fromJSON (object: AwsAssumedRoleType): AwsAssumedRole {
+  static fromJson (object: AwsAssumedRoleType): AwsAssumedRole {
     const {
       roleArn,
       sessionName,
@@ -65,11 +65,11 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
 
   private static buildPrimaryCreds (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType): AwsAssumedRole | AwsKeys | LocalAwsProfile {
     if (AwsKeys.isAwsKeys(credentials)) {
-      return AwsKeys.fromJSON({ ...(credentials as AwsKeysType) });
+      return AwsKeys.fromJson({ ...(credentials as AwsKeysType) });
     } else if (LocalAwsProfile.isLocalAwsProfile(credentials)) {
-      return LocalAwsProfile.fromJSON({ ...(credentials as LocalAwsProfileType) });
+      return LocalAwsProfile.fromJson({ ...(credentials as LocalAwsProfileType) });
     } else {
-      return this.fromJSON({ ...(credentials as AwsAssumedRoleType) });
+      return this.fromJson({ ...(credentials as AwsAssumedRoleType) });
     }
   }
 

@@ -30,7 +30,7 @@ class AwsKeys extends AwsCredentialsType implements AwsKeysType {
     return 'AwsAccessKeyId' in credentials;
   }
 
-  static fromJSON (object: AwsKeysType): AwsKeys {
+  static fromJson (object: AwsKeysType): AwsKeys {
     const {
       AwsAccessKeyId,
       AwsSecretAccessKey,

@@ -23,7 +23,7 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileType 
     return 'profileName' in credentials;
   }
 
-  static fromJSON (object: LocalAwsProfileType): LocalAwsProfile {
+  static fromJson (object: LocalAwsProfileType): LocalAwsProfile {
     const {
       profileName
     } = object;

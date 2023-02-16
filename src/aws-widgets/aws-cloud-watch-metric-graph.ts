@@ -208,8 +208,7 @@ export class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMet
     }
   }
 
-  render() {
+  render () {
     throw new Error('Method not implemented.');
   }
-  
 }
