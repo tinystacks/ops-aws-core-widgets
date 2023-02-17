@@ -5,6 +5,7 @@ import { Widget } from '@tinystacks/ops-core';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
 import { LocalAwsProfile } from '../aws-provider/aws-credentials/local-aws-profile';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
+import { h, Fragment } from 'preact';
 
 // eslint-disable-next-line no-shadow
 enum TimeUnitEnum {
@@ -12,7 +13,7 @@ enum TimeUnitEnum {
   ms = 'ms',
   s = 's',
   m = 'm',
-  h = 'h',
+  hr = 'h',
   d = 'd',
   w = 'w',
   mo = 'mo',
@@ -208,7 +209,5 @@ export class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMet
     }
   }
 
-  render () {
-    throw new Error('Method not implemented.');
-  }
+  render (): JSX.Element { return <>TODO</>; }
 }
