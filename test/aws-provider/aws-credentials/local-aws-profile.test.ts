@@ -25,7 +25,7 @@ const mockV3Credentials = {
   sessionToken: 'test-session-token'
 } as AwsCredentialIdentity;
 
-describe('fromJSON', () => {
+describe('fromJson', () => {
   afterEach(() => {
     // for mocks
     jest.clearAllMocks();
@@ -34,15 +34,15 @@ describe('fromJSON', () => {
   });
 
   it('creates LocalAwsProfile object', () => {
-    const mockFromJSONArgs = {
+    const mockfromJsonArgs = {
       profileName: 'default'
     };
-    const mockFromJSONResult = new LocalAwsProfile({
+    const mockfromJsonResult = new LocalAwsProfile({
       profileName: 'default'
     });
 
-    const result = LocalAwsProfile.fromJSON(mockFromJSONArgs);
-    expect(result).toEqual(mockFromJSONResult);
+    const result = LocalAwsProfile.fromJson(mockfromJsonArgs);
+    expect(result).toEqual(mockfromJsonResult);
   });
 });
 

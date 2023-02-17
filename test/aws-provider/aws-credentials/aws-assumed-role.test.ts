@@ -37,7 +37,7 @@ const mockV3Credentials = {
   sessionToken: 'test-session-token'
 } as AwsCredentialIdentity;
 
-describe('fromJSON', () => {
+describe('fromJson', () => {
   afterEach(() => {
     // for mocks
     jest.clearAllMocks();
@@ -46,7 +46,7 @@ describe('fromJSON', () => {
   });
 
   it('has AwsAssumedRoleType primary credentials', () => {
-    const mockFromJSONArgs = {
+    const mockfromJsonArgs = {
       roleArn: 'test-role-arn',
       sessionName: 'test-session-name',
       region: 'test-region',
@@ -60,7 +60,7 @@ describe('fromJSON', () => {
       }
     }
 
-    const mockFromJSONResult = new AwsAssumedRole({
+    const mockfromJsonResult = new AwsAssumedRole({
       roleArn: 'test-role-arn',
       sessionName: 'test-session-name',
       region: 'test-region',
@@ -74,11 +74,11 @@ describe('fromJSON', () => {
       })
     });
 
-    const result = AwsAssumedRole.fromJSON(mockFromJSONArgs);
-    expect(result).toEqual(mockFromJSONResult);
+    const result = AwsAssumedRole.fromJson(mockfromJsonArgs);
+    expect(result).toEqual(mockfromJsonResult);
   })
   it('has AwsKeys primary credentials', () => {
-    const mockFromJSONArgs = {
+    const mockfromJsonArgs = {
       roleArn: 'test-role-arn',
       sessionName: 'test-session-name',
       region: 'test-region',
@@ -89,7 +89,7 @@ describe('fromJSON', () => {
       }
     }
 
-    const mockFromJSONResult = new AwsAssumedRole({
+    const mockfromJsonResult = new AwsAssumedRole({
       roleArn: 'test-role-arn',
       sessionName: 'test-session-name',
       region: 'test-region',
@@ -100,11 +100,11 @@ describe('fromJSON', () => {
       })
     });
 
-    const result = AwsAssumedRole.fromJSON(mockFromJSONArgs);
-    expect(result).toEqual(mockFromJSONResult);
+    const result = AwsAssumedRole.fromJson(mockfromJsonArgs);
+    expect(result).toEqual(mockfromJsonResult);
   })
   it('has LocalAwsProfile primary credentials', () => {
-    const mockFromJSONArgs = {
+    const mockfromJsonArgs = {
       roleArn: 'test-role-arn',
       sessionName: 'test-session-name',
       region: 'test-region',
@@ -113,7 +113,7 @@ describe('fromJSON', () => {
       }
     }
 
-    const mockFromJSONResult = new AwsAssumedRole({
+    const mockfromJsonResult = new AwsAssumedRole({
       roleArn: 'test-role-arn',
       sessionName: 'test-session-name',
       region: 'test-region',
@@ -122,8 +122,8 @@ describe('fromJSON', () => {
       })
     });
 
-    const result = AwsAssumedRole.fromJSON(mockFromJSONArgs);
-    expect(result).toEqual(mockFromJSONResult);
+    const result = AwsAssumedRole.fromJson(mockfromJsonArgs);
+    expect(result).toEqual(mockfromJsonResult);
   })
 });
 describe('getCredentials', () => {

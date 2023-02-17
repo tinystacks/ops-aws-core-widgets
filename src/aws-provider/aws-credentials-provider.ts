@@ -34,7 +34,7 @@ class AwsCredentialsProvider extends Provider {
     this.region = region;
   }
 
-  static fromJSON (object: AwsCredentialsProviderType): AwsCredentialsProvider {
+  static fromJson (object: AwsCredentialsProviderType): AwsCredentialsProvider {
     const {
       credentials,
       // accountId,
@@ -44,11 +44,11 @@ class AwsCredentialsProvider extends Provider {
 
     let creds: AwsCredentialsType;
     if (AwsAssumedRole.isAwsAssumedRole(credentials)) {
-      creds = AwsAssumedRole.fromJSON({ ...(credentials as AwsAssumedRoleType) });
+      creds = AwsAssumedRole.fromJson({ ...(credentials as AwsAssumedRoleType) });
     } else if (AwsKeys.isAwsKeys(credentials)) {
-      creds = AwsKeys.fromJSON({ ...(credentials as AwsKeysType) });
+      creds = AwsKeys.fromJson({ ...(credentials as AwsKeysType) });
     } else {
-      creds = LocalAwsProfile.fromJSON({ ...(credentials as LocalAwsProfileType) });
+      creds = LocalAwsProfile.fromJson({ ...(credentials as LocalAwsProfileType) });
     }
     return new AwsCredentialsProvider({
       credentials: creds,

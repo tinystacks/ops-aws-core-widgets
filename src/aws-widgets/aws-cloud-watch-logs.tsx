@@ -2,6 +2,7 @@ import { Widget as WidgetType } from '@tinystacks/ops-model';
 import { Widget } from '@tinystacks/ops-core';
 import { CloudWatchLogs } from '@aws-sdk/client-cloudwatch-logs';
 import { OutputLogEvents } from 'aws-sdk/clients/cloudwatchlogs';
+import { h, Fragment } from 'preact';
 
 type AwsCloudWatchLogsType = WidgetType & {
   region: string,
@@ -76,11 +77,9 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
     }
   }
 
-  render () {
-    throw new Error('Method not implemented.');
-  }
-
-  public get events () {
+  get events () {
     return this._events;
   }
+
+  render (): JSX.Element { return <>TODO</>; }
 }

@@ -14,7 +14,7 @@ const mockV3Credentials = {
   sessionToken: 'test-session-token'
 } as AwsCredentialIdentity;
 
-describe('fromJSON', () => {
+describe('fromJson', () => {
   afterEach(() => {
     // for mocks
     jest.clearAllMocks();
@@ -23,19 +23,19 @@ describe('fromJSON', () => {
   });
 
   it('creates AwsKeys object', async () => {
-    const mockFromJSONArgs = {
+    const mockfromJsonArgs = {
       AwsAccessKeyId: 'test-access-key',
       AwsSecretAccessKey: 'test-secret-key',
       AwsSessionToken: 'test-session-token'
     };
-    const mockFromJSONResult = new AwsKeys({
+    const mockfromJsonResult = new AwsKeys({
       AwsAccessKeyId: 'test-access-key',
       AwsSecretAccessKey: 'test-secret-key',
       AwsSessionToken: 'test-session-token'
     });
 
-    const result = AwsKeys.fromJSON(mockFromJSONArgs);
-    expect(result).toEqual(mockFromJSONResult);   
+    const result = AwsKeys.fromJson(mockfromJsonArgs);
+    expect(result).toEqual(mockfromJsonResult);   
   });
 });
 

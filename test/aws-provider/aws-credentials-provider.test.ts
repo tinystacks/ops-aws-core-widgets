@@ -210,7 +210,7 @@ describe('getCredentials', () => {
   });
 });
 
-describe('fromJSON', () => {
+describe('fromJson', () => {
   afterEach(() => {
     // for mocks
     jest.clearAllMocks();
@@ -219,7 +219,7 @@ describe('fromJSON', () => {
   });
 
   it('has AwsAssumedRole credentials', () => {
-    const mockFromJSONArgs = {
+    const mockfromJsonArgs = {
       type: 'AwsCredentialsProvider',
       credentials: {
         roleArn: 'test-role-arn',
@@ -230,16 +230,16 @@ describe('fromJSON', () => {
         }
       }
     }
-    const spy = jest.spyOn(AwsAssumedRole, 'fromJSON').mockImplementation(() => mockAwsAssumedRole);
+    const spy = jest.spyOn(AwsAssumedRole, 'fromJson').mockImplementation(() => mockAwsAssumedRole);
 
-    const result = AwsCredentialsProvider.fromJSON(mockFromJSONArgs);
+    const result = AwsCredentialsProvider.fromJson(mockfromJsonArgs);
     expect(spy).toBeCalled();
     expect(result).toEqual(new AwsCredentialsProvider({
       credentials: mockAwsAssumedRole
     }));
   });
   it('has AwsKeys credentials', () => {
-    const mockFromJSONArgs = {
+    const mockfromJsonArgs = {
       type: 'AwsCredentialsProvider',
       credentials: {
         AwsAccessKeyId: 'test-access-key',
@@ -247,24 +247,24 @@ describe('fromJSON', () => {
         AwsSessionToken: 'test-session-token'
       }
     };
-    const spy = jest.spyOn(AwsKeys, 'fromJSON').mockImplementation(() => mockAwsKeys);
+    const spy = jest.spyOn(AwsKeys, 'fromJson').mockImplementation(() => mockAwsKeys);
 
-    const result = AwsCredentialsProvider.fromJSON(mockFromJSONArgs);
+    const result = AwsCredentialsProvider.fromJson(mockfromJsonArgs);
     expect(spy).toBeCalled();
     expect(result).toEqual(new AwsCredentialsProvider({
       credentials: mockAwsKeys
     }));
   });
   it('has LocalAwsProfile credentials', () => {
-    const mockFromJSONArgs = {
+    const mockfromJsonArgs = {
       type: 'AwsCredentialsProvider',
       credentials: {
         profileName: 'default'
       }
     };
-    const spy = jest.spyOn(LocalAwsProfile, 'fromJSON').mockImplementation(() => mockLocalAwsProfile);
+    const spy = jest.spyOn(LocalAwsProfile, 'fromJson').mockImplementation(() => mockLocalAwsProfile);
 
-    const result = AwsCredentialsProvider.fromJSON(mockFromJSONArgs);
+    const result = AwsCredentialsProvider.fromJson(mockfromJsonArgs);
     expect(spy).toBeCalled();
     expect(result).toEqual(new AwsCredentialsProvider({
       credentials: mockLocalAwsProfile
