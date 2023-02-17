@@ -56,6 +56,15 @@ class AwsCredentialsProvider extends Provider {
     });
   }
 
+  toJson () {
+    return {
+      credentials: this.credentials,
+      accountId: this.accountId,
+      region: this.region,
+      id: this.id
+    };
+  }
+
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V2) {
     return await this.credentials.getCredentials(awsSdkVersion);
   }
