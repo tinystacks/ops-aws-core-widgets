@@ -30,8 +30,8 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
       description,
       showDescription,
       region,
-      logGroupName,
       logStreamName,
+      logGroupName,
       startTime,
       endTime
     } = args;
@@ -45,15 +45,59 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
       showDescription
     );
     this.region = region;
-    this.logGroupName = logGroupName;
     this.logStreamName = logStreamName;
+    this.logGroupName = logGroupName;
     this.startTime = startTime;
     this.endTime = endTime;
     this._events = [];
   }
 
-  toJson (): WidgetType {
-    throw new Error('Method not implemented.');
+  fromJson (object: AwsCloudWatchLogsType): AwsCloudWatchLogs {
+    const {
+      id,
+      displayName,
+      type,
+      providerId,
+      showDisplayName,
+      description,
+      showDescription,
+      region,
+      logStreamName,
+      logGroupName,
+      startTime,
+      endTime
+    } = object;
+    return new AwsCloudWatchLogs({
+      id,
+      displayName,
+      type,
+      providerId,
+      showDisplayName,
+      description,
+      showDescription,
+      region,
+      logStreamName,
+      logGroupName,
+      startTime,
+      endTime
+    });
+  } 
+
+  toJson (): AwsCloudWatchLogsType {
+    return {
+      id: this.id,
+      type: this.type,
+      displayName: this.displayName,
+      providerId: this.providerId,
+      showDisplayName: this.showDisplayName,
+      description: this.description,
+      showDescription: this.showDescription,
+      region: this.region,
+      logStreamName: this.logStreamName,
+      logGroupName: this.logGroupName,
+      startTime: this.startTime,
+      endTime: this.endTime
+    };
   }
 
   async getData (): Promise<void> {
@@ -64,7 +108,7 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
       startTime: this.startTime,
       endTime: this.endTime
     });
-    this._events = [...this.events, ...res.events];
+    this._events = [...this._events, ...res.events];
     while (res.nextForwardToken) {
       res = await cwLogsClient.getLogEvents({
         logStreamName: this.logStreamName,
@@ -73,7 +117,7 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
         endTime: this.endTime,
         nextToken: res.nextForwardToken
       });
-      this._events = [...this.events, ...res.events];
+      this._events = [...this._events, ...res.events];
     }
   }
 
