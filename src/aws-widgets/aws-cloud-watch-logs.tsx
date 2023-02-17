@@ -101,6 +101,7 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
   }
 
   async getData (): Promise<void> {
+    // TODO: integrate provider
     const cwLogsClient = new CloudWatchLogs({});
     let res = await cwLogsClient.getLogEvents({
       logStreamName: this.logStreamName,
