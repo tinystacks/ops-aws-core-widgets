@@ -15,10 +15,10 @@ type AwsCloudWatchLogsType = WidgetType & {
 export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
   static type = 'AwsCloudWatchLogs';
   region: string;
-  logGroupName: string;
   logStreamName: string;
-  startTime: number;
-  endTime: number;
+  logGroupName?: string;
+  startTime?: number;
+  endTime?: number;
   private _events: OutputLogEvents;
 
   constructor (args: AwsCloudWatchLogsType) {
