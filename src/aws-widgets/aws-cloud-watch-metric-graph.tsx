@@ -3,7 +3,6 @@ import dayjs, { ManipulateType } from 'dayjs';
 import { Widget as WidgetType } from '@tinystacks/ops-model';
 import { Widget } from '@tinystacks/ops-core';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
-import { LocalAwsProfile } from '../aws-provider/aws-credentials/local-aws-profile';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 import { h, Fragment } from 'preact';
 
@@ -160,16 +159,22 @@ export class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMet
   async getData (): Promise<void> {
     // Start DELETEME
     // Remove once provider plugin is integrated
-    const awsCredentialsProvider = this.provider as unknown as AwsCredentialsProvider;
-    const providerThatWorks = new AwsCredentialsProvider({
-      id: awsCredentialsProvider.id, 
-      credentials: new LocalAwsProfile({ 
-        profileName: (awsCredentialsProvider.credentials as any).profileName 
-      })
-    });
+    // const awsCredentialsProvider = this.provider as unknown as AwsCredentialsProvider;
+    // const providerThatWorks = new AwsCredentialsProvider({
+    //   id: awsCredentialsProvider.id, 
+    //   credentials: new LocalAwsProfile({ 
+    //     profileName: (awsCredentialsProvider.credentials as any).profileName 
+    //   })
+    // });
     // END DELETEME
+    // const cwClient = new CloudWatch({
+    //   credentials: await providerThatWorks.getCredentials(AwsSdkVersionEnum.V3),
+    //   region: this.region
+    // });
+
+    const awsCredentialsProvider = this.provider as AwsCredentialsProvider;
     const cwClient = new CloudWatch({
-      credentials: await providerThatWorks.getCredentials(AwsSdkVersionEnum.V3),
+      credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
       region: this.region
     });
     let startTime;

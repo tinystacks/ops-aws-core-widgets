@@ -1,4 +1,4 @@
-import AWS from 'aws-sdk';
+import { STS, Credentials } from '@aws-sdk/client-sts';
 import { 
   AwsAssumedRole as AwsAssumedRoleType,
   AwsKeys as AwsKeysType,
@@ -17,8 +17,8 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
   region: string;
   primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
   duration?: number;
-  private stsClient: AWS.STS;
-  private stsCreds: AWS.STS.Credentials;
+  private stsClient: STS;
+  private stsCreds: Credentials;
 
   constructor (args: {
     roleArn: string,
@@ -102,18 +102,15 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
       return this.getVersionedCredentials(awsSdkVersion, genericCreds);
     }
     const creds = await this.primaryCredentials.getCredentials(awsSdkVersion);
-    this.stsClient = new AWS.STS({
-      accessKeyId: creds.accessKeyId,
-      secretAccessKey: creds.secretAccessKey,
-      sessionToken: creds.sessionToken,
+    this.stsClient = new STS({
+      credentials: creds,
       region: this.region
     });
-    
     const res = await this.stsClient.assumeRole({
       RoleArn: this.roleArn,
       RoleSessionName: this.sessionName,
       DurationSeconds: this.duration
-    }).promise();
+    });
     this.stsCreds = res.Credentials;
     const genericCreds = this.mapStsCredsToGenericCreds();
     return this.getVersionedCredentials(awsSdkVersion, genericCreds);

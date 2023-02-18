@@ -7,21 +7,33 @@ import { LocalAwsProfile } from '../../../src/aws-provider/aws-credentials/local
 import { AwsSdkVersionEnum } from '../../../src/aws-provider/aws-credentials/aws-credentials-type';
 import { AwsCredentialIdentity } from '@aws-sdk/types';
 
-jest.useFakeTimers().setSystemTime(new Date('2023-02-02 00:00:00').getTime());
+// jest.mock('aws-sdk', () => {
+//   const original = jest.requireActual('aws-sdk');
+//   return {
+//     ...original,
+//     STS: jest.fn(() => {
+//       return {
+//         assumeRole: (...args: any) => ({
+//           promise: () => mockAssumeRole(...args)
+//         })
+//       }
+//     })
+//   }
+// });
 
-jest.mock('aws-sdk', () => {
-  const original = jest.requireActual('aws-sdk');
-  return {
-    ...original,
-    STS: jest.fn(() => {
-      return {
-        assumeRole: (...args) => ({
-          promise: () => mockAssumeRole(...args)
-        })
-      }
-    })
-  }
-});
+import { STS } from '@aws-sdk/client-sts';
+
+// jest.mock('@aws-sdk/client-sts', () => {
+//   return {
+//     STS: jest.fn(() => {
+//       return {
+//         assumeRole: mockAssumeRole
+//       }
+//     })
+//   }
+// });
+
+jest.useFakeTimers().setSystemTime(new Date('2023-02-02 00:00:00').getTime());
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 
@@ -126,6 +138,7 @@ describe('fromJson', () => {
     expect(result).toEqual(mockfromJsonResult);
   })
 });
+
 describe('getCredentials', () => {
   afterEach(() => {
     // for mocks
