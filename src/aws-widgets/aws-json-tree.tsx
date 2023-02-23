@@ -51,7 +51,9 @@ export class AwsJsonTree extends Widget implements AwsJsonTreeType {
 
   fromJson (object: AwsJsonTreeType): AwsJsonTree {
 
-    //validate cloudControlType
+    //TO-DO validate cloudControlType
+    // Minimum length of 10. Maximum length of 196.
+    //Pattern: [A-Za-z0-9]{2,64}::[A-Za-z0-9]{2,64}::[A-Za-z0-9]{2,64}
 
     const {
       id,
