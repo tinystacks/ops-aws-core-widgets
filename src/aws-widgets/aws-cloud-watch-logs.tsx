@@ -2,7 +2,7 @@ import { Widget as WidgetType } from '@tinystacks/ops-model';
 import { Widget } from '@tinystacks/ops-core';
 import { CloudWatchLogs } from '@aws-sdk/client-cloudwatch-logs';
 import { OutputLogEvents } from 'aws-sdk/clients/cloudwatchlogs';
-import { h, Fragment } from 'preact';
+import { Fragment } from 'preact';
 
 type AwsCloudWatchLogsType = WidgetType & {
   region: string,
