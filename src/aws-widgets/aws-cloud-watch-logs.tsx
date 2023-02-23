@@ -3,6 +3,7 @@ import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { CloudWatchLogs } from '@aws-sdk/client-cloudwatch-logs';
 import { OutputLogEvents } from 'aws-sdk/clients/cloudwatchlogs';
 import { Fragment } from 'preact';
+import isEmpty from 'lodash.isempty';
 
 type AwsCloudWatchLogsProps = Widget & {
   region: string,
@@ -47,6 +48,9 @@ export class AwsCloudWatchLogs extends BaseWidget {
   }
 
   async getData (providers?: BaseProvider[]): Promise<void> {
+    if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
+      throw new Error('An AwsCredentialsProvider was expected, but was not given');
+    }
     // TODO: integrate provider
     const cwLogsClient = new CloudWatchLogs({});
     let res = await cwLogsClient.getLogEvents({

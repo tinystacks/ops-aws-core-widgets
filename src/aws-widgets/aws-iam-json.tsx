@@ -4,7 +4,6 @@ import { Fragment } from 'preact';
 import { IAM } from '@aws-sdk/client-iam';
 import { Policy } from 'aws-sdk/clients/iam';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
-import { LocalAwsProfile } from '../aws-provider/aws-credentials/local-aws-profile';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 import isNil from 'lodash.isnil';
 import isEmpty from 'lodash.isempty';
@@ -53,7 +52,7 @@ export class AwsIamJson extends BaseWidget {
 
   async getData (providers?: BaseProvider[]): Promise<void> {
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
-      throw new Error('An AwsCredentialsProvider was expected, but was not given')
+      throw new Error('An AwsCredentialsProvider was expected, but was not given');
     }
     try {
       const awsProvider = BaseProvider.fromJson(providers[0]) as unknown as AwsCredentialsProvider;

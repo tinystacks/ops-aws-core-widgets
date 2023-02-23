@@ -4,7 +4,6 @@ import { Fragment } from 'preact';
 import { CloudControl } from 'aws-sdk';
 import { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
-import { LocalAwsProfile } from '../aws-provider/aws-credentials/local-aws-profile';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 import isEmpty from 'lodash.isempty';
 
@@ -53,7 +52,7 @@ export class AwsJsonTree extends BaseWidget {
   
   async getData (providers?: BaseProvider[]): Promise<void> {
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
-      throw new Error('An AwsCredentialsProvider was expected, but was not given')
+      throw new Error('An AwsCredentialsProvider was expected, but was not given');
     }
 
     try{ 
