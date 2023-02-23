@@ -1,10 +1,10 @@
-import { Widget as WidgetType } from '@tinystacks/ops-model';
-import { Widget } from '@tinystacks/ops-core';
+import { Widget } from '@tinystacks/ops-model';
+import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { CloudWatchLogs } from '@aws-sdk/client-cloudwatch-logs';
 import { OutputLogEvents } from 'aws-sdk/clients/cloudwatchlogs';
 import { Fragment } from 'preact';
 
-type AwsCloudWatchLogsType = WidgetType & {
+type AwsCloudWatchLogsProps = Widget & {
   region: string,
   logStreamName: string,
   logGroupName?: string,
@@ -12,7 +12,7 @@ type AwsCloudWatchLogsType = WidgetType & {
   endTime?: number
 }
 
-export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
+export class AwsCloudWatchLogs extends BaseWidget {
   static type = 'AwsCloudWatchLogs';
   region: string;
   logStreamName: string;
@@ -21,77 +21,23 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
   endTime?: number;
   private _events: OutputLogEvents;
 
-  constructor (args: AwsCloudWatchLogsType) {
-    const {
-      id,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      logStreamName,
-      logGroupName,
-      startTime,
-      endTime
-    } = args;
-    super (
-      id,
-      displayName,
-      AwsCloudWatchLogs.type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription
-    );
-    this.region = region;
-    this.logStreamName = logStreamName;
-    this.logGroupName = logGroupName;
-    this.startTime = startTime;
-    this.endTime = endTime;
+  constructor (props: AwsCloudWatchLogsProps) {
+    super (props);
+    this.region = props.region;
+    this.logStreamName = props.logStreamName;
+    this.logGroupName = props.logGroupName;
+    this.startTime = props.startTime;
+    this.endTime = props.endTime;
     this._events = [];
   }
 
-  fromJson (object: AwsCloudWatchLogsType): AwsCloudWatchLogs {
-    const {
-      id,
-      displayName,
-      type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      logStreamName,
-      logGroupName,
-      startTime,
-      endTime
-    } = object;
-    return new AwsCloudWatchLogs({
-      id,
-      displayName,
-      type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      logStreamName,
-      logGroupName,
-      startTime,
-      endTime
-    });
+  fromJson (object: AwsCloudWatchLogsProps): AwsCloudWatchLogs {
+    return new AwsCloudWatchLogs(object); 
   } 
 
-  toJson (): AwsCloudWatchLogsType {
-    return {
-      id: this.id,
-      type: this.type,
-      displayName: this.displayName,
-      providerId: this.providerId,
-      showDisplayName: this.showDisplayName,
-      description: this.description,
-      showDescription: this.showDescription,
+  toJson (): AwsCloudWatchLogsProps {
+    return { 
+      ...super.toJson(),  
       region: this.region,
       logStreamName: this.logStreamName,
       logGroupName: this.logGroupName,
@@ -100,7 +46,7 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
     };
   }
 
-  async getData (): Promise<void> {
+  async getData (providers?: BaseProvider[]): Promise<void> {
     // TODO: integrate provider
     const cwLogsClient = new CloudWatchLogs({});
     let res = await cwLogsClient.getLogEvents({

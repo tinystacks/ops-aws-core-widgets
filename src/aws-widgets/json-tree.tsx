@@ -1,15 +1,15 @@
-import { Widget as WidgetType } from '@tinystacks/ops-model';
-import { Widget } from '@tinystacks/ops-core';
+import { Widget  } from '@tinystacks/ops-model';
+import { BaseWidget } from '@tinystacks/ops-core';
 import { Fragment } from 'preact';
 import get from 'lodash.get';
 
-type JsonTreeType = WidgetType & {
+type JsonTreeProps = Widget & {
   region: string,
   jsonObject: { [key: string]: any; },
   paths: string[]
 }
 
-export class JsonTree extends Widget implements JsonTreeType {
+export class JsonTree extends BaseWidget {
   static type = 'JsonTree';
   region: string;
   jsonObject: { [key: string]: any; };
@@ -17,75 +17,25 @@ export class JsonTree extends Widget implements JsonTreeType {
   private _filteredJson: any[];
 
   
-  constructor (args: JsonTreeType) {
-    const {
-      id,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      jsonObject, 
-      paths
-    } = args;
-    super (
-      id,
-      displayName,
-      JsonTree.type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription
-    );
-    this.region = region;
-    this.jsonObject = jsonObject; 
-    this.paths = paths;
+  constructor (props: JsonTreeProps) {
+    super(props);
+    this.region = props.region;
+    this.jsonObject = props.jsonObject; 
+    this.paths = props.paths;
     this._filteredJson = [];
-
   }
 
-  fromJson (object: JsonTreeType): JsonTree {
-    const {
-      id,
-      type,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      jsonObject, 
-      paths
-    } = object;
-    return new JsonTree({
-      id,
-      type,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      jsonObject, 
-      paths
-    });
+  fromJson (object: JsonTreeProps): JsonTree {
+    return new JsonTree(object);
   }
   
 
-  toJson (): JsonTreeType {
+  toJson (): JsonTreeProps {
     return { 
-      id: this.id,
-      type: this.type,
-      displayName: this.displayName,
-      providerId: this.providerId,
-      showDisplayName: this.showDisplayName,
-      description: this.description,
-      showDescription: this.showDescription,
+      ...super.toJson(),  
       region: this.region,
       jsonObject: this.jsonObject,
-      paths: this.paths
-    };
+      paths: this.paths };
   }
 
   

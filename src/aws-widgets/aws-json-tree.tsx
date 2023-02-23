@@ -1,19 +1,20 @@
-import { Widget as WidgetType } from '@tinystacks/ops-model';
-import { Widget } from '@tinystacks/ops-core';
+import { Widget } from '@tinystacks/ops-model';
+import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { Fragment } from 'preact';
 import { CloudControl } from 'aws-sdk';
 import { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
 import { LocalAwsProfile } from '../aws-provider/aws-credentials/local-aws-profile';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
+import isEmpty from 'lodash.isempty';
 
-type AwsJsonTreeType = WidgetType & {
+type AwsJsonTreeProps = Widget & {
   region: string,
   cloudControlType: string,
   paths?: string[]
 }
 
-export class AwsJsonTree extends Widget implements AwsJsonTreeType {
+export class AwsJsonTree extends BaseWidget {
   static type = 'AwsJsonTree';
   region: string;
   cloudControlType: string;
@@ -21,98 +22,45 @@ export class AwsJsonTree extends Widget implements AwsJsonTreeType {
   private _resourceDescriptions: ResourceDescription[]; 
 
   
-  constructor (args: AwsJsonTreeType) {
-    const {
-      id,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      cloudControlType, 
-      paths
-    } = args;
-    super (
-      id,
-      displayName,
-      AwsJsonTree.type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription
-    );
-    this.region = region;
-    this.cloudControlType = cloudControlType; 
-    this.paths = paths;
+  constructor (props: AwsJsonTreeProps) {
+    super (props);
+    this.region = props.region;
+    this.cloudControlType = props.cloudControlType; 
+    this.paths = props.paths;
     this._resourceDescriptions =[];
 
   }
 
-  fromJson (object: AwsJsonTreeType): AwsJsonTree {
+  fromJson (object: AwsJsonTreeProps): AwsJsonTree {
 
     //TO-DO validate cloudControlType
     // Minimum length of 10. Maximum length of 196.
     //Pattern: [A-Za-z0-9]{2,64}::[A-Za-z0-9]{2,64}::[A-Za-z0-9]{2,64}
-
-    const {
-      id,
-      type,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      cloudControlType, 
-      paths
-    } = object;
-    return new AwsJsonTree({
-      id,
-      type,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      cloudControlType, 
-      paths
-    });
+    return new AwsJsonTree(object);
   }
   
+  
 
-  toJson (): AwsJsonTreeType {
+  toJson (): AwsJsonTreeProps {
+
     return { 
-      id: this.id,
-      type: this.type,
-      displayName: this.displayName,
-      providerId: this.providerId,
-      showDisplayName: this.showDisplayName,
-      description: this.description,
-      showDescription: this.showDescription,
+      ...super.toJson(),  
       region: this.region,
       cloudControlType: this.cloudControlType,
-      paths: this.paths
-    };
+      paths: this.paths };
   }
 
   
-  async getData (): Promise<void> {
+  async getData (providers?: BaseProvider[]): Promise<void> {
+    if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
+      throw new Error('An AwsCredentialsProvider was expected, but was not given')
+    }
 
     try{ 
-
-      //TO-DO update as getData will take in a an array of providers
-      const awsCred = this.provider as  AwsCredentialsProvider;
-      const provider = new AwsCredentialsProvider({
-        id: awsCred.id, 
-        credentials: new LocalAwsProfile({ 
-          profileName: (awsCred.credentials as any).profileName 
-        })
-      });
+      const awsProvider = BaseProvider.fromJson(providers[0]) as unknown as AwsCredentialsProvider;
 
       const cloudControlClient = new CloudControl({
-        credentials: await provider.getCredentials(AwsSdkVersionEnum.V3),
+        credentials: await awsProvider.getCredentials(AwsSdkVersionEnum.V3),
         region: this.region
       });
 

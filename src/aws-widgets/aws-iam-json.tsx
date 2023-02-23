@@ -1,5 +1,5 @@
-import { Widget as WidgetType } from '@tinystacks/ops-model';
-import { Widget } from '@tinystacks/ops-core';
+import { Widget } from '@tinystacks/ops-model';
+import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { Fragment } from 'preact';
 import { IAM } from '@aws-sdk/client-iam';
 import { Policy } from 'aws-sdk/clients/iam';
@@ -7,14 +7,15 @@ import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider
 import { LocalAwsProfile } from '../aws-provider/aws-credentials/local-aws-profile';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 import isNil from 'lodash.isnil';
+import isEmpty from 'lodash.isempty';
 
-type AwsIamJsonType = WidgetType & {
+type AwsIamJsonProps = Widget & {
   region: string,
   roleArn?: string,
   policyArn?: string,
 }
 
-export class AwsIamJson extends Widget implements AwsIamJsonType {
+export class AwsIamJson extends BaseWidget {
   static type = 'AwsIamJson';
   region: string;
   roleArn?: string;
@@ -23,97 +24,42 @@ export class AwsIamJson extends Widget implements AwsIamJsonType {
   private _rolePolicies: string[];
 
 
-  constructor (args: AwsIamJsonType) {
-    const {
-      id,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      roleArn,
-      policyArn
-    } = args;
-    super(
-      id,
-      displayName,
-      AwsIamJson.type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription
-    );
-    this.region = region;
-    this.roleArn = roleArn;
-    this.policyArn = policyArn;
+  constructor (props: AwsIamJsonProps) {
+    super(props);
+    this.region = props.region;
+    this.roleArn = props.roleArn;
+    this.policyArn = props.policyArn;
     this._policy = {};
     this._rolePolicies = [];
 
   }
 
-
-  fromJson (object: AwsIamJsonType): AwsIamJson {
-    const {
-      id,
-      type,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      roleArn, 
-      policyArn
-    } = object;
-
-    if(isNil(roleArn) && isNil(policyArn)){ 
+  fromJson (object: AwsIamJsonProps): AwsIamJson {
+    if(isNil(object.roleArn) && isNil(object.policyArn)){ 
       throw new Error('Either role arn or policy arn must be defined for IAM Json Widget');
     }
 
-    return new AwsIamJson({
-      id,
-      type,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      roleArn, 
-      policyArn
-    });
+    return new AwsIamJson(object);
   }
 
-  toJson (): AwsIamJsonType {
-
-    return {
-      id: this.id,
-      type: this.type,
-      displayName: this.displayName,
-      providerId: this.providerId,
-      showDisplayName: this.showDisplayName,
-      description: this.description,
-      showDescription: this.showDescription,
+  toJson (): AwsIamJsonProps {
+    return { 
+      ...super.toJson(),  
       region: this.region,
       roleArn: this.roleArn,
-      policyArn: this.policyArn
-    };
+      policyArn: this.policyArn };
   }
 
 
-  async getData (): Promise<void> {
-    //TO-DO update as getData will take in a an array of providers
+  async getData (providers?: BaseProvider[]): Promise<void> {
+    if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
+      throw new Error('An AwsCredentialsProvider was expected, but was not given')
+    }
     try {
-      const awsCred = this.provider as  AwsCredentialsProvider;
-      const provider = new AwsCredentialsProvider({
-        id: awsCred.id, 
-        credentials: new LocalAwsProfile({ 
-          profileName: (awsCred.credentials as any).profileName 
-        })
-      });
+      const awsProvider = BaseProvider.fromJson(providers[0]) as unknown as AwsCredentialsProvider;
+      
       const iamClient = new IAM({
-        credentials: await provider.getCredentials(AwsSdkVersionEnum.V3),
+        credentials: await awsProvider.getCredentials(AwsSdkVersionEnum.V3),
         region: this.region
       });
       if (this.policyArn) {
