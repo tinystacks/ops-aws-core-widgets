@@ -11,10 +11,12 @@ export class AwsCli extends BaseWidget {
   static type = 'AwsCli';
   command: string;
   private _commandResult: {stdout: string, stderr: string}; 
+  private _hasDataBeenFetched: boolean;
   
   constructor (props: AwsCliProps) {
     super(props);
     this.command = props.command;
+    this._hasDataBeenFetched = false;
   }
 
   fromJson (object: AwsCliProps): AwsCli {
@@ -35,16 +37,20 @@ export class AwsCli extends BaseWidget {
     }
 
     try{ 
-      exec(this.command, (error, stdout, stderr) => {
-        if (error) {
-          throw new Error(`Error executing command ${this.command}, ${error}`); 
-        }
-        this._commandResult.stdout = stdout;
-        this._commandResult.stderr = stderr;
-      });
-
-      if(overrides && overrides['runOnStart']){ 
-        //do something
+      if(overrides && (overrides['runOnStart'] || overrides['run'])){ 
+        exec(this.command, (error, stdout, stderr) => {
+          if (error) {
+            throw new Error(`Error executing command ${this.command}, ${error}`); 
+          }
+          this._commandResult.stdout = stdout;
+          this._commandResult.stderr = stderr;
+        });
+      }
+      if(overrides && overrides['clear']){ 
+        this._commandResult = {
+          stdout: '', 
+          stderr: ''
+        };
       }
     } catch(e){ 
       throw new Error(`Error executing command ${this.command}, ${e}`);
