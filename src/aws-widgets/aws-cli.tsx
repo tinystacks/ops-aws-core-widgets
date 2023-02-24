@@ -45,12 +45,14 @@ export class AwsCli extends BaseWidget {
           this._commandResult.stdout = stdout;
           this._commandResult.stderr = stderr;
         });
+        return;
       }
       if(overrides && overrides['clear']){ 
         this._commandResult = {
           stdout: '', 
           stderr: ''
         };
+        return;
       }
     } catch(e){ 
       throw new Error(`Error executing command ${this.command}, ${e}`);
