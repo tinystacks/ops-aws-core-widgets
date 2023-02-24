@@ -2,9 +2,9 @@ import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { CloudControl } from 'aws-sdk';
 import { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
-import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 import isEmpty from 'lodash.isempty';
+import { getAwsCredentialsProvider } from '../utils';
 
 type AwsJsonTreeProps = Widget & {
   region: string,
@@ -55,10 +55,9 @@ export class AwsJsonTree extends BaseWidget {
     }
 
     try{ 
-      const awsProvider = BaseProvider.fromJson(providers[0]) as AwsCredentialsProvider;
-
+      const awsCredentialsProvider = getAwsCredentialsProvider(providers);
       const cloudControlClient = new CloudControl({
-        credentials: await awsProvider.getCredentials(AwsSdkVersionEnum.V3),
+        credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
         region: this.region
       });
 

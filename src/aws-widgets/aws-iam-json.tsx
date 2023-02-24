@@ -2,10 +2,10 @@ import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { IAM } from '@aws-sdk/client-iam';
 import { Policy } from 'aws-sdk/clients/iam';
-import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 import isNil from 'lodash.isnil';
 import isEmpty from 'lodash.isempty';
+import { getAwsCredentialsProvider } from '../utils';
 
 type AwsIamJsonProps = Widget & {
   region: string,
@@ -54,10 +54,9 @@ export class AwsIamJson extends BaseWidget {
       throw new Error('An AwsCredentialsProvider was expected, but was not given');
     }
     try {
-      const awsProvider = BaseProvider.fromJson(providers[0]) as AwsCredentialsProvider;
-      
+      const awsCredentialsProvider = getAwsCredentialsProvider(providers);
       const iamClient = new IAM({
-        credentials: await awsProvider.getCredentials(AwsSdkVersionEnum.V3),
+        credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
         region: this.region
       });
       if (this.policyArn) {

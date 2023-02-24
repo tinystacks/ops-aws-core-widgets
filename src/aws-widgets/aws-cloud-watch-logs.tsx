@@ -31,7 +31,7 @@ export class AwsCloudWatchLogs extends BaseWidget {
     this.logGroupName = props.logGroupName;
     this.startTime = props.startTime;
     this.endTime = props.endTime;
-    this.events = [];
+    this.events = props.events || [];
   }
 
   fromJson (object: AwsCloudWatchLogsProps): AwsCloudWatchLogs {
