@@ -1,20 +1,19 @@
-import { 
-  AwsKeys as AwsKeysType,
-  AwsAssumedRole as AwsAssumedRoleType,
-  LocalAwsProfile as LocalAwsProfileType
-} from '@tinystacks/ops-model';
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
+import { AwsAssumedRoleType } from './aws-assumed-role.js';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
+import { LocalAwsProfileType } from './local-aws-profile.js';
+
+export type AwsKeysType = {
+  AwsAccessKeyId: string,
+  AwsSecretAccessKey: string,
+  AwsSessionToken?: string
+};
 
 class AwsKeys extends AwsCredentialsType implements AwsKeysType {
   AwsAccessKeyId: string;
   AwsSecretAccessKey: string;
   AwsSessionToken?: string;
 
-  constructor (args: {
-    AwsAccessKeyId: string,
-    AwsSecretAccessKey: string,
-    AwsSessionToken?: string
-  }) {
+  constructor (args: AwsKeysType) {
     const { 
       AwsAccessKeyId,
       AwsSecretAccessKey,

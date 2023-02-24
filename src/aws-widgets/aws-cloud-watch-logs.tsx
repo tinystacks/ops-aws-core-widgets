@@ -1,102 +1,47 @@
 import { Widget as WidgetType } from '@tinystacks/ops-model';
-import { Widget } from '@tinystacks/ops-core';
 import { CloudWatchLogs } from '@aws-sdk/client-cloudwatch-logs';
 import { OutputLogEvents } from 'aws-sdk/clients/cloudwatchlogs';
-import { h, Fragment } from 'preact';
-import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
+import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
+import { getAwsCredentialsProvider } from '../utils.js';
+import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
+
+import React from 'react';
 
 type AwsCloudWatchLogsProps = WidgetType & {
   region: string,
   logStreamName: string,
   logGroupName?: string,
   startTime?: number,
-  endTime?: number
-}
-
-type AwsCloudWatchLogsType = AwsCloudWatchLogsProps & {
+  endTime?: number,
   events: OutputLogEvents
 }
 
-export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
+export class AwsCloudWatchLogs extends BaseWidget {
   static type = 'AwsCloudWatchLogs';
   region: string;
   logStreamName: string;
   logGroupName?: string;
   startTime?: number;
   endTime?: number;
-  events: OutputLogEvents;
+  events?: OutputLogEvents;
 
   constructor (args: AwsCloudWatchLogsProps) {
-    const {
-      id,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      logStreamName,
-      logGroupName,
-      startTime,
-      endTime
-    } = args;
-    super (
-      id,
-      displayName,
-      AwsCloudWatchLogs.type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription
-    );
-    this.region = region;
-    this.logStreamName = logStreamName;
-    this.logGroupName = logGroupName;
-    this.startTime = startTime;
-    this.endTime = endTime;
-    this.events = [];
+    super (args);
+    this.region = args.region;
+    this.logStreamName = args.logStreamName;
+    this.logGroupName = args.logGroupName;
+    this.startTime = args.startTime;
+    this.endTime = args.endTime;
+    this.events = args.events || [];
   }
 
-  fromJson (object: AwsCloudWatchLogsProps): AwsCloudWatchLogs {
-    const {
-      id,
-      displayName,
-      type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      logStreamName,
-      logGroupName,
-      startTime,
-      endTime
-    } = object;
-    return new AwsCloudWatchLogs({
-      id,
-      displayName,
-      type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      logStreamName,
-      logGroupName,
-      startTime,
-      endTime
-    });
+  static fromJson (object: AwsCloudWatchLogsProps): AwsCloudWatchLogs {
+    return new AwsCloudWatchLogs(object);
   } 
 
-  toJson (): AwsCloudWatchLogsType {
+  toJson (): AwsCloudWatchLogsProps {
     return {
-      id: this.id,
-      type: this.type,
-      displayName: this.displayName,
-      providerId: this.providerId,
-      showDisplayName: this.showDisplayName,
-      description: this.description,
-      showDescription: this.showDescription,
+      ...super.toJson(),
       region: this.region,
       logStreamName: this.logStreamName,
       logGroupName: this.logGroupName,
@@ -106,8 +51,10 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
     };
   }
 
-  async getData (): Promise<void> {
-    const awsCredentialsProvider = this.provider as AwsCredentialsProvider;
+  async getData (providers: BaseProvider[]): Promise<void> {
+    const provider = getAwsCredentialsProvider(providers);
+
+    const awsCredentialsProvider = provider as AwsCredentialsProvider;
     const cwLogsClient = new CloudWatchLogs({
       credentials: await awsCredentialsProvider.getCredentials(),
       region: this.region
@@ -131,5 +78,15 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
     }
   }
 
-  render (): JSX.Element { return <>TODO</>; }
+  render (): React.ReactElement {
+    function CloudWatchLogsComponent (props: { events: OutputLogEvents }) {
+      return (
+        <div>
+          {props.events.map(event => event.message)}
+        </div>
+      );
+    }
+
+    return <CloudWatchLogsComponent events={this.events}/>;
+  }
 }

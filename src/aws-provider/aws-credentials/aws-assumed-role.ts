@@ -1,15 +1,18 @@
 import { STS, Credentials } from '@aws-sdk/client-sts';
-import { 
-  AwsAssumedRole as AwsAssumedRoleType,
-  AwsKeys as AwsKeysType,
-  LocalAwsProfile as LocalAwsProfileType
-} from '@tinystacks/ops-model';
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
-import { AwsKeys } from './aws-keys';
-import { LocalAwsProfile } from './local-aws-profile';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
+import { AwsKeys, AwsKeysType } from './aws-keys.js';
+import { LocalAwsProfile, LocalAwsProfileType } from './local-aws-profile.js';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 const DEFAULT_REGION = 'us-east-1';
+
+export type AwsAssumedRoleType = {
+  roleArn: string,
+  sessionName: string,
+  region: string,
+  primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
+  duration?: number
+};
 
 class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
   roleArn: string;
@@ -20,13 +23,7 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
   private stsClient: STS;
   private stsCreds: Credentials;
 
-  constructor (args: {
-    roleArn: string,
-    sessionName: string,
-    region: string,
-    primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
-    duration?: number
-  }) {
+  constructor (args: AwsAssumedRoleType) {
     const {
       roleArn,
       sessionName,

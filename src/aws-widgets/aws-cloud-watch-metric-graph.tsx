@@ -1,10 +1,12 @@
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import dayjs, { ManipulateType } from 'dayjs';
+import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
+import { getAwsCredentialsProvider } from '../utils.js';
 import { Widget as WidgetType } from '@tinystacks/ops-model';
-import { Widget } from '@tinystacks/ops-core';
-import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
-import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
-import { h, Fragment } from 'preact';
+import { BaseWidget } from '@tinystacks/ops-core';
+import { BaseProvider } from '@tinystacks/ops-core';
+
+import React from 'react';
 
 // eslint-disable-next-line no-shadow
 enum TimeUnitEnum {
@@ -57,7 +59,7 @@ type AwsCloudWatchMetricGraphType = WidgetType & {
   region: string;
 }
 
-export class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMetricGraphType {
+export class AwsCloudWatchMetricGraph extends BaseWidget {
   static type = 'AwsCloudWatchMetricGraph';
   statistic: string;
   showTimeRangeSelector: boolean;
@@ -67,85 +69,31 @@ export class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMet
   timeRange: TimeRange | RelativeTime;
   region: string;
 
-  constructor (
-    id: string,
-    displayName: string,
-    providerId: string,
-    showDisplayName?: boolean,
-    description?: string,
-    showDescription?: boolean,
-    statistic = 'Average',
-    showTimeRangeSelector = true,
-    showStatisticSelector = true,
-    showPeriodSelector = true,
-    metrics: Metric[] = [],
-    timeRange: TimeRange | RelativeTime = {
-      time: 5,
-      unit: TimeUnitEnum.m
-    },
-    region = 'us-east-1'
-  ) {
-    super (
-      id,
-      displayName,
-      AwsCloudWatchMetricGraph.type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription
-    );
-    this.statistic = statistic;
+  constructor (props: AwsCloudWatchMetricGraphType) {
+    super (props);
+    const {
+      statistic, showTimeRangeSelector, showStatisticSelector, showPeriodSelector, metrics, timeRange, region
+    } = props;
+    this.statistic = statistic || 'Average';
     this.showTimeRangeSelector = showTimeRangeSelector;
     this.showStatisticSelector = showStatisticSelector;
     this.showPeriodSelector = showPeriodSelector;
     this.metrics = metrics;
-    this.timeRange = timeRange;
-    this.region = region;
+    this.timeRange = timeRange || {
+      time: 5,
+      unit: TimeUnitEnum.m
+    };
+    this.region = region || 'us-east-1';
   }
   additionalProperties?: any;
 
   static fromJson (object: AwsCloudWatchMetricGraphType): AwsCloudWatchMetricGraph {
-    const {
-      id,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      statistic,
-      showTimeRangeSelector,
-      showStatisticSelector,
-      showPeriodSelector,
-      metrics,
-      timeRange,
-      region
-    } = object;
-    return new AwsCloudWatchMetricGraph(
-      id!,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      statistic,
-      showTimeRangeSelector,
-      showStatisticSelector,
-      showPeriodSelector,
-      metrics,
-      timeRange,
-      region
-    );
+    return new AwsCloudWatchMetricGraph(object);
   }
 
   toJson (): AwsCloudWatchMetricGraphType {
     return {
-      id: this.id,
-      type: this.type,
-      displayName: this.displayName,
-      providerId: this.providerId,
-      showDisplayName: this.showDisplayName,
-      description: this.description,
-      showDescription: this.showDescription,
+      ...super.toJson(),
       statistic: this.statistic,
       showTimeRangeSelector: this.showTimeRangeSelector,
       showStatisticSelector: this.showStatisticSelector,
@@ -156,8 +104,8 @@ export class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMet
     };
   }
 
-  async getData (): Promise<void> {
-    const awsCredentialsProvider = this.provider as AwsCredentialsProvider;
+  async getData (providers: BaseProvider[]): Promise<void> {
+    const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const cwClient = new CloudWatch({
       credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
       region: this.region
@@ -176,6 +124,7 @@ export class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMet
       startTime = relativeTimeStart.toDate();
     }
 
+    const hydratedMetrics = [];
     for (const metric of this.metrics) {
       const metricStatsResponse = await cwClient.getMetricStatistics({
         Namespace: metric.metricNamespace,
@@ -196,8 +145,12 @@ export class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMet
         value: Number((datapoint as any)[this.statistic]),
         unit: datapoint.Unit || ''
       }));
+
+      hydratedMetrics.push(metric);
     }
+
+    this.metrics = hydratedMetrics;
   }
 
-  render (): JSX.Element { return <>TODO</>; }
+  render (): JSX.Element { return <>{JSON.stringify(this.metrics.map(m => m.data))}</>; }
 }

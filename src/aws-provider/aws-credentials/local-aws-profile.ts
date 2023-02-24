@@ -1,17 +1,16 @@
-import { 
-  LocalAwsProfile as LocalAwsProfileType,
-  AwsAssumedRole as AwsAssumedRoleType,
-  AwsKeys as AwsKeysType
-} from '@tinystacks/ops-model';
 import AWS from 'aws-sdk';
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
+import { AwsAssumedRoleType } from './aws-assumed-role.js';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
+import { AwsKeysType } from './aws-keys.js';
+
+export type LocalAwsProfileType = {
+  profileName: string
+};
 
 class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileType {
   profileName: string;
 
-  constructor (args: {
-    profileName: string
-  }) {
+  constructor (args: LocalAwsProfileType) {
     const { 
       profileName
     } = args;
