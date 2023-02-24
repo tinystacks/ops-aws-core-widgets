@@ -32,7 +32,7 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileType 
     });
   }
 
-  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V2) {
+  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     try {
       const sharedCreds = new AWS.SharedIniFileCredentials({
         profile: this.profileName

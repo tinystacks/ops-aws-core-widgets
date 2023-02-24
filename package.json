@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.4.0",
+    "@types/lodash": "^4.14.191",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.52.0",
     "depcheck": "^1.4.3",
@@ -50,6 +51,7 @@
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "^3.267.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.272.0",
+    "@aws-sdk/client-ecs": "^3.276.0",
     "@aws-sdk/types": "^3.257.0",
     "@tinystacks/ops-core": "^0.0.30",
     "@tinystacks/ops-model": "^1.0.1",

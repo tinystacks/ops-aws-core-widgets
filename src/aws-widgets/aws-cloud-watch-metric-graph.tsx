@@ -157,21 +157,6 @@ export class AwsCloudWatchMetricGraph extends Widget implements AwsCloudWatchMet
   }
 
   async getData (): Promise<void> {
-    // Start DELETEME
-    // Remove once provider plugin is integrated
-    // const awsCredentialsProvider = this.provider as unknown as AwsCredentialsProvider;
-    // const providerThatWorks = new AwsCredentialsProvider({
-    //   id: awsCredentialsProvider.id, 
-    //   credentials: new LocalAwsProfile({ 
-    //     profileName: (awsCredentialsProvider.credentials as any).profileName 
-    //   })
-    // });
-    // END DELETEME
-    // const cwClient = new CloudWatch({
-    //   credentials: await providerThatWorks.getCredentials(AwsSdkVersionEnum.V3),
-    //   region: this.region
-    // });
-
     const awsCredentialsProvider = this.provider as AwsCredentialsProvider;
     const cwClient = new CloudWatch({
       credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),

@@ -65,7 +65,7 @@ class AwsCredentialsProvider extends Provider {
     };
   }
 
-  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V2) {
+  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     return await this.credentials.getCredentials(awsSdkVersion);
   }
 }

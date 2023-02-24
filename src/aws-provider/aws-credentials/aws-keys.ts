@@ -43,7 +43,7 @@ class AwsKeys extends AwsCredentialsType implements AwsKeysType {
     });
   }
 
-  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V2) {
+  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     return this.getVersionedCredentials(
       awsSdkVersion, 
       {

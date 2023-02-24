@@ -85,7 +85,7 @@ describe('getCredentials', () => {
     expect(spy).toBeCalledWith(AwsSdkVersionEnum.V3);
     expect(result).toEqual(mockV3Credentials);
   });
-  it('AwsAssumedRole, no args, defaults to v2 sdk', async () => {
+  it('AwsAssumedRole, no args, defaults to v3 sdk', async () => {
     const awsAssumedRole = new AwsAssumedRole({
       roleArn: 'test-role-arn',
       sessionName: 'test-session-name',
@@ -95,7 +95,7 @@ describe('getCredentials', () => {
       })
     });
     const spy = jest.spyOn(awsAssumedRole, 'getCredentials').mockImplementation(() => { 
-      return new Promise((resolve) => resolve(mockV2Credentials));
+      return new Promise((resolve) => resolve(mockV3Credentials));
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
@@ -103,8 +103,8 @@ describe('getCredentials', () => {
     });
     const result = await awsCredentialsProvider.getCredentials();
     expect(spy).toBeCalled();
-    expect(spy).toBeCalledWith(AwsSdkVersionEnum.V2);
-    expect(result).toEqual(mockV2Credentials);
+    expect(spy).toBeCalledWith(AwsSdkVersionEnum.V3);
+    expect(result).toEqual(mockV3Credentials);
   });
   it('AwsKeys, v2 sdk', async () => {
     const awsKeys = new AwsKeys({
@@ -142,7 +142,7 @@ describe('getCredentials', () => {
     expect(spy).toBeCalledWith(AwsSdkVersionEnum.V3);
     expect(result).toEqual(mockV3Credentials);
   });
-  it('AwsKeys, no args, defaults to v2 sdk', async () => {
+  it('AwsKeys, no args, defaults to v3 sdk', async () => {
     const awsKeys = new AwsKeys({
       AwsAccessKeyId: 'test-access-key',
       AwsSecretAccessKey: 'test-secret-key',
@@ -157,8 +157,8 @@ describe('getCredentials', () => {
     });
     const result = await awsCredentialsProvider.getCredentials();
     expect(spy).toBeCalled();
-    expect(spy).toBeCalledWith(AwsSdkVersionEnum.V2);
-    expect(result).toEqual(mockV2Credentials);
+    expect(spy).toBeCalledWith(AwsSdkVersionEnum.V3);
+    expect(result).toEqual(mockV3Credentials);
   });
   it('LocalAwsProfile, v2 sdk', async () => {
     const localAwsProfile = new LocalAwsProfile({
@@ -192,12 +192,12 @@ describe('getCredentials', () => {
     expect(spy).toBeCalledWith(AwsSdkVersionEnum.V3);
     expect(result).toEqual(mockV3Credentials);
   });
-  it('LocalAwsProfile, no args, defaults to v2 sdk', async () => {
+  it('LocalAwsProfile, no args, defaults to v3 sdk', async () => {
     const localAwsProfile = new LocalAwsProfile({
       profileName: 'default'
     });
     const spy = jest.spyOn(localAwsProfile, 'getCredentials').mockImplementation(() => { 
-      return new Promise((resolve) => resolve(mockV2Credentials));
+      return new Promise((resolve) => resolve(mockV3Credentials));
     });
 
     const awsCredentialsProvider = new AwsCredentialsProvider({
@@ -205,8 +205,8 @@ describe('getCredentials', () => {
     });
     const result = await awsCredentialsProvider.getCredentials();
     expect(spy).toBeCalled();
-    expect(spy).toBeCalledWith(AwsSdkVersionEnum.V2);
-    expect(result).toEqual(mockV2Credentials);
+    expect(spy).toBeCalledWith(AwsSdkVersionEnum.V3);
+    expect(result).toEqual(mockV3Credentials);
   });
 });
 

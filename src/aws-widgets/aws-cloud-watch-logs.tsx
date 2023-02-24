@@ -5,12 +5,16 @@ import { OutputLogEvents } from 'aws-sdk/clients/cloudwatchlogs';
 import { h, Fragment } from 'preact';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
 
-type AwsCloudWatchLogsType = WidgetType & {
+type AwsCloudWatchLogsProps = WidgetType & {
   region: string,
   logStreamName: string,
   logGroupName?: string,
   startTime?: number,
   endTime?: number
+}
+
+type AwsCloudWatchLogsType = AwsCloudWatchLogsProps & {
+  events: OutputLogEvents
 }
 
 export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
@@ -20,9 +24,9 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
   logGroupName?: string;
   startTime?: number;
   endTime?: number;
-  private _events: OutputLogEvents;
+  events: OutputLogEvents;
 
-  constructor (args: AwsCloudWatchLogsType) {
+  constructor (args: AwsCloudWatchLogsProps) {
     const {
       id,
       displayName,
@@ -50,10 +54,10 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
     this.logGroupName = logGroupName;
     this.startTime = startTime;
     this.endTime = endTime;
-    this._events = [];
+    this.events = [];
   }
 
-  fromJson (object: AwsCloudWatchLogsType): AwsCloudWatchLogs {
+  fromJson (object: AwsCloudWatchLogsProps): AwsCloudWatchLogs {
     const {
       id,
       displayName,
@@ -97,7 +101,8 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
       logStreamName: this.logStreamName,
       logGroupName: this.logGroupName,
       startTime: this.startTime,
-      endTime: this.endTime
+      endTime: this.endTime,
+      events: this.events
     };
   }
 
@@ -113,7 +118,7 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
       startTime: this.startTime,
       endTime: this.endTime
     });
-    this._events = [...this._events, ...res.events];
+    this.events = [...this.events, ...res.events];
     while (res.nextForwardToken) {
       res = await cwLogsClient.getLogEvents({
         logStreamName: this.logStreamName,
@@ -122,12 +127,8 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
         endTime: this.endTime,
         nextToken: res.nextForwardToken
       });
-      this._events = [...this._events, ...res.events];
+      this.events = [...this.events, ...res.events];
     }
-  }
-
-  get events () {
-    return this._events;
   }
 
   render (): JSX.Element { return <>TODO</>; }

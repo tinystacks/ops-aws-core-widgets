@@ -15,13 +15,15 @@ import { AwsCredentialIdentity } from '@aws-sdk/types';
 //       return {
 //         assumeRole: (...args: any) => ({
 //           promise: () => mockAssumeRole(...args)
-//         })
+//         }) 
 //       }
 //     })
 //   }
 // });
 
 import { STS } from '@aws-sdk/client-sts';
+
+
 
 // jest.mock('@aws-sdk/client-sts', () => {
 //   return {
@@ -32,6 +34,27 @@ import { STS } from '@aws-sdk/client-sts';
 //     })
 //   }
 // });
+
+// jest.mock('@aws-sdk/client-sts', () => {
+//   return {
+//     __esModule: true,
+//     STS: jest.fn().mockImplementation(() => {
+//       return {
+//         assumeRole: mockAssumeRole
+//       }
+//     })
+//   }
+// });
+
+const mockStsInstance = {
+  assumeRole: mockAssumeRole
+};
+
+jest.mock('@aws-sdk/client-sts', () => {
+  return {
+    STS: jest.fn(() => mockStsInstance)
+  }
+});
 
 jest.useFakeTimers().setSystemTime(new Date('2023-02-02 00:00:00').getTime());
 
@@ -201,7 +224,7 @@ describe('getCredentials', () => {
     });
     expect(result).toEqual(mockV3Credentials);
   });
-  it('sts creds have expired, no args, defaults to v2 sdk', async () => {
+  it('sts creds have expired, no args, defaults to v3 sdk', async () => {
     mockAssumeRole.mockResolvedValueOnce({
       Credentials: {
         AccessKeyId: 'test-access-key',
@@ -226,7 +249,7 @@ describe('getCredentials', () => {
       RoleSessionName: 'test-session-name',
       DurationSeconds: ROLE_SESSION_DURATION_SECONDS
     });
-    expect(result).toEqual(mockV2Credentials);
+    expect(result).toEqual(mockV3Credentials);
   });
   it('sts creds have not expired, v2 sdk', async () => {
     mockAssumeRole.mockResolvedValueOnce({
@@ -278,7 +301,7 @@ describe('getCredentials', () => {
     expect(mockAssumeRole).toBeCalledTimes(1);
     expect(result).toEqual(mockV3Credentials);
   });
-  it('sts creds have not expired, no args, defaults to v2 sdk', async () => {
+  it('sts creds have not expired, no args, defaults to v3 sdk', async () => {
     mockAssumeRole.mockResolvedValueOnce({
       Credentials: {
         AccessKeyId: 'test-access-key',
@@ -301,6 +324,6 @@ describe('getCredentials', () => {
     const result = await awsAssumedRole.getCredentials();
     // mockAssumeRole only called once during initial call
     expect(mockAssumeRole).toBeCalledTimes(1);
-    expect(result).toEqual(mockV2Credentials);
+    expect(result).toEqual(mockV3Credentials);
   });
 });
