@@ -101,7 +101,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget{
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
       throw new Error('An AwsCredentialsProvider was expected, but was not given');
     } 
-    const awsProvider = BaseProvider.fromJson(providers[0]) as unknown as AwsCredentialsProvider;
+    const awsProvider = BaseProvider.fromJson(providers[0]) as AwsCredentialsProvider;
     const cwClient = new CloudWatch({
       credentials: await awsProvider.getCredentials(AwsSdkVersionEnum.V3),
       region: this.region

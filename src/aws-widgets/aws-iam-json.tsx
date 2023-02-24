@@ -55,7 +55,7 @@ export class AwsIamJson extends BaseWidget {
       throw new Error('An AwsCredentialsProvider was expected, but was not given');
     }
     try {
-      const awsProvider = BaseProvider.fromJson(providers[0]) as unknown as AwsCredentialsProvider;
+      const awsProvider = BaseProvider.fromJson(providers[0]) as AwsCredentialsProvider;
       
       const iamClient = new IAM({
         credentials: await awsProvider.getCredentials(AwsSdkVersionEnum.V3),

@@ -56,7 +56,7 @@ export class AwsJsonTree extends BaseWidget {
     }
 
     try{ 
-      const awsProvider = BaseProvider.fromJson(providers[0]) as unknown as AwsCredentialsProvider;
+      const awsProvider = BaseProvider.fromJson(providers[0]) as AwsCredentialsProvider;
 
       const cloudControlClient = new CloudControl({
         credentials: await awsProvider.getCredentials(AwsSdkVersionEnum.V3),
