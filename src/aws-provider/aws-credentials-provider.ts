@@ -20,13 +20,13 @@ class AwsCredentialsProvider extends BaseProvider {
   region?: string;
 
   constructor (props: AwsCredentialsProviderProps) {
-    super(props.id, AwsCredentialsProvider.type);
+    super({ id: props.id, type: AwsCredentialsProvider.type });
     this.credentials = props.credentials;
     this.accountId = props.accountId;
     this.region = props.region;
   }
 
-  static fromJson (object: AwsCredentialsProviderType): AwsCredentialsProviderProps { //this should return a Promise<BaseProvider> | BaseProvider
+  static fromJson (object: AwsCredentialsProviderType): AwsCredentialsProviderProps {
     let creds;
     if (AwsAssumedRole.isAwsAssumedRole(object.credentials)) {
       creds = AwsAssumedRole.fromJson({ ...(object.credentials as AwsAssumedRoleType) });

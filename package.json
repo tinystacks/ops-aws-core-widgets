@@ -55,7 +55,7 @@
     "@aws-sdk/client-cloudwatch-logs": "^3.272.0",
     "@aws-sdk/client-iam": "^3.276.0",
     "@aws-sdk/types": "^3.257.0",
-    "@tinystacks/ops-core": "0.0.0-release",
+    "@tinystacks/ops-core": "0.0.3-release",
     "@tinystacks/ops-model": "0.0.0-release",
     "@types/lodash.isnil": "^4.0.7",
     "@types/react": "^18.0.28",
