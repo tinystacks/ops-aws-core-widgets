@@ -2,10 +2,11 @@ import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import dayjs, { ManipulateType } from 'dayjs';
 import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
-import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
-import { h, Fragment } from 'preact';
 import isEmpty from 'lodash.isempty';
+import { getAwsCredentialsProvider } from '../utils.js';
+
+import React from 'react';
 
 // eslint-disable-next-line no-shadow
 enum TimeUnitEnum {
@@ -58,7 +59,7 @@ type AwsCloudWatchMetricGraphProps = Widget & {
   region: string;
 }
 
-export class AwsCloudWatchMetricGraph extends BaseWidget{
+export class AwsCloudWatchMetricGraph extends BaseWidget {
   static type = 'AwsCloudWatchMetricGraph';
   statistic: string;
   showTimeRangeSelector: boolean;
@@ -101,10 +102,9 @@ export class AwsCloudWatchMetricGraph extends BaseWidget{
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
       throw new Error('An AwsCredentialsProvider was expected, but was not given');
     } 
-    const awsProvider = BaseProvider.fromJson(providers[0]) as AwsCredentialsProvider;
+    const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const cwClient = new CloudWatch({
-      credentials: await awsProvider.getCredentials(AwsSdkVersionEnum.V3),
-      region: this.region
+      credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3)
     });
     let startTime;
     let endTime;
@@ -120,6 +120,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget{
       startTime = relativeTimeStart.toDate();
     }
 
+    const hydratedMetrics = [];
     for (const metric of this.metrics) {
       const metricStatsResponse = await cwClient.getMetricStatistics({
         Namespace: metric.metricNamespace,
@@ -140,8 +141,12 @@ export class AwsCloudWatchMetricGraph extends BaseWidget{
         value: Number((datapoint as any)[this.statistic]),
         unit: datapoint.Unit || ''
       }));
+
+      hydratedMetrics.push(metric);
     }
+
+    this.metrics = hydratedMetrics;
   }
 
-  render (): JSX.Element { return <>TODO</>; }
+  render (): JSX.Element { return <>{JSON.stringify(this.metrics.map(m => m.data))}</>; }
 }

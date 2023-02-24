@@ -2,15 +2,17 @@ import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { CloudWatchLogs } from '@aws-sdk/client-cloudwatch-logs';
 import { OutputLogEvents } from 'aws-sdk/clients/cloudwatchlogs';
-import { Fragment } from 'preact';
 import isEmpty from 'lodash.isempty';
+import { getAwsCredentialsProvider } from '../utils';
+import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
 
 type AwsCloudWatchLogsProps = Widget & {
   region: string,
   logStreamName: string,
   logGroupName?: string,
   startTime?: number,
-  endTime?: number
+  endTime?: number,
+  events: OutputLogEvents
 }
 
 export class AwsCloudWatchLogs extends BaseWidget {
@@ -20,7 +22,7 @@ export class AwsCloudWatchLogs extends BaseWidget {
   logGroupName?: string;
   startTime?: number;
   endTime?: number;
-  private _events: OutputLogEvents;
+  events?: OutputLogEvents;
 
   constructor (props: AwsCloudWatchLogsProps) {
     super (props);
@@ -29,7 +31,7 @@ export class AwsCloudWatchLogs extends BaseWidget {
     this.logGroupName = props.logGroupName;
     this.startTime = props.startTime;
     this.endTime = props.endTime;
-    this._events = [];
+    this.events = [];
   }
 
   fromJson (object: AwsCloudWatchLogsProps): AwsCloudWatchLogs {
@@ -43,7 +45,8 @@ export class AwsCloudWatchLogs extends BaseWidget {
       logStreamName: this.logStreamName,
       logGroupName: this.logGroupName,
       startTime: this.startTime,
-      endTime: this.endTime
+      endTime: this.endTime,
+      events: this.events
     };
   }
 
@@ -51,15 +54,20 @@ export class AwsCloudWatchLogs extends BaseWidget {
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
       throw new Error('An AwsCredentialsProvider was expected, but was not given');
     }
-    // TODO: integrate provider
-    const cwLogsClient = new CloudWatchLogs({});
+    const provider = getAwsCredentialsProvider(providers);
+
+    const awsCredentialsProvider = provider as AwsCredentialsProvider;
+    const cwLogsClient = new CloudWatchLogs({
+      credentials: await awsCredentialsProvider.getCredentials(),
+      region: this.region
+    });
     let res = await cwLogsClient.getLogEvents({
       logStreamName: this.logStreamName,
       logGroupName: this.logGroupName,
       startTime: this.startTime,
       endTime: this.endTime
     });
-    this._events = [...this._events, ...res.events];
+    this.events = [...this.events, ...res.events];
     while (res.nextForwardToken) {
       res = await cwLogsClient.getLogEvents({
         logStreamName: this.logStreamName,
@@ -68,13 +76,19 @@ export class AwsCloudWatchLogs extends BaseWidget {
         endTime: this.endTime,
         nextToken: res.nextForwardToken
       });
-      this._events = [...this._events, ...res.events];
+      this.events = [...this.events, ...res.events];
     }
   }
 
-  get events () {
-    return this._events;
-  }
+  render (): React.ReactElement {
+    function CloudWatchLogsComponent (props: { events: OutputLogEvents }) {
+      return (
+        <div>
+          {props.events.map(event => event.message)}
+        </div>
+      );
+    }
 
-  render (): JSX.Element { return <>TODO</>; }
+    return <CloudWatchLogsComponent events={this.events}/>;
+  }
 }

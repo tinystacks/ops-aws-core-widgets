@@ -91,7 +91,7 @@ describe('getCredentials', () => {
       profileName: 'default'
     });
     const result = await localAwsProfile.getCredentials();
-    expect(result).toEqual(mockV2Credentials);
+    expect(result).toEqual(mockV3Credentials);
   });
   it('reads profile unsuccessfully', async () => {
     mockSharedIniFileCredentials.mockImplementationOnce(() => {

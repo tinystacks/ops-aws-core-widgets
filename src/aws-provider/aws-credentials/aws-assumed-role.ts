@@ -1,7 +1,7 @@
-import AWS from 'aws-sdk';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
 import { AwsKeys, AwsKeysType } from './aws-keys';
 import { LocalAwsProfile, LocalAwsProfileType } from './local-aws-profile';
+import { STS, Credentials } from '@aws-sdk/client-sts';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 const DEFAULT_REGION = 'us-east-1';
@@ -20,8 +20,8 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType{
   region: string;
   primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
   duration?: number;
-  private stsClient: AWS.STS;
-  private stsCreds: AWS.STS.Credentials;
+  private stsClient: STS;
+  private stsCreds: Credentials;
 
   constructor (props: AwsAssumedRoleType) {
     super();
@@ -77,25 +77,22 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType{
     };
   }
 
-  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V2) {
+  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     // if sts creds exist and have not expired, return them as generic creds
     if (!this.credsWillExpireInSession()) {
       const genericCreds = this.mapStsCredsToGenericCreds();
       return this.getVersionedCredentials(awsSdkVersion, genericCreds);
     }
     const creds = await this.primaryCredentials.getCredentials(awsSdkVersion);
-    this.stsClient = new AWS.STS({
-      accessKeyId: creds.accessKeyId,
-      secretAccessKey: creds.secretAccessKey,
-      sessionToken: creds.sessionToken,
+    this.stsClient = new STS({
+      credentials: creds,
       region: this.region
     });
-    
     const res = await this.stsClient.assumeRole({
       RoleArn: this.roleArn,
       RoleSessionName: this.sessionName,
       DurationSeconds: this.duration
-    }).promise();
+    });
     this.stsCreds = res.Credentials;
     const genericCreds = this.mapStsCredsToGenericCreds();
     return this.getVersionedCredentials(awsSdkVersion, genericCreds);

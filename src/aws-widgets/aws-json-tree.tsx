@@ -1,6 +1,5 @@
 import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
-import { Fragment } from 'preact';
 import { CloudControl } from 'aws-sdk';
 import { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';

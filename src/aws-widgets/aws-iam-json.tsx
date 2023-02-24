@@ -1,6 +1,5 @@
 import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
-import { Fragment } from 'preact';
 import { IAM } from '@aws-sdk/client-iam';
 import { Policy } from 'aws-sdk/clients/iam';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';

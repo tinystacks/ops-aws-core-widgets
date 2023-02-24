@@ -1,6 +1,5 @@
 import { Widget  } from '@tinystacks/ops-model';
 import { BaseWidget } from '@tinystacks/ops-core';
-import { Fragment } from 'preact';
 import get from 'lodash.get';
 
 type JsonTreeProps = Widget & {

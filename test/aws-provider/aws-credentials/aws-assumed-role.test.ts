@@ -1,27 +1,62 @@
 const mockAssumeRole = jest.fn();
 
 import AWS from 'aws-sdk';
-import { AwsAssumedRole } from '../../../src/aws-provider/aws-credentials/aws-assumed-role';
-import { AwsKeys } from '../../../src/aws-provider/aws-credentials/aws-keys';
-import { LocalAwsProfile } from '../../../src/aws-provider/aws-credentials/local-aws-profile';
-import { AwsSdkVersionEnum } from '../../../src/aws-provider/aws-credentials/aws-credentials-type';
+import { AwsAssumedRole } from '../../../src/aws-provider/aws-credentials/aws-assumed-role.js';
+import { AwsKeys } from '../../../src/aws-provider/aws-credentials/aws-keys.js';
+import { LocalAwsProfile } from '../../../src/aws-provider/aws-credentials/local-aws-profile.js';
+import { AwsSdkVersionEnum } from '../../../src/aws-provider/aws-credentials/aws-credentials-type.js';
 import { AwsCredentialIdentity } from '@aws-sdk/types';
 
-jest.useFakeTimers().setSystemTime(new Date('2023-02-02 00:00:00').getTime());
+// jest.mock('aws-sdk', () => {
+//   const original = jest.requireActual('aws-sdk');
+//   return {
+//     ...original,
+//     STS: jest.fn(() => {
+//       return {
+//         assumeRole: (...args: any) => ({
+//           promise: () => mockAssumeRole(...args)
+//         }) 
+//       }
+//     })
+//   }
+// });
 
-jest.mock('aws-sdk', () => {
-  const original = jest.requireActual('aws-sdk');
+import { STS } from '@aws-sdk/client-sts';
+
+
+
+// jest.mock('@aws-sdk/client-sts', () => {
+//   return {
+//     STS: jest.fn(() => {
+//       return {
+//         assumeRole: mockAssumeRole
+//       }
+//     })
+//   }
+// });
+
+// jest.mock('@aws-sdk/client-sts', () => {
+//   return {
+//     __esModule: true,
+//     STS: jest.fn().mockImplementation(() => {
+//       return {
+//         assumeRole: mockAssumeRole
+//       }
+//     })
+//   }
+// });
+
+const mockStsInstance = {
+  assumeRole: mockAssumeRole
+};
+
+jest.mock('@aws-sdk/client-sts', () => {
   return {
-    ...original,
-    STS: jest.fn(() => {
-      return {
-        assumeRole: (...args) => ({
-          promise: () => mockAssumeRole(...args)
-        })
-      }
-    })
+    STS: jest.fn(() => mockStsInstance)
   }
 });
+
+jest.useFakeTimers().setSystemTime(new Date('2023-02-02 00:00:00').getTime());
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 
@@ -126,6 +161,7 @@ describe('fromJson', () => {
     expect(result).toEqual(mockfromJsonResult);
   })
 });
+
 describe('getCredentials', () => {
   afterEach(() => {
     // for mocks
@@ -188,7 +224,7 @@ describe('getCredentials', () => {
     });
     expect(result).toEqual(mockV3Credentials);
   });
-  it('sts creds have expired, no args, defaults to v2 sdk', async () => {
+  it('sts creds have expired, no args, defaults to v3 sdk', async () => {
     mockAssumeRole.mockResolvedValueOnce({
       Credentials: {
         AccessKeyId: 'test-access-key',
@@ -213,7 +249,7 @@ describe('getCredentials', () => {
       RoleSessionName: 'test-session-name',
       DurationSeconds: ROLE_SESSION_DURATION_SECONDS
     });
-    expect(result).toEqual(mockV2Credentials);
+    expect(result).toEqual(mockV3Credentials);
   });
   it('sts creds have not expired, v2 sdk', async () => {
     mockAssumeRole.mockResolvedValueOnce({
@@ -265,7 +301,7 @@ describe('getCredentials', () => {
     expect(mockAssumeRole).toBeCalledTimes(1);
     expect(result).toEqual(mockV3Credentials);
   });
-  it('sts creds have not expired, no args, defaults to v2 sdk', async () => {
+  it('sts creds have not expired, no args, defaults to v3 sdk', async () => {
     mockAssumeRole.mockResolvedValueOnce({
       Credentials: {
         AccessKeyId: 'test-access-key',
@@ -288,6 +324,6 @@ describe('getCredentials', () => {
     const result = await awsAssumedRole.getCredentials();
     // mockAssumeRole only called once during initial call
     expect(mockAssumeRole).toBeCalledTimes(1);
-    expect(result).toEqual(mockV2Credentials);
+    expect(result).toEqual(mockV3Credentials);
   });
 });
