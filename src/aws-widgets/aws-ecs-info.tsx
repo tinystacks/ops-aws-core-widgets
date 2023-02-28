@@ -2,31 +2,13 @@ import { Widget as WidgetType } from "@tinystacks/ops-model"
 import { Widget } from '@tinystacks/ops-core';
 import { 
   ECS,
-  PortMapping,
-  KeyValuePair,
-  Secret,
-  Volume,
-  Container,
-  DescribeServicesCommandOutput,
-  DescribeClustersCommandOutput,
-  ListTasksCommandOutput,
   DescribeTaskDefinitionCommandOutput,
   DescribeCapacityProvidersCommandOutput,
   DescribeTasksCommandOutput
 } from '@aws-sdk/client-ecs';
 import _ from 'lodash';
 import { AwsCredentialsProvider } from "../aws-provider/aws-credentials-provider";
-
-type Image = {
-  containerName: string;
-  portMappings: PortMapping[];
-  envVars: KeyValuePair[];
-  secrets: Secret[],
-  volumes: Volume[],
-  cwLogsArn: string,
-  memory: string,
-  cpu: string
-}
+import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from "../utils/aws-ecs-utils";
 
 type AwsEcsInfoProps = WidgetType & {
   region: string,
@@ -99,7 +81,7 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
     this.serviceName = serviceName;
   }
 
-  fromJson(object: AwsEcsInfoProps): AwsEcsInfo {
+  fromJson(object: AwsEcsInfoType): AwsEcsInfo {
     const {
       id,
       displayName,
@@ -111,9 +93,22 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
       region,
       accountId,
       clusterName,
-      serviceName
+      serviceName,
+      serviceArn,
+      clusterArn,
+      runningCount,
+      desiredCount,
+      capacity,
+      asgArn,
+      memory,
+      cpu,
+      taskDefinitionArn,
+      status,
+      roleArn,
+      execRoleArn,
+      images
     } = object;
-    return new AwsEcsInfo({
+    const awsEcsInfo = new AwsEcsInfo({
       id,
       displayName,
       type,
@@ -126,6 +121,21 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
       clusterName,
       serviceName
     });
+    awsEcsInfo.serviceArn = serviceArn;
+    awsEcsInfo.clusterArn = clusterArn;
+    awsEcsInfo.runningCount = runningCount;
+    awsEcsInfo.desiredCount = desiredCount;
+    awsEcsInfo.capacity = capacity;
+    awsEcsInfo.asgArn = asgArn;
+    awsEcsInfo.memory = memory;
+    awsEcsInfo.cpu = cpu;
+    awsEcsInfo.taskDefinitionArn = taskDefinitionArn;
+    awsEcsInfo.status = status;
+    awsEcsInfo.roleArn = roleArn;
+    awsEcsInfo.execRoleArn = execRoleArn;
+    awsEcsInfo.images = images;
+    
+    return awsEcsInfo;
   }
 
   toJson(): AwsEcsInfoType {
@@ -163,30 +173,12 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
       credentials: await awsCredentialsProvider.getCredentials(),
       region: this.region
     });
-    const initialAwsPromises = [];
-    initialAwsPromises.push(ecsClient.describeServices({
-      cluster: this.clusterName,
-      services: [ this.serviceName ]
-    }));
-    initialAwsPromises.push(ecsClient.describeClusters({
-      clusters: [ this.clusterName ]
-    }));
-    initialAwsPromises.push(ecsClient.listTasks({
-      cluster: this.clusterName,
-      serviceName: this.serviceName
-    }));
-    const initialSettledPromises = (await Promise.allSettled(initialAwsPromises)).map((promise) => {
-      if (promise.status === 'fulfilled') {
-        return promise.value;
-      }
-      console.error(promise.reason);
-      return undefined;
-    });
-    const describeServicesRes = initialSettledPromises[0] as DescribeServicesCommandOutput;
-    const describeClustersRes = initialSettledPromises[1] as DescribeClustersCommandOutput;
-    const listTasksRes = initialSettledPromises[2] as ListTasksCommandOutput;
+    const {
+      service,
+      cluster,
+      taskArns
+    } = await getCoreEcsData(ecsClient, this.clusterName, this.serviceName);
    
-    const service = _.get(describeServicesRes, 'services[0]');
     const primaryDeployment = service?.deployments?.find((deployment) => {
       return deployment.status === 'PRIMARY';
     });
@@ -202,13 +194,9 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
     secondaryAwsPromises.push(ecsClient.describeTaskDefinition({
       taskDefinition: service?.taskDefinition
     }));
-
-    const cluster = _.get(describeClustersRes, 'clusters[0]');
     secondaryAwsPromises.push(ecsClient.describeCapacityProviders({
       capacityProviders: [ _.get(cluster, 'defaultCapacityProviderStrategy[0].capacityProvider') ]
     }));
-   
-    const taskArns = listTasksRes?.taskArns;
     secondaryAwsPromises.push(ecsClient.describeTasks({
       cluster: this.clusterName,
       tasks: taskArns
@@ -225,43 +213,17 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
     const describeTasksRes = secondarySettledPromises[2] as DescribeTasksCommandOutput;
 
     const taskDefinition = describeTaskDefinitionRes?.taskDefinition;
-    if (!!taskDefinition) {
-      this.memory = taskDefinition.memory;
-      this.cpu = taskDefinition.cpu;
-      this.execRoleArn = taskDefinition.executionRoleArn;
-    }
+    this.memory = taskDefinition?.memory;
+    this.cpu = taskDefinition?.cpu;
+    this.execRoleArn = taskDefinition?.executionRoleArn;
 
     const capacityProvider = _.get(describeCapacityProvidersRes, 'capacityProviders[0]');
-    if (!!capacityProvider) {
-      this.asgArn = capacityProvider?.autoScalingGroupProvider?.autoScalingGroupArn;
-      this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity
-    }
+    this.asgArn = capacityProvider?.autoScalingGroupProvider?.autoScalingGroupArn;
+    this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity
 
-    const allTasks = describeTasksRes?.tasks;
-    if (!!allTasks) {
-      const tasks = allTasks?.filter((task) => task.taskDefinitionArn === this.taskDefinitionArn);
-      let containers: Container[] = [];
-      tasks.forEach((task) => {
-        containers = [...containers, ...task.containers]
-      });
-      this.images = [];
-      containers.forEach((container) => {
-        const containerDefinition = taskDefinition.containerDefinitions.find((containerDefinition) => {
-          return containerDefinition.name === container.name;
-        });
-        const logConfigOptions = containerDefinition?.logConfiguration?.options;
-        this.images.push({
-          containerName: container.name,
-          portMappings: containerDefinition?.portMappings,
-          envVars: containerDefinition?.environment,
-          secrets: containerDefinition?.secrets,
-          volumes: taskDefinition?.volumes,
-          memory: container.memory,
-          cwLogsArn: `arn:aws:logs:${logConfigOptions['awslogs-region']}:${this.accountId}:${logConfigOptions['awslogs-group']}:*`,
-          cpu: container.cpu
-        });
-      });
-    }
+    const tasks = describeTasksRes?.tasks;
+    const associatedTasks = getTasksForTaskDefinition(tasks, this.taskDefinitionArn);
+    this.images = hydrateImages(associatedTasks, taskDefinition, this.accountId);
   }
 
   render(): JSX.Element {

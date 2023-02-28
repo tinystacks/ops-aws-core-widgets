@@ -57,6 +57,7 @@ export class AwsCloudWatchLogs extends Widget implements AwsCloudWatchLogsType {
     this.events = [];
   }
 
+  // take full type for full serialization, set others explicitly
   fromJson (object: AwsCloudWatchLogsProps): AwsCloudWatchLogs {
     const {
       id,
