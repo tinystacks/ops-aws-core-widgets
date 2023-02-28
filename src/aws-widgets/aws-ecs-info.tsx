@@ -1,4 +1,4 @@
-import { Widget as WidgetType } from '@tinystacks/ops-model';
+import { Widget } from '@tinystacks/ops-model';
 import {
   ECS,
   PortMapping,
@@ -28,7 +28,7 @@ type Image = {
   cpu: string
 }
 
-type AwsEcsInfoProps = WidgetType & {
+type AwsEcsInfoProps = Widget & {
   region: string,
   accountId: string,
   clusterName: string,

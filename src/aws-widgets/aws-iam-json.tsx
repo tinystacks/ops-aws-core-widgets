@@ -3,9 +3,9 @@ import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { IAM } from '@aws-sdk/client-iam';
 import { Policy } from 'aws-sdk/clients/iam';
 import isNil from 'lodash.isnil';
-import { getAwsCredentialsProvider } from '../utils';
+import { getAwsCredentialsProvider } from '../utils.js';
 import isEmpty from 'lodash.isempty';
-import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
+import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 
 type AwsIamJsonProps = Widget & {
   region: string,
@@ -27,8 +27,8 @@ export class AwsIamJson extends BaseWidget {
     this.region = props.region;
     this.roleArn = props.roleArn;
     this.policyArn = props.policyArn;
-    this._policy = {};
-    this._rolePolicies = [];
+    this.policy = {};
+    this.rolePolicies = [];
 
   }
 
@@ -83,13 +83,11 @@ export class AwsIamJson extends BaseWidget {
     }
   }
 
-  get policy () {
-    return this._policy;
-  }
+  get policy () { return this._policy; }
+  set policy (_policy) { this._policy = _policy; }
 
-  get rolePolicies () { 
-    return this._rolePolicies;
-  }
+  get rolePolicies () { return this._rolePolicies; }
+  set rolePolicies (_rolePolicies) { this._rolePolicies = _rolePolicies; }
 
   render (): JSX.Element { return <>TODO</>; }
 
