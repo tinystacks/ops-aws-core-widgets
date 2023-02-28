@@ -1,20 +1,20 @@
-import { STS, Credentials } from '@aws-sdk/client-sts';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
 import { AwsKeys, AwsKeysType } from './aws-keys.js';
 import { LocalAwsProfile, LocalAwsProfileType } from './local-aws-profile.js';
+import { STS, Credentials } from '@aws-sdk/client-sts';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 const DEFAULT_REGION = 'us-east-1';
 
-export type AwsAssumedRoleType = {
-  roleArn: string,
-  sessionName: string,
-  region: string,
+export type AwsAssumedRoleType = { 
+  roleArn: string;
+  sessionName: string;
+  region: string;
   primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
-  duration?: number
-};
+  duration?: number;
+}
 
-class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
+class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType{
   roleArn: string;
   sessionName: string;
   region: string;
@@ -23,20 +23,13 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
   private stsClient: STS;
   private stsCreds: Credentials;
 
-  constructor (args: AwsAssumedRoleType) {
-    const {
-      roleArn,
-      sessionName,
-      region,
-      primaryCredentials,
-      duration
-    } = args;
+  constructor (props: AwsAssumedRoleType) {
     super();
-    this.roleArn = roleArn;
-    this.sessionName = sessionName;
-    this.region = region || DEFAULT_REGION;
-    this.primaryCredentials = primaryCredentials;
-    this.duration = duration || ROLE_SESSION_DURATION_SECONDS;
+    this.roleArn = props.roleArn;
+    this.sessionName = props.sessionName;
+    this.region = props.region || DEFAULT_REGION;
+    this.primaryCredentials = props.primaryCredentials;
+    this.duration = props.duration || ROLE_SESSION_DURATION_SECONDS;
   }
 
   static isAwsAssumedRole (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType) {
@@ -44,19 +37,11 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType {
   }
 
   static fromJson (object: AwsAssumedRoleType): AwsAssumedRole {
-    const {
-      roleArn,
-      sessionName,
-      region,
-      primaryCredentials,
-      duration
-    } = object;
     return new AwsAssumedRole({
-      roleArn,
-      sessionName,
-      region: region || DEFAULT_REGION,
-      primaryCredentials: this.buildPrimaryCreds(primaryCredentials),
-      duration: duration || ROLE_SESSION_DURATION_SECONDS
+      ...object,
+      region: object.region || DEFAULT_REGION,
+      primaryCredentials: this.buildPrimaryCreds(object.primaryCredentials),
+      duration: object.duration || ROLE_SESSION_DURATION_SECONDS
     });
   }
 

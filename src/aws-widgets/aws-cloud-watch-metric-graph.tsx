@@ -1,10 +1,10 @@
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import dayjs, { ManipulateType } from 'dayjs';
+import { Widget } from '@tinystacks/ops-model';
+import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
+import isEmpty from 'lodash.isempty';
 import { getAwsCredentialsProvider } from '../utils.js';
-import { Widget as WidgetType } from '@tinystacks/ops-model';
-import { BaseWidget } from '@tinystacks/ops-core';
-import { BaseProvider } from '@tinystacks/ops-core';
 import get from 'lodash.get';
 
 import { Line } from 'react-chartjs-2';
@@ -100,7 +100,7 @@ type RelativeTime = {
   unit: TimeUnitEnum;
 }
 
-type AwsCloudWatchMetricGraphType = WidgetType & {
+type AwsCloudWatchMetricGraphProps = Widget & {
   showTimeRangeSelector?: boolean;
   showPeriodSelector?: boolean;
   period?: number;
@@ -118,7 +118,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
   region: string;
   period: number;
 
-  constructor (props: AwsCloudWatchMetricGraphType) {
+  constructor (props: AwsCloudWatchMetricGraphProps) {
     super (props);
     const {
       showTimeRangeSelector, showPeriodSelector, metrics, timeRange, region, period
@@ -135,11 +135,11 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
   }
   additionalProperties?: any;
 
-  static fromJson (object: AwsCloudWatchMetricGraphType): AwsCloudWatchMetricGraph {
+  static fromJson (object: AwsCloudWatchMetricGraphProps): AwsCloudWatchMetricGraph {
     return new AwsCloudWatchMetricGraph(object);
   }
 
-  toJson (): AwsCloudWatchMetricGraphType {
+  toJson (): AwsCloudWatchMetricGraphProps {
     return {
       ...super.toJson(),
       showTimeRangeSelector: this.showTimeRangeSelector,
@@ -150,11 +150,13 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
     };
   }
 
-  async getData (providers: BaseProvider[]): Promise<void> {
+  async getData (providers?: BaseProvider[]): Promise<void> {
+    if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
+      throw new Error('An AwsCredentialsProvider was expected, but was not given');
+    } 
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const cwClient = new CloudWatch({
-      credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
-      region: this.region
+      credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3)
     });
     let startTime;
     let endTime;
@@ -272,7 +274,6 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
             display: true,
             position: 'bottom'
           }
-          
         }
       }}
     />);

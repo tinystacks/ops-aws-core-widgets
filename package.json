@@ -11,7 +11,7 @@
     "url": "git+https://github.com/tinystacks/ops-aws-core-plugins.git"
   },
   "scripts": {
-    "build": "npm run build:types && npm run build:js; pushd dist; rm **/*.jsx; popd",
+    "build": "npm run build:types; npm run build:js; pushd dist; rm **/*.jsx; popd",
     "build:types": "tsc",
     "build:js": "babel dist --out-dir dist --extensions \".js,.jsx\" --source-maps inline",
     "cleanup": "rm -rf dist || true && rm *.tgz || true",
@@ -45,8 +45,6 @@
     "@types/lodash.isempty": "^4.4.7",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.52.0",
-    "babel-plugin-css-modules-transform": "^1.6.2",
-    "babel-plugin-react-css-modules": "^5.2.6",
     "depcheck": "^1.4.3",
     "eslint": "^8.33.0",
     "eslint-plugin-import": "^2.27.5",
@@ -58,13 +56,17 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@aws-cdk/aws-iam": "^1.194.0",
+    "@aws-sdk/client-cloudcontrol": "^3.279.0",
     "@aws-sdk/client-cloudwatch": "^3.267.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.272.0",
-    "@aws-sdk/client-ecs": "^3.276.0",
+    "@aws-sdk/client-ecs": "^3.278.0",
+    "@aws-sdk/client-iam": "^3.276.0",
     "@aws-sdk/types": "^3.257.0",
     "@chakra-ui/react": "^2.5.1",
     "@tinystacks/ops-core": "0.0.3-release",
     "@tinystacks/ops-model": "0.0.0-release",
+    "@types/lodash.isnil": "^4.0.7",
     "@types/react": "^18.0.28",
     "aws-sdk": "^2.1307.0",
     "chart.js": "^4.2.1",

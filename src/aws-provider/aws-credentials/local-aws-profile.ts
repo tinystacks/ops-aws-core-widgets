@@ -1,21 +1,19 @@
 import AWS from 'aws-sdk';
-import { AwsAssumedRoleType } from './aws-assumed-role.js';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
+import { AwsAssumedRoleType } from './aws-assumed-role.js';
 import { AwsKeysType } from './aws-keys.js';
 
-export type LocalAwsProfileType = {
-  profileName: string
+export type LocalAwsProfileType = { 
+  profileName: string;
 };
+
 
 class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileType {
   profileName: string;
 
-  constructor (args: LocalAwsProfileType) {
-    const { 
-      profileName
-    } = args;
+  constructor (props: LocalAwsProfileType) {
     super();
-    this.profileName = profileName;
+    this.profileName = props.profileName;
   }
 
   static isLocalAwsProfile (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType) {
@@ -23,12 +21,8 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileType 
   }
 
   static fromJson (object: LocalAwsProfileType): LocalAwsProfile {
-    const {
-      profileName
-    } = object;
-    return new LocalAwsProfile({
-      profileName
-    });
+
+    return new LocalAwsProfile(object);
   }
 
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {

@@ -11,7 +11,7 @@ type AwsCredentialsProviderProps = Provider & {
   region?: string,
 };
 
-class AwsCredentialsProvider extends BaseProvider {
+export class AwsCredentialsProvider extends BaseProvider {
   static type = 'AwsCredentialsProvider';
   credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType;
   accountId?: string;
@@ -55,7 +55,3 @@ class AwsCredentialsProvider extends BaseProvider {
     return await creds.getCredentials(awsSdkVersion);
   }
 }
-
-export { 
-  AwsCredentialsProvider
-};
