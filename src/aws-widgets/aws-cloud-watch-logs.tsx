@@ -12,6 +12,7 @@ type AwsCloudWatchLogsProps = Widget & {
   logGroupName: string,
   logStreamName?: string,
   timeRange: TimeRange | RelativeTime,
+  showTimeRangeSelector?: boolean;
   events?: OutputLogEvent[];
 }
 
@@ -21,6 +22,7 @@ export class AwsCloudWatchLogs extends BaseWidget {
   logGroupName: string;
   logStreamName?: string;
   timeRange: TimeRange | RelativeTime;
+  showTimeRangeSelector?: boolean;
   events?: OutputLogEvent[];
 
   constructor (props: AwsCloudWatchLogsProps) {
@@ -32,6 +34,7 @@ export class AwsCloudWatchLogs extends BaseWidget {
       time: 5,
       unit: TimeUnitEnum.m
     };
+    this.showTimeRangeSelector = props.showTimeRangeSelector || false;
     this.events = props.events || [];
   }
 
