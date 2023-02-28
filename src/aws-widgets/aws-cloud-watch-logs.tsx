@@ -3,26 +3,24 @@ import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { CloudWatchLogs, OutputLogEvent } from '@aws-sdk/client-cloudwatch-logs';
 import isEmpty from 'lodash.isempty';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
-import { getAwsCredentialsProvider } from '../utils.js';
+import { getAwsCredentialsProvider, getTimes, RelativeTime, TimeRange, TimeUnitEnum } from '../utils/utils.js';
 import { Box, Code, Stack } from '@chakra-ui/react';
 import React from 'react';
 
 type AwsCloudWatchLogsProps = Widget & {
   region: string,
-  logStreamName: string,
-  logGroupName?: string,
-  startTime?: number,
-  endTime?: number,
-  events: OutputLogEvent[]
+  logGroupName: string,
+  logStreamName?: string,
+  timeRange: TimeRange | RelativeTime,
+  events?: OutputLogEvent[];
 }
 
 export class AwsCloudWatchLogs extends BaseWidget {
   static type = 'AwsCloudWatchLogs';
   region: string;
-  logStreamName: string;
   logGroupName: string;
-  startTime?: number;
-  endTime?: number;
+  logStreamName?: string;
+  timeRange: TimeRange | RelativeTime;
   events?: OutputLogEvent[];
 
   constructor (props: AwsCloudWatchLogsProps) {
@@ -30,8 +28,10 @@ export class AwsCloudWatchLogs extends BaseWidget {
     this.region = props.region;
     this.logStreamName = props.logStreamName;
     this.logGroupName = props.logGroupName;
-    this.startTime = props.startTime;
-    this.endTime = props.endTime;
+    this.timeRange = props.timeRange || {
+      time: 5,
+      unit: TimeUnitEnum.m
+    };
     this.events = props.events || [];
   }
 
@@ -45,8 +45,7 @@ export class AwsCloudWatchLogs extends BaseWidget {
       region: this.region,
       logStreamName: this.logStreamName,
       logGroupName: this.logGroupName,
-      startTime: this.startTime,
-      endTime: this.endTime,
+      timeRange: this.timeRange,
       events: this.events
     };
   }
@@ -63,11 +62,16 @@ export class AwsCloudWatchLogs extends BaseWidget {
       region: this.region
     });
 
-    this.events = (await cwLogsClient.getLogEvents({
-      logStreamName: this.logStreamName,
+    const {
+      startTime,
+      endTime
+    } = getTimes(this.timeRange);
+
+    this.events = (await cwLogsClient.filterLogEvents({
       logGroupName: this.logGroupName,
-      startTime: this.startTime,
-      endTime: this.endTime
+      logStreamNames: [ this.logStreamName ],
+      startTime: startTime.getTime(),
+      endTime: endTime.getTime()
     })).events;
 
     // TODO: This ends up infinite looping when the timeframe is too wide. We prob wanna add a MaxItems field

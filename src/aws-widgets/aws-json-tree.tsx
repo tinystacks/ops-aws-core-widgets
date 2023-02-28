@@ -3,7 +3,7 @@ import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import CloudControl, { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 import isEmpty from 'lodash.isempty';
-import { getAwsCredentialsProvider } from '../utils.js';
+import { getAwsCredentialsProvider } from '../utils/utils.js';
 
 type AwsJsonTreeProps = Widget & {
   region: string,
