@@ -4,7 +4,7 @@ import { OutputLogEvents } from 'aws-sdk/clients/cloudwatchlogs';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
 import { getAwsCredentialsProvider } from '../utils.js';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
-
+import { Box, Code, Stack } from '@chakra-ui/react';
 import React from 'react';
 
 type AwsCloudWatchLogsProps = WidgetType & {
@@ -59,34 +59,68 @@ export class AwsCloudWatchLogs extends BaseWidget {
       credentials: await awsCredentialsProvider.getCredentials(),
       region: this.region
     });
-    let res = await cwLogsClient.getLogEvents({
+
+    this.events = (await cwLogsClient.getLogEvents({
       logStreamName: this.logStreamName,
       logGroupName: this.logGroupName,
       startTime: this.startTime,
       endTime: this.endTime
-    });
-    this.events = [...this.events, ...res.events];
-    while (res.nextForwardToken) {
-      res = await cwLogsClient.getLogEvents({
-        logStreamName: this.logStreamName,
-        logGroupName: this.logGroupName,
-        startTime: this.startTime,
-        endTime: this.endTime,
-        nextToken: res.nextForwardToken
-      });
-      this.events = [...this.events, ...res.events];
-    }
+    })).events;
+
+    // TODO: This ends up infinite looping when the timeframe is too wide. We prob wanna add a MaxItems field
+    //       OR pass pagination back to the client and to getData as an override
+    // let res = await cwLogsClient.getLogEvents({
+    //   logStreamName: this.logStreamName,
+    //   logGroupName: this.logGroupName,
+    //   startTime: this.startTime,
+    //   endTime: this.endTime
+    // });
+    // this.events = [...this.events, ...res.events];
+    // while (res.nextForwardToken) {
+    //   res = await cwLogsClient.getLogEvents({
+    //     logStreamName: this.logStreamName,
+    //     logGroupName: this.logGroupName,
+    //     startTime: this.startTime,
+    //     endTime: this.endTime,
+    //     nextToken: res.nextForwardToken
+    //   });
+    //   this.events = [...this.events, ...res.events];
+    // }
   }
 
-  render (): React.ReactElement {
-    function CloudWatchLogsComponent (props: { events: OutputLogEvents }) {
-      return (
-        <div>
-          {props.events.map(event => event.message)}
-        </div>
-      );
-    }
-
-    return <CloudWatchLogsComponent events={this.events}/>;
+  render (): JSX.Element {
+    const eventsRender = (this.events || []).map(event => ( 
+      <Stack direction='row' style={{ backgroundColor: '#101828' }}>
+        <Box style={{
+          backgroundColor: '#1D2939',
+          color: '#D0D5DD',
+          padding: '0px 10px',
+          width: '134px'
+        }}>
+          {new Date(event.timestamp).toLocaleTimeString()}
+        </Box>
+        <Box style={{ color: '#E1E4E8', padding: '0px 10px' }}>
+          {event.message}
+        </Box>
+      </Stack>
+    ));
+    return (
+      <Box className='logscontainer' style={{
+        overflow: 'scroll',
+        fontFamily: 'monospace',
+        fontSize: '14px',
+        fontWeight: '400',
+        lineHeight: '21px',
+        letterSpacing: '0em',
+        textAlign: 'left',
+        padding: '10px',
+        borderRadius: '10px',
+        height: '400px'
+      }}>
+        <Code>
+          {eventsRender}
+        </Code>
+      </Box>
+    );
   }
-}
+} 

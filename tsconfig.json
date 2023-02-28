@@ -27,5 +27,9 @@
     "jsx": "preserve",
     "allowJs": true
   },
-  "include": ["./src"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.css"
+  ]
 }
