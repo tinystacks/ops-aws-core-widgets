@@ -1,14 +1,3 @@
-// cluster, service, region
-
-// pull all active deployments
-
-// deploymentId, deploymentStatus, starting TimeRanges, running/pending/desired
-
-// describe task deinfition shoulds all task ids
-
-// call describe tasks on cluster, map to deployments and show them
-
-// keep in one big object called deployments
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { Widget } from '@tinystacks/ops-model';
 import { 
@@ -17,7 +6,7 @@ import {
   Task as AwsTask
 } from '@aws-sdk/client-ecs';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
-import { getAwsCredentialsProvider } from '../utils.js';
+import { getAwsCredentialsProvider } from '../utils/utils.js';
 
 type Task = {
   taskId?: string;
@@ -83,7 +72,6 @@ export class AwsEcsDeployments extends BaseWidget implements AwsEcsDeploymentsTy
     this.serviceName = serviceName;
     this.deployments = deployments || [];
   }
-  additionalProperties?: any;
 
   static fromJson (object: AwsEcsDeploymentsType): AwsEcsDeployments {
     return new AwsEcsDeployments(object);

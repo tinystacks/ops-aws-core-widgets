@@ -7,7 +7,7 @@ import {
 } from '@aws-sdk/client-ecs';
 import _ from 'lodash';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
-import { getAwsCredentialsProvider } from '../utils.js';
+import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
 
 type AwsEcsInfoProps = Widget & {
@@ -119,18 +119,18 @@ export class AwsEcsInfo extends BaseWidget {
     this.status = service?.status;
     this.roleArn = service?.roleArn;
 
-    const secondaryAwsPromises = [];
-    secondaryAwsPromises.push(ecsClient.describeTaskDefinition({
+    const promises = [];
+    promises.push(ecsClient.describeTaskDefinition({
       taskDefinition: service?.taskDefinition
     }));
-    secondaryAwsPromises.push(ecsClient.describeCapacityProviders({
+    promises.push(ecsClient.describeCapacityProviders({
       capacityProviders: [_.get(cluster, 'defaultCapacityProviderStrategy[0].capacityProvider')]
     }));
-    secondaryAwsPromises.push(ecsClient.describeTasks({
+    promises.push(ecsClient.describeTasks({
       cluster: this.clusterName,
       tasks: taskArns
     }));
-    const secondarySettledPromises = (await Promise.allSettled(secondaryAwsPromises)).map((promise) => {
+    const secondarySettledPromises = (await Promise.allSettled(promises)).map((promise) => {
       if (promise.status === 'fulfilled') {
         return promise.value;
       }

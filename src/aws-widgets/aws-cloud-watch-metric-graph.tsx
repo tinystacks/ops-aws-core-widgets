@@ -1,10 +1,9 @@
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
-import dayjs, { ManipulateType } from 'dayjs';
 import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 import isEmpty from 'lodash.isempty';
-import { getAwsCredentialsProvider } from '../utils.js';
+import { getAwsCredentialsProvider, getTimes, RelativeTime, TimeRange, TimeUnitEnum } from '../utils/utils.js';
 import get from 'lodash.get';
 
 import { Line } from 'react-chartjs-2';
@@ -57,19 +56,6 @@ const metricColorPattern = [
 
 import React from 'react';
 
-// eslint-disable-next-line no-shadow
-enum TimeUnitEnum {
-  ns = 'ns',
-  ms = 'ms',
-  s = 's',
-  m = 'm',
-  hr = 'h',
-  d = 'd',
-  w = 'w',
-  mo = 'mo',
-  yr = 'yr'
-}
-
 type KeyValuePair = {
   key: string;
   value: string;
@@ -88,16 +74,6 @@ type Metric = {
   statistic?: string;
   dimensions: KeyValuePair[];
   data?: MetricData[];
-}
-
-type TimeRange = {
-  startTime: number;
-  endTime: number;
-}
-
-type RelativeTime = {
-  time: number;
-  unit: TimeUnitEnum;
 }
 
 type AwsCloudWatchMetricGraphProps = Widget & {
@@ -158,19 +134,11 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
     const cwClient = new CloudWatch({
       credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3)
     });
-    let startTime;
-    let endTime;
-    const abosluteTimeRange = this.timeRange as TimeRange;
-    if (abosluteTimeRange.startTime && abosluteTimeRange.endTime) {
-      startTime = new Date(abosluteTimeRange.startTime);
-      endTime = new Date(abosluteTimeRange.endTime);
-    } else {
-      const now = dayjs();
-      const relativeTimeRange = this.timeRange as RelativeTime;
-      const relativeTimeStart = now.subtract(relativeTimeRange.time, relativeTimeRange.unit as ManipulateType);
-      endTime = now.toDate();
-      startTime = relativeTimeStart.toDate();
-    }
+    
+    const { 
+      startTime,
+      endTime
+    } = getTimes(this.timeRange);
 
     const hydratedMetrics = [];
     for (const metric of this.metrics) {

@@ -3,7 +3,7 @@ import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { IAM } from '@aws-sdk/client-iam';
 import { Policy } from 'aws-sdk/clients/iam';
 import isNil from 'lodash.isnil';
-import { getAwsCredentialsProvider } from '../utils.js';
+import { getAwsCredentialsProvider } from '../utils/utils.js';
 import isEmpty from 'lodash.isempty';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 
