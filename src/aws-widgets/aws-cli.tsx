@@ -1,7 +1,7 @@
 import { Widget  } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { exec } from 'child_process';
-import util from "node:util";
+import util from 'node:util';
 
 const execPromise = util.promisify(exec);
 
@@ -40,11 +40,11 @@ export class AwsCli extends BaseWidget {
   async getData (providers?: BaseProvider[], overrides?: { [key: string]: any; }): Promise<void> {
     try{ 
       if(overrides && (overrides['runOnStart'] || overrides['run'])){ 
-        const {stdout, stderr} = await execPromise(this.command);
+        const { stdout, stderr } = await execPromise(this.command);
         this._commandResult = { 
           stdout: stdout,  
           stderr: stderr
-        }
+        };
         return;
       }
       if(overrides && overrides['clear']){ 
@@ -55,11 +55,11 @@ export class AwsCli extends BaseWidget {
         return;
       }
       if(!overrides){ 
-        const {stdout, stderr} = await execPromise(this.command);
+        const { stdout, stderr } = await execPromise(this.command);
         this._commandResult = { 
           stdout: stdout,  
           stderr: stderr
-        }
+        };
         return;
       }
     } catch(e){ 
