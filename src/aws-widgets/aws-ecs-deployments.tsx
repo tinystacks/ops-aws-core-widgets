@@ -9,16 +9,15 @@
 // call describe tasks on cluster, map to deployments and show them
 
 // keep in one big object called deployments
-import { Widget } from '@tinystacks/ops-core';
-import { Widget as WidgetType } from '@tinystacks/ops-model';
+import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
+import { Widget } from '@tinystacks/ops-model';
 import { 
   ECS,
   Deployment as AwsDeployment,
   Task as AwsTask
 } from '@aws-sdk/client-ecs';
-import _ from 'lodash';
-import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider';
-import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils';
+import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
+import { getAwsCredentialsProvider } from '../utils.js';
 
 type Task = {
   taskId?: string;
@@ -50,7 +49,7 @@ type Deployment = {
   taskDefinition?: TaskDefinition;
 }
 
-type AwsEcsDeploymentsProps = WidgetType & {
+type AwsEcsDeploymentsProps = Widget & {
   region: string;
   accountId: string;
   clusterName: string;
@@ -58,97 +57,50 @@ type AwsEcsDeploymentsProps = WidgetType & {
 }
 
 type AwsEcsDeploymentsType = AwsEcsDeploymentsProps & {
-  deployments: Deployment[];
+  deployments?: Deployment[];
 }
 
-export class AwsEcsDeployments extends Widget implements AwsEcsDeploymentsType {
+export class AwsEcsDeployments extends BaseWidget implements AwsEcsDeploymentsType {
   static type = 'AwsEcsDeployments';
   region: string;
   accountId: string;
   clusterName: string;
   serviceName: string;
-  deployments: Deployment[];
+  deployments?: Deployment[];
 
-  constructor(props: AwsEcsDeploymentsProps) {
+  constructor (props: AwsEcsDeploymentsType) {
     const {
-      id,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      accountId,
-      clusterName,
-      serviceName
-    } = props;
-    super (
-      id,
-      displayName,
-      AwsEcsDeployments.type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription
-    );
-    this.region = region;
-    this.accountId = accountId;
-    this.clusterName = clusterName;
-    this.serviceName = serviceName;
-    this.deployments = [];
-  }
-
-  fromJson(object: AwsEcsDeploymentsType): AwsEcsDeployments {
-    const {
-      id,
-      displayName,
-      type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
       region,
       accountId,
       clusterName,
       serviceName,
       deployments
-    } = object;
+    } = props;
+    super (props);
+    this.region = region;
+    this.accountId = accountId;
+    this.clusterName = clusterName;
+    this.serviceName = serviceName;
+    this.deployments = deployments || [];
+  }
+  additionalProperties?: any;
 
-    const awsEcsDeployments = new AwsEcsDeployments({
-      id,
-      displayName,
-      type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      accountId,
-      clusterName,
-      serviceName
-    });
-    awsEcsDeployments.deployments = deployments;
-    return awsEcsDeployments
+  static fromJson (object: AwsEcsDeploymentsType): AwsEcsDeployments {
+    return new AwsEcsDeployments(object);
   }
 
-  toJson(): AwsEcsDeploymentsType {
+  toJson (): AwsEcsDeploymentsType {
     return {
-      id: this.id,
-      type: this.type,
-      displayName: this.displayName,
-      providerId: this.providerId,
-      showDisplayName: this.showDisplayName,
-      description: this.description,
-      showDescription: this.showDescription,
+      ...super.toJson(),
       region: this.region,
       accountId: this.accountId,
       clusterName: this.clusterName,
       serviceName: this.serviceName,
       deployments: this.deployments
-    }
+    };
   }
 
-  private async hydrateDeployment(ecsClient: ECS, awsDeployment: AwsDeployment, awsTasks: AwsTask[], accountId: string) {
+  private async hydrateDeployment (ecsClient: ECS, awsDeployment: AwsDeployment, awsTasks: AwsTask[], accountId: string) {
     const deployment: Deployment = {
       deploymentId: awsDeployment.id,
       status: awsDeployment.status,
@@ -170,7 +122,7 @@ export class AwsEcsDeployments extends Widget implements AwsEcsDeploymentsType {
         status: task.lastStatus,
         group: task.group,
         version: task.version
-      } as Task
+      } as Task;
     });
     const containers = hydrateImages(associatedAwsTasks, taskDefinition, accountId);
     deployment.taskDefinition = {
@@ -186,8 +138,8 @@ export class AwsEcsDeployments extends Widget implements AwsEcsDeploymentsType {
     return deployment;
   }
 
-  async getData(): Promise<void> {
-    const awsCredentialsProvider = this.provider as AwsCredentialsProvider;
+  async getData (providers?: BaseProvider[]): Promise<void> {
+    const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const ecsClient = new ECS({
       credentials: await awsCredentialsProvider.getCredentials(),
       region: this.region
@@ -207,7 +159,7 @@ export class AwsEcsDeployments extends Widget implements AwsEcsDeploymentsType {
     const deploymentPromises: Promise<Deployment>[] = [];
     service.deployments.forEach((deployment) => {
       deploymentPromises.push(this.hydrateDeployment(ecsClient, deployment, tasks, this.accountId));
-    })
+    });
     const settledPromises = (await Promise.allSettled(deploymentPromises)).reduce((filtered, promise) => {
       if (promise.status === 'fulfilled') {
         filtered.push(promise.value);
@@ -220,7 +172,7 @@ export class AwsEcsDeployments extends Widget implements AwsEcsDeploymentsType {
     this.deployments = settledPromises;
   }
 
-  render(): JSX.Element {
+  render (): JSX.Element {
     throw new Error('Method not implemented.');
   }
   

@@ -1,16 +1,16 @@
-import { Widget as WidgetType } from "@tinystacks/ops-model"
-import { Widget } from '@tinystacks/ops-core';
-import { 
+import { Widget } from '@tinystacks/ops-model';
+import {
   ECS,
   DescribeTaskDefinitionCommandOutput,
   DescribeCapacityProvidersCommandOutput,
   DescribeTasksCommandOutput
 } from '@aws-sdk/client-ecs';
 import _ from 'lodash';
-import { AwsCredentialsProvider } from "../aws-provider/aws-credentials-provider";
-import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from "../utils/aws-ecs-utils";
+import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
+import { getAwsCredentialsProvider } from '../utils.js';
+import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
 
-type AwsEcsInfoProps = WidgetType & {
+type AwsEcsInfoProps = Widget & {
   region: string,
   accountId: string,
   clusterName: string,
@@ -33,7 +33,7 @@ type AwsEcsInfoType = AwsEcsInfoProps & {
   images: Image[];
 }
 
-export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
+export class AwsEcsInfo extends BaseWidget {
   static type = 'AwsEcsInfo';
   region: string;
   accountId: string;
@@ -51,29 +51,17 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
   status: string;
   roleArn: string;
   execRoleArn: string;
-  images: Image[]
+  images: Image[];
 
   constructor (props: AwsEcsInfoProps) {
     const {
-      id,
-      displayName,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
       region,
       accountId,
       clusterName,
       serviceName
-    } = props
+    } = props;
     super (
-      id,
-      displayName,
-      AwsEcsInfo.type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription
+      props
     );
     this.region = region;
     this.accountId = accountId;
@@ -81,72 +69,13 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
     this.serviceName = serviceName;
   }
 
-  fromJson(object: AwsEcsInfoType): AwsEcsInfo {
-    const {
-      id,
-      displayName,
-      type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      accountId,
-      clusterName,
-      serviceName,
-      serviceArn,
-      clusterArn,
-      runningCount,
-      desiredCount,
-      capacity,
-      asgArn,
-      memory,
-      cpu,
-      taskDefinitionArn,
-      status,
-      roleArn,
-      execRoleArn,
-      images
-    } = object;
-    const awsEcsInfo = new AwsEcsInfo({
-      id,
-      displayName,
-      type,
-      providerId,
-      showDisplayName,
-      description,
-      showDescription,
-      region,
-      accountId,
-      clusterName,
-      serviceName
-    });
-    awsEcsInfo.serviceArn = serviceArn;
-    awsEcsInfo.clusterArn = clusterArn;
-    awsEcsInfo.runningCount = runningCount;
-    awsEcsInfo.desiredCount = desiredCount;
-    awsEcsInfo.capacity = capacity;
-    awsEcsInfo.asgArn = asgArn;
-    awsEcsInfo.memory = memory;
-    awsEcsInfo.cpu = cpu;
-    awsEcsInfo.taskDefinitionArn = taskDefinitionArn;
-    awsEcsInfo.status = status;
-    awsEcsInfo.roleArn = roleArn;
-    awsEcsInfo.execRoleArn = execRoleArn;
-    awsEcsInfo.images = images;
-    
-    return awsEcsInfo;
+  static fromJson (object: AwsEcsInfoProps): AwsEcsInfo {
+    return new AwsEcsInfo(object);
   }
 
-  toJson(): AwsEcsInfoType {
+  toJson (): AwsEcsInfoType {
     return {
-      id: this.id,
-      type: this.type,
-      displayName: this.displayName,
-      providerId: this.providerId,
-      showDisplayName: this.showDisplayName,
-      description: this.description,
-      showDescription: this.showDescription,
+      ...super.toJson(),
       region: this.region,
       accountId: this.accountId,
       clusterName: this.clusterName,
@@ -164,11 +93,11 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
       roleArn: this.roleArn,
       execRoleArn: this.execRoleArn,
       images: this.images
-    }
+    };
   }
 
-  async getData(): Promise<void> {
-    const awsCredentialsProvider = this.provider as AwsCredentialsProvider;
+  async getData (providers?: BaseProvider[]): Promise<void> {
+    const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const ecsClient = new ECS({
       credentials: await awsCredentialsProvider.getCredentials(),
       region: this.region
@@ -195,7 +124,7 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
       taskDefinition: service?.taskDefinition
     }));
     secondaryAwsPromises.push(ecsClient.describeCapacityProviders({
-      capacityProviders: [ _.get(cluster, 'defaultCapacityProviderStrategy[0].capacityProvider') ]
+      capacityProviders: [_.get(cluster, 'defaultCapacityProviderStrategy[0].capacityProvider')]
     }));
     secondaryAwsPromises.push(ecsClient.describeTasks({
       cluster: this.clusterName,
@@ -219,14 +148,14 @@ export class AwsEcsInfo extends Widget implements AwsEcsInfoType {
 
     const capacityProvider = _.get(describeCapacityProvidersRes, 'capacityProviders[0]');
     this.asgArn = capacityProvider?.autoScalingGroupProvider?.autoScalingGroupArn;
-    this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity
+    this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity;
 
     const tasks = describeTasksRes?.tasks;
     const associatedTasks = getTasksForTaskDefinition(tasks, this.taskDefinitionArn);
     this.images = hydrateImages(associatedTasks, taskDefinition, this.accountId);
   }
 
-  render(): JSX.Element {
-    throw new Error("Method not implemented.");
+  render (): JSX.Element {
+    throw new Error('Method not implemented.');
   }
 }

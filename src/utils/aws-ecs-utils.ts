@@ -9,7 +9,8 @@ import {
   Volume,
   DescribeServicesCommandOutput,
   DescribeClustersCommandOutput,
-  ListTasksCommandOutput
+  ListTasksCommandOutput,
+  ContainerDefinition
 } from '@aws-sdk/client-ecs';
 import _ from 'lodash';
 
@@ -24,7 +25,7 @@ export type Image = {
   cpu: string
 }
 
-export async function getCoreEcsData(ecsClient: ECS, clusterName: string, serviceName: string) {
+export async function getCoreEcsData (ecsClient: ECS, clusterName: string, serviceName: string) {
   const promises = [];
   promises.push(ecsClient.describeServices({
     cluster: clusterName,
@@ -55,19 +56,19 @@ export async function getCoreEcsData(ecsClient: ECS, clusterName: string, servic
   };
 }
 
-export function getTasksForTaskDefinition(tasks: Task[], taskDefinitionArn: string) {
-  return tasks.filter((task) => task.taskDefinitionArn === taskDefinitionArn);
+export function getTasksForTaskDefinition (tasks: Task[], taskDefinitionArn: string) {
+  return tasks.filter(task => task.taskDefinitionArn === taskDefinitionArn);
 }
 
-export function hydrateImages(tasks: Task[], taskDefinition: TaskDefinition, accountId: string) {
+export function hydrateImages (tasks: Task[], taskDefinition: TaskDefinition, accountId: string) {
   const images: Image[] = [];
   let containers: Container[] = [];
   tasks.forEach((task) => {
-    containers = [...containers, ...task.containers]
+    containers = [...containers, ...task.containers];
   });
   containers.forEach((container) => {
-    const containerDefinition = taskDefinition.containerDefinitions.find((containerDefinition) => {
-      return containerDefinition.name === container.name;
+    const containerDefinition = taskDefinition.containerDefinitions.find((cd: ContainerDefinition) => {
+      return cd.name === container.name;
     });
     const logConfigOptions = containerDefinition?.logConfiguration?.options;
     images.push({

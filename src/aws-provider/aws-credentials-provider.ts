@@ -1,75 +1,57 @@
-import { 
-  AwsCredentialsProvider as AwsCredentialsProviderType,
-  AwsAssumedRole as AwsAssumedRoleType,
-  AwsKeys as AwsKeysType,
-  LocalAwsProfile as LocalAwsProfileType
-} from '@tinystacks/ops-model';
-import { Provider } from '@tinystacks/ops-core';
-import { AwsAssumedRole } from './aws-credentials/aws-assumed-role';
-import { AwsKeys } from './aws-credentials/aws-keys';
-import { LocalAwsProfile } from './aws-credentials/local-aws-profile';
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials/aws-credentials-type';
+import { BaseProvider } from '@tinystacks/ops-core';
+import { AwsAssumedRole, AwsAssumedRoleType } from './aws-credentials/aws-assumed-role.js';
+import { AwsKeys, AwsKeysType } from './aws-credentials/aws-keys.js';
+import { LocalAwsProfile, LocalAwsProfileType } from './aws-credentials/local-aws-profile.js';
+import { AwsSdkVersionEnum } from './aws-credentials/aws-credentials-type.js';
+import { Provider } from '@tinystacks/ops-model';
 
-class AwsCredentialsProvider extends Provider {
+type AwsCredentialsProviderProps = Provider & {
+  credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType,
+  accountId?: string,
+  region?: string,
+};
+
+export class AwsCredentialsProvider extends BaseProvider {
   static type = 'AwsCredentialsProvider';
-  credentials: AwsCredentialsType;
+  credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType;
   accountId?: string;
   region?: string;
 
-  constructor (args: {
-    credentials: AwsCredentialsType,
-    accountId?: string,
-    region?: string,
-    id?: string,
-  }) {
+  constructor (args: AwsCredentialsProviderProps) {
     const {
       credentials,
       accountId,
-      region,
-      id
+      region
     } = args;
-    super(id, AwsCredentialsProvider.type);
+    super(args);
     this.credentials = credentials;
     this.accountId = accountId;
     this.region = region;
   }
 
-  static fromJson (object: AwsCredentialsProviderType): AwsCredentialsProvider {
-    const {
-      credentials,
-      // accountId,
-      // region,
-      id
-    } = object;
+  static fromJson (object: AwsCredentialsProviderProps): AwsCredentialsProvider {
+    return new AwsCredentialsProvider(object);
+  }
 
-    let creds: AwsCredentialsType;
+  toJson () {
+    return {
+      ...super.toJson(),
+      credentials: this.credentials,
+      accountId: this.accountId,
+      region: this.region
+    };
+  }
+
+  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
+    const { credentials } = this;
+    let creds: AwsAssumedRole | AwsKeys | LocalAwsProfile;
     if (AwsAssumedRole.isAwsAssumedRole(credentials)) {
-      creds = AwsAssumedRole.fromJson({ ...(credentials as AwsAssumedRoleType) });
+      creds = AwsAssumedRole.fromJson({ ...(credentials as AwsAssumedRole) });
     } else if (AwsKeys.isAwsKeys(credentials)) {
       creds = AwsKeys.fromJson({ ...(credentials as AwsKeysType) });
     } else {
       creds = LocalAwsProfile.fromJson({ ...(credentials as LocalAwsProfileType) });
     }
-    return new AwsCredentialsProvider({
-      credentials: creds,
-      id
-    });
-  }
-
-  toJson () {
-    return {
-      credentials: this.credentials,
-      accountId: this.accountId,
-      region: this.region,
-      id: this.id
-    };
-  }
-
-  async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
-    return await this.credentials.getCredentials(awsSdkVersion);
+    return await creds.getCredentials(awsSdkVersion);
   }
 }
-
-export { 
-  AwsCredentialsProvider
-};
