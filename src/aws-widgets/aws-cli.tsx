@@ -38,6 +38,7 @@ export class AwsCli extends BaseWidget {
   }
 
   async getData (providers?: BaseProvider[], overrides?: { [key: string]: any; }): Promise<void> {
+    this._hasDataBeenFetched = true;
     try{ 
       if(overrides && (overrides['runOnStart'] || overrides['run'])){ 
         const { stdout, stderr } = await execPromise(this.command);
@@ -71,6 +72,11 @@ export class AwsCli extends BaseWidget {
   get commandResult () {
     return this._commandResult;
   }
+
+  get hasDataBeenFetched (){ 
+    return this._hasDataBeenFetched; 
+  }
+  
   render (): JSX.Element { return <>TODO</>; }
 
 }
