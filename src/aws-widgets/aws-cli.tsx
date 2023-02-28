@@ -1,7 +1,9 @@
 import { Widget  } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
-import isEmpty from 'lodash.isempty';
 import { exec } from 'child_process';
+import util from "node:util";
+
+const execPromise = util.promisify(exec);
 
 type AwsCliProps = Widget & {
   command: string
@@ -16,6 +18,10 @@ export class AwsCli extends BaseWidget {
   constructor (props: AwsCliProps) {
     super(props);
     this.command = props.command;
+    this._commandResult = {
+      stdout: '', 
+      stderr: ''
+    };
     this._hasDataBeenFetched = false;
   }
 
@@ -32,19 +38,13 @@ export class AwsCli extends BaseWidget {
   }
 
   async getData (providers?: BaseProvider[], overrides?: { [key: string]: any; }): Promise<void> {
-    if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
-      throw new Error('An AwsCredentialsProvider was expected, but was not given');
-    }
-
     try{ 
       if(overrides && (overrides['runOnStart'] || overrides['run'])){ 
-        exec(this.command, (error, stdout, stderr) => {
-          if (error) {
-            throw new Error(`Error executing command ${this.command}, ${error}`); 
-          }
-          this._commandResult.stdout = stdout;
-          this._commandResult.stderr = stderr;
-        });
+        const {stdout, stderr} = await execPromise(this.command);
+        this._commandResult = { 
+          stdout: stdout,  
+          stderr: stderr
+        }
         return;
       }
       if(overrides && overrides['clear']){ 
@@ -52,6 +52,14 @@ export class AwsCli extends BaseWidget {
           stdout: '', 
           stderr: ''
         };
+        return;
+      }
+      if(!overrides){ 
+        const {stdout, stderr} = await execPromise(this.command);
+        this._commandResult = { 
+          stdout: stdout,  
+          stderr: stderr
+        }
         return;
       }
     } catch(e){ 

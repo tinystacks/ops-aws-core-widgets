@@ -1,7 +1,6 @@
 import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
-import { CloudControl } from 'aws-sdk';
-import { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
+import CloudControl, { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 import isEmpty from 'lodash.isempty';
 import { getAwsCredentialsProvider } from '../utils';
@@ -9,6 +8,7 @@ import { getAwsCredentialsProvider } from '../utils';
 type AwsJsonTreeProps = Widget & {
   region: string,
   cloudControlType: string,
+  resourceModel?: string,
   paths?: string[]
 }
 
@@ -16,6 +16,7 @@ export class AwsJsonTree extends BaseWidget {
   static type = 'AwsJsonTree';
   region: string;
   cloudControlType: string;
+  resourceModel?: string;
   paths?: string[];
   private _resourceDescriptions: ResourceDescription[]; 
 
@@ -24,6 +25,7 @@ export class AwsJsonTree extends BaseWidget {
     super (props);
     this.region = props.region;
     this.cloudControlType = props.cloudControlType; 
+    this.resourceModel = props.resourceModel;
     this.paths = props.paths;
     this._resourceDescriptions =[];
 
@@ -45,6 +47,7 @@ export class AwsJsonTree extends BaseWidget {
       ...super.toJson(),  
       region: this.region,
       cloudControlType: this.cloudControlType,
+      resourceModel: this.resourceModel,
       paths: this.paths };
   }
 
@@ -68,9 +71,9 @@ export class AwsJsonTree extends BaseWidget {
       this._resourceDescriptions = [...this._resourceDescriptions, ...res.ResourceDescriptions]; 
       while(res.NextToken){ 
         res = await cloudControlClient.listResources({ 
-          TypeName: this.cloudControlType
+          TypeName: this.cloudControlType, 
+          ResourceModel: this.resourceModel
         }).promise();
-
         this._resourceDescriptions = [...this._resourceDescriptions, ...res.ResourceDescriptions]; 
       }
     } catch(e){ 
@@ -83,6 +86,6 @@ export class AwsJsonTree extends BaseWidget {
     return this._resourceDescriptions;
   }
 
-  render (): JSX.Element { return <>TODO</>; }
+  render (): JSX.Element { return <>TODO</>;  }
 
 }

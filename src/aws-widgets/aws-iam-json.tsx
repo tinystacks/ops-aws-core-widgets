@@ -2,10 +2,10 @@ import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { IAM } from '@aws-sdk/client-iam';
 import { Policy } from 'aws-sdk/clients/iam';
-import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 import isNil from 'lodash.isnil';
-import isEmpty from 'lodash.isempty';
 import { getAwsCredentialsProvider } from '../utils';
+import isEmpty from 'lodash.isempty';
+import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type';
 
 type AwsIamJsonProps = Widget & {
   region: string,
@@ -53,6 +53,7 @@ export class AwsIamJson extends BaseWidget {
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
       throw new Error('An AwsCredentialsProvider was expected, but was not given');
     }
+
     try {
       const awsCredentialsProvider = getAwsCredentialsProvider(providers);
       const iamClient = new IAM({
