@@ -5,14 +5,20 @@ import get from 'lodash.get';
 type JsonTreeProps = Widget & {
   region: string,
   jsonObject: { [key: string]: any; },
-  paths: string[]
+  paths: {
+    pathDisplayName: string,
+    path: string
+  }[]
 }
 
 export class JsonTree extends BaseWidget {
   static type = 'JsonTree';
   region: string;
   jsonObject: { [key: string]: any; };
-  paths: string[];
+  paths: {
+    pathDisplayName: string,
+    path: string
+  }[];
   private _filteredJson: any[];
 
   
@@ -39,7 +45,7 @@ export class JsonTree extends BaseWidget {
 
   
   getData (): void {
-    this.paths.forEach((path) => { 
+    this.paths.forEach(({ path }) => { 
       const value = get(this.jsonObject, path); 
       if(value){ 
         this._filteredJson.push(value);

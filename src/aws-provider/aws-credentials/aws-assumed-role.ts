@@ -1,6 +1,6 @@
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
-import { AwsKeys, AwsKeysType } from './aws-keys';
-import { LocalAwsProfile, LocalAwsProfileType } from './local-aws-profile';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
+import { AwsKeys, AwsKeysType } from './aws-keys.js';
+import { LocalAwsProfile, LocalAwsProfileType } from './local-aws-profile.js';
 import { STS, Credentials } from '@aws-sdk/client-sts';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;

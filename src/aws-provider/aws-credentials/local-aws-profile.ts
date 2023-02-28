@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
-import { AwsAssumedRoleType } from './aws-assumed-role';
-import { AwsKeysType } from './aws-keys';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
+import { AwsAssumedRoleType } from './aws-assumed-role.js';
+import { AwsKeysType } from './aws-keys.js';
 
 export type LocalAwsProfileType = { 
   profileName: string;

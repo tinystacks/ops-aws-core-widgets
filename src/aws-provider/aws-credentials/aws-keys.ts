@@ -1,6 +1,6 @@
-import { AwsAssumedRoleType } from './aws-assumed-role';
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type';
-import { LocalAwsProfileType } from './local-aws-profile';
+import { AwsAssumedRoleType } from './aws-assumed-role.js';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
+import { LocalAwsProfileType } from './local-aws-profile.js';
 
 export type AwsKeysType = { 
   AwsAccessKeyId: string;
