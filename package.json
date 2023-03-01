@@ -1,6 +1,6 @@
 {
   "name": "@tinystacks/ops-aws-core-plugins",
-  "version": "0.0.3-release",
+  "version": "0.0.4-release",
   "main": "dist/index.js",
   "type": "module",
   "files": [
@@ -64,9 +64,10 @@
     "@aws-sdk/client-ecs": "^3.278.0",
     "@aws-sdk/client-iam": "^3.276.0",
     "@aws-sdk/types": "^3.257.0",
+    "@chakra-ui/icons": "^2.0.17",
     "@chakra-ui/react": "^2.5.1",
-    "@tinystacks/ops-core": "0.0.3-release",
-    "@tinystacks/ops-model": "0.0.0-release",
+    "@tinystacks/ops-core": "0.0.4-release",
+    "@tinystacks/ops-model": "0.0.4-release",
     "@types/lodash.isnil": "^4.0.7",
     "@types/react": "^18.0.28",
     "aws-sdk": "^2.1307.0",
@@ -78,6 +79,7 @@
     "lodash.isobject": "^3.0.2",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
-    "react-simple-code-editor": "^0.13.1"
+    "react-simple-code-editor": "^0.13.1",
+    "rsuite": "^5.28.0"
   }
 }
