@@ -49,7 +49,7 @@ type AwsEcsDeploymentsType = AwsEcsDeploymentsProps & {
   deployments?: Deployment[];
 }
 
-export class AwsEcsDeployments extends BaseWidget implements AwsEcsDeploymentsType {
+export class AwsEcsDeployments extends BaseWidget {
   static type = 'AwsEcsDeployments';
   region: string;
   accountId: string;

@@ -1,5 +1,6 @@
-import { BaseProvider } from '@tinystacks/ops-core';
 import isEmpty from 'lodash.isempty';
+import get from 'lodash.get';
+import { BaseProvider } from '@tinystacks/ops-core';
 import dayjs, { ManipulateType } from 'dayjs';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
 
@@ -29,7 +30,8 @@ export enum TimeUnitEnum {
   yr = 'yr'
 }
 
-export type TimeRange = {
+export type TimeRange = AbsoluteTimeRange | RelativeTime;
+export type AbsoluteTimeRange = {
   startTime: number;
   endTime: number;
 }
@@ -39,10 +41,10 @@ export type RelativeTime = {
   unit: TimeUnitEnum;
 }
 
-export function getTimes (timeRange: TimeRange | RelativeTime) {
+export function getTimes (timeRange: TimeRange) {
   let startTime: Date;
   let endTime: Date;
-  const abosluteTimeRange = timeRange as TimeRange;
+  const abosluteTimeRange = timeRange as AbsoluteTimeRange;
   if (abosluteTimeRange.startTime && abosluteTimeRange.endTime) {
     startTime = new Date(abosluteTimeRange.startTime);
     endTime = new Date(abosluteTimeRange.endTime);
@@ -58,3 +60,29 @@ export function getTimes (timeRange: TimeRange | RelativeTime) {
     endTime
   };
 }
+
+export function cleanTimeRange (timeRange: TimeRange, overrides: TimeRangeOverrides): TimeRange {
+  const clean = overrides && overrides.timeRange ? overrides.timeRange : timeRange;
+  if (!timeRange) {
+    throw new Error('No timerange is defined');
+  }
+
+  const rTime = get(clean, 'time');
+  if (rTime && typeof rTime === 'string') {
+    (clean as RelativeTime).time = parseInt(rTime);
+  }
+
+  const startTime = get(clean, 'startTime');
+  if (startTime && typeof startTime === 'string') {
+    (clean as AbsoluteTimeRange).startTime = parseInt(startTime);
+  }
+  
+  const endTime = get(clean, 'endTime');
+  if (endTime && typeof endTime === 'string') {
+    (clean as AbsoluteTimeRange).endTime = parseInt(endTime);
+  }
+
+  return clean;
+}
+
+export type TimeRangeOverrides = { timeRange?: TimeRange };

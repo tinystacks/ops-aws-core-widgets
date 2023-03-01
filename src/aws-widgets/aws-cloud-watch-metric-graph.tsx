@@ -1,19 +1,22 @@
+import get from 'lodash.get';
+import isEmpty from 'lodash.isempty';
+import React from 'react';
+
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
-import isEmpty from 'lodash.isempty';
-import { getAwsCredentialsProvider, getTimes, RelativeTime, TimeRange, TimeUnitEnum } from '../utils/utils.js';
-import get from 'lodash.get';
-
+import { getAwsCredentialsProvider, getTimes, TimeUnitEnum, TimeRange, TimeRangeOverrides, cleanTimeRange } from '../utils/utils.js';
+import { Stack, Box } from '@chakra-ui/react';
+import { TimeRangeSelector } from '../components/time-range-selector.js';
 import { Line } from 'react-chartjs-2';
 import {
   CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, Chart, LineElement, TooltipItem, TooltipModel
 } from 'chart.js';
+
 Chart.register(
   CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, LineElement
 );
-
 // taken from: https://stackoverflow.com/questions/55300288/react-chartjs-2-vertical-line-when-hovering-over-chart/71943022#71943022
 Chart.register(
   {
@@ -54,8 +57,6 @@ const metricColorPattern = [
   MetricColors.GREEN
 ];
 
-import React from 'react';
-
 type KeyValuePair = {
   key: string;
   value: string;
@@ -75,22 +76,22 @@ type Metric = {
   dimensions: KeyValuePair[];
   data?: MetricData[];
 }
+type AwsCloudWatchMetricGraphOverrides = TimeRangeOverrides;
 
-type AwsCloudWatchMetricGraphProps = Widget & {
+type AwsCloudWatchMetricGraphProps = Widget & AwsCloudWatchMetricGraphOverrides & {
   showTimeRangeSelector?: boolean;
   showPeriodSelector?: boolean;
   period?: number;
   metrics: Metric[];
-  timeRange?: TimeRange | RelativeTime;
   region: string;
-}
+};
 
 export class AwsCloudWatchMetricGraph extends BaseWidget {
   static type = 'AwsCloudWatchMetricGraph';
   showTimeRangeSelector: boolean;
   showPeriodSelector: boolean;
   metrics: Metric[];
-  timeRange: TimeRange | RelativeTime;
+  timeRange: TimeRange;
   region: string;
   period: number;
 
@@ -126,10 +127,13 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
     };
   }
 
-  async getData (providers?: BaseProvider[]): Promise<void> {
+  async getData (providers?: BaseProvider[], overrides?: AwsCloudWatchMetricGraphOverrides): Promise<void> {
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
       throw new Error('An AwsCredentialsProvider was expected, but was not given');
-    } 
+    }
+
+    this.timeRange = cleanTimeRange(this.timeRange, overrides);
+
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const cwClient = new CloudWatch({
       credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3)
@@ -171,7 +175,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
     this.metrics = hydratedMetrics;
   }
 
-  render (): JSX.Element {
+  render (_children?: any, overridesCallback?: (overrides: AwsCloudWatchMetricGraphOverrides) => void): JSX.Element {
     // this is a map of all the timestamps to each datapoint
     // Sort by timestamp before render.
     const datasets = this.metrics.map((m: Metric, index: number) => {
@@ -192,8 +196,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
       };
     });
 
-    // const datasets = 
-    return (<Line
+    const graph = (<Line
       datasetIdKey='label'
       data={{
         // labels: sortedTimestamps.map(timestamp => new Date(toNumber(timestamp)).toLocaleTimeString()),
@@ -245,5 +248,18 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
         }
       }}
     />);
+    return (
+      <Stack>
+        <Box>
+          <TimeRangeSelector
+            timeRange={this.timeRange}
+            updateTimeRange={timeRange => overridesCallback({ timeRange })}
+          />
+        </Box>
+        <Box>
+          {graph}
+        </Box>
+      </Stack>
+    );
   }
 }
