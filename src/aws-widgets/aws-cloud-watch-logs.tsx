@@ -10,6 +10,7 @@ import {
 } from '../utils/utils.js';
 import { Box, Code, Stack } from '@chakra-ui/react';
 import { TimeRangeSelector } from '../components/time-range-selector.js';
+
 type AwsCloudWatchLogsProps = Widget & {
   region: string,
   logGroupName: string,

@@ -1,7 +1,6 @@
 import get from 'lodash.get';
 import isEmpty from 'lodash.isempty';
 import React from 'react';
-
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';

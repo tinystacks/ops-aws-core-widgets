@@ -1,3 +1,4 @@
+import React from 'react';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { Widget } from '@tinystacks/ops-model';
 import { 
@@ -7,6 +8,7 @@ import {
 } from '@aws-sdk/client-ecs';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
+import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 
 type Task = {
   taskId?: string;
@@ -58,19 +60,12 @@ export class AwsEcsDeployments extends BaseWidget {
   deployments?: Deployment[];
 
   constructor (props: AwsEcsDeploymentsType) {
-    const {
-      region,
-      accountId,
-      clusterName,
-      serviceName,
-      deployments
-    } = props;
     super (props);
-    this.region = region;
-    this.accountId = accountId;
-    this.clusterName = clusterName;
-    this.serviceName = serviceName;
-    this.deployments = deployments || [];
+    this.region = props.region;
+    this.accountId = props.accountId;
+    this.clusterName = props.clusterName;
+    this.serviceName = props.serviceName;
+    this.deployments = props.deployments || [];
   }
 
   static fromJson (object: AwsEcsDeploymentsType): AwsEcsDeployments {
@@ -161,7 +156,123 @@ export class AwsEcsDeployments extends BaseWidget {
   }
 
   render (): JSX.Element {
-    throw new Error('Method not implemented.');
+    // map deployments list
+    // map tasks
+
+    const deploymentRows = this.deployments.map((deployment) => {
+      const taskRows = deployment.taskDefinition.tasks.map((task) => {
+        return (
+          <Tr>
+            <Td>{task.taskId}</Td>
+            <Td>{task.startTime.toLocaleString()}</Td>
+            <Td>{task.stopTime.toLocaleString()}</Td>
+            <Td>{task.status}</Td>
+            <Td>{task.group}</Td>
+            <Td>{task.version}</Td>
+          </Tr>
+        );
+      });
+      const taskTable = (
+        <Table variant='simple'>
+          <Thead>
+            <Tr>
+              <Th>TASK ID</Th>
+              <Th>STARTED</Th>
+              <Th>STOPPED</Th>
+              <Th>STATUS</Th>
+              <Th>GROUP</Th>
+              <Th>VERSION</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {taskRows}
+          </Tbody>
+        </Table>
+      );
+      const taskDefinition = (
+        <Accordion allowMultiple>
+          <AccordionItem>
+            <h2>
+              <AccordionButton>
+                <TableContainer>
+                  <Table variant='simple'>
+                    <Thead>
+                      <Tr>
+                        <Th>TASK DEFINITION</Th>
+                        <Th>CPU LIMITS</Th>
+                        <Th>MEMORY LIMITS</Th>
+                        <Th>ROLE ARN</Th>
+                        <Th>EXECUTION ROLE ARN</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      <Tr>
+                        <Td>{deployment.taskDefinition.taskDefinitionArn}</Td>
+                        <Td>{deployment.taskDefinition.cpu}</Td>
+                        <Td>{deployment.taskDefinition.memory}</Td>
+                        <Td>{deployment.taskDefinition.roleArn}</Td>
+                        <Td>{deployment.taskDefinition.execRoleArn}</Td>
+                      </Tr>
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+                <AccordionIcon />
+              </AccordionButton>
+            </h2>
+            <AccordionPanel>
+              {taskTable}
+            </AccordionPanel>
+          </AccordionItem>
+        </Accordion>
+      );
+
+      return (
+        <Tr>
+          <Accordion allowMultiple>
+            <AccordionItem>
+              <h2>
+                <AccordionButton>
+                  <Td>{deployment.deploymentId}</Td>
+                  <Td>{deployment.status}</Td>
+                  <Td>{deployment.startTime.toLocaleString()}</Td>
+                  <Td>{deployment.runningCount} / {deployment.pendingCount} / {deployment.desiredCount}</Td>
+                  <AccordionIcon />
+                </AccordionButton>
+              </h2>
+              <AccordionPanel>
+                {taskDefinition}
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
+        </Tr>
+      );
+    });
+
+    return (
+      <TableContainer>
+        <Table variant='simple'>
+          <Thead>
+            <Tr>
+              <Th>DEPLOYMENT ID</Th>
+              <Th>DEPLOYMENT STATUS</Th>
+              <Th>STARTED</Th>
+              <Th>RUNNING / PENDING / DESIRED</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {deploymentRows}
+          </Tbody>
+        </Table>
+      </TableContainer>
+    );
+
+    return ( 
+      <Stack>
+        <Box bg='tomato' w='100%' p={4} color='white'>
+          This is the Box
+        </Box>
+      </Stack>
+    );
   }
   
 }
