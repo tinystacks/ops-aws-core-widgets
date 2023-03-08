@@ -7,7 +7,7 @@ import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 import { getAwsCredentialsProvider, getTimes, TimeUnitEnum, TimeRange, TimeRangeOverrides, cleanTimeRange } from '../utils/utils.js';
-import { Stack, Box } from '@chakra-ui/react';
+import { Box, HStack } from '@chakra-ui/react';
 import { TimeRangeSelector } from '../components/time-range-selector.js';
 import { Line } from 'react-chartjs-2';
 import {
@@ -196,7 +196,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
       };
     });
 
-    const graph = (<Line
+    const graph = (<Line width="100%" height="100%"
       datasetIdKey='label'
       data={{
         // labels: sortedTimestamps.map(timestamp => new Date(toNumber(timestamp)).toLocaleTimeString()),
@@ -249,7 +249,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
       }}
     />);
     return (
-      <Stack>
+      <HStack>
         <Box>
           <TimeRangeSelector
             timeRange={this.timeRange}
@@ -259,7 +259,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
         <Box>
           {graph}
         </Box>
-      </Stack>
+      </HStack>
     );
   }
 }
