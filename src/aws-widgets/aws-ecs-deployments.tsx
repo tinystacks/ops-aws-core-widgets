@@ -8,7 +8,9 @@ import {
 } from '@aws-sdk/client-ecs';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
-import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import TaskDefinitionRow from '../components/task-definition-row.js';
+import DeploymentRow from '../components/deployment-row.js';
 
 type Task = {
   taskId?: string;
@@ -30,7 +32,7 @@ type TaskDefinition = {
   tasks?: Task[];
 }
 
-type Deployment = {
+export type Deployment = {
   deploymentId?: string;
   status?: string;
   startTime?: Date;
@@ -161,11 +163,21 @@ export class AwsEcsDeployments extends BaseWidget {
 
     const deploymentRows = this.deployments.map((deployment) => {
       const taskRows = deployment.taskDefinition.tasks.map((task) => {
+        // return (
+        //   <Flex alignItems='center' minH='78px' justifyContent='start' mb='5px'>
+        //     <Flex direction='column' h='100%'>
+        //       <Box w='2px' bg='gray.200' h='100%' />
+        //     </Flex>
+        //     <Flex direction='column' justifyContent='flex-start' h='100%'>
+        //         test
+        //     </Flex>
+        //   </Flex>
+        // );
         return (
           <Tr>
             <Td>{task.taskId}</Td>
-            <Td>{task.startTime.toLocaleString()}</Td>
-            <Td>{task.stopTime.toLocaleString()}</Td>
+            <Td>{task.startTime?.toLocaleString()}</Td>
+            <Td>{task.stopTime?.toLocaleString()}</Td>
             <Td>{task.status}</Td>
             <Td>{task.group}</Td>
             <Td>{task.version}</Td>
@@ -189,62 +201,33 @@ export class AwsEcsDeployments extends BaseWidget {
           </Tbody>
         </Table>
       );
-      const taskDefinition = (
-        <Accordion allowMultiple>
-          <AccordionItem>
-            <h2>
-              <AccordionButton>
-                <TableContainer>
-                  <Table variant='simple'>
-                    <Thead>
-                      <Tr>
-                        <Th>TASK DEFINITION</Th>
-                        <Th>CPU LIMITS</Th>
-                        <Th>MEMORY LIMITS</Th>
-                        <Th>ROLE ARN</Th>
-                        <Th>EXECUTION ROLE ARN</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      <Tr>
-                        <Td>{deployment.taskDefinition.taskDefinitionArn}</Td>
-                        <Td>{deployment.taskDefinition.cpu}</Td>
-                        <Td>{deployment.taskDefinition.memory}</Td>
-                        <Td>{deployment.taskDefinition.roleArn}</Td>
-                        <Td>{deployment.taskDefinition.execRoleArn}</Td>
-                      </Tr>
-                    </Tbody>
-                  </Table>
-                </TableContainer>
-                <AccordionIcon />
-              </AccordionButton>
-            </h2>
-            <AccordionPanel>
-              {taskTable}
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
-      );
 
       return (
-        <Tr>
-          <Accordion allowMultiple>
-            <AccordionItem>
-              <h2>
-                <AccordionButton>
-                  <Td>{deployment.deploymentId}</Td>
-                  <Td>{deployment.status}</Td>
-                  <Td>{deployment.startTime.toLocaleString()}</Td>
-                  <Td>{deployment.runningCount} / {deployment.pendingCount} / {deployment.desiredCount}</Td>
-                  <AccordionIcon />
-                </AccordionButton>
-              </h2>
-              <AccordionPanel>
-                {taskDefinition}
-              </AccordionPanel>
-            </AccordionItem>
-          </Accordion>
-        </Tr>
+        <DeploymentRow deployment={deployment}>
+          <TaskDefinitionRow deployment={deployment} taskTable={taskTable}/>
+        </DeploymentRow>
+
+
+       
+
+      // <Tr>
+      //   <Accordion allowMultiple>
+      //     <AccordionItem>
+      //       <h2>
+      //         <AccordionButton>
+      //           <Td>{deployment.deploymentId}</Td>
+      //           <Td>{deployment.status}</Td>
+      //           <Td>{deployment.startTime?.toLocaleString()}</Td>
+      //           <Td>{deployment.runningCount} / {deployment.pendingCount} / {deployment.desiredCount}</Td>
+      //           <AccordionIcon />
+      //         </AccordionButton>
+      //       </h2>
+      //       <AccordionPanel>
+      //         {taskDefinition}
+      //       </AccordionPanel>
+      //     </AccordionItem>
+      //   </Accordion>
+      // </Tr>
       );
     });
 
@@ -257,6 +240,7 @@ export class AwsEcsDeployments extends BaseWidget {
               <Th>DEPLOYMENT STATUS</Th>
               <Th>STARTED</Th>
               <Th>RUNNING / PENDING / DESIRED</Th>
+              <Th>Expand</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -266,13 +250,13 @@ export class AwsEcsDeployments extends BaseWidget {
       </TableContainer>
     );
 
-    return ( 
-      <Stack>
-        <Box bg='tomato' w='100%' p={4} color='white'>
-          This is the Box
-        </Box>
-      </Stack>
-    );
+    // return ( 
+    //   <Stack>
+    //     <Box bg='tomato' w='100%' p={4} color='white'>
+    //       This is the Box
+    //     </Box>
+    //   </Stack>
+    // );
   }
   
 }

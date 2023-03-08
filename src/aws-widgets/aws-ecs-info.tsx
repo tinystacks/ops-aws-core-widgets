@@ -9,6 +9,7 @@ import _ from 'lodash';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
+import { Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 
 type AwsEcsInfoProps = Widget & {
   region: string,
@@ -156,6 +157,57 @@ export class AwsEcsInfo extends BaseWidget {
   }
 
   render (): JSX.Element {
-    throw new Error('Method not implemented.');
+    const imageRows = this.images.map((image) => {
+      return (
+        <Tr>
+          <Td>{image.containerName}</Td>
+          <Td>{image.portMappings.length}</Td>
+          <Td>{image.envVars.length}</Td>
+          <Td>{image.volumes[0].name}</Td>
+        </Tr>
+      );
+    });
+    return (
+      <Stack>
+        <TableContainer>
+          <Table variant='simple'>
+            <Thead>
+              <Tr>
+                <Th>SERVICE ARN</Th>
+                <Th>CLUSTER ARN</Th>
+                <Th>TASKS RUNNING/DESIRED</Th>
+                <Th>CAPACITY</Th>
+                <Th>ACTIVE TASK DEF ARN</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              <Tr>
+                <Td>{this.serviceArn}</Td>
+                <Td>{this.clusterArn}</Td>
+                <Td>{this.runningCount}/{this.desiredCount}</Td>
+                <Td>{this.capacity}</Td>
+                <Td>{this.taskDefinitionArn}</Td>
+              </Tr>
+            </Tbody>
+          </Table>
+        </TableContainer>
+        <TableContainer>
+          <Table variant='simple'>
+            <Thead>
+              <Tr>
+                <Th>CONTAINER ID</Th>
+                <Th>CPORT MAPPING</Th>
+                <Th>ENV VARIABLES</Th>
+                <Th>VOLUME</Th>
+                <Th>View logs</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {imageRows}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      </Stack>
+    );
   }
 }

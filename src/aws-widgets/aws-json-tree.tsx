@@ -31,7 +31,7 @@ export class AwsJsonTree extends BaseWidget {
 
   }
 
-  fromJson (object: AwsJsonTreeProps): AwsJsonTree {
+  static fromJson (object: AwsJsonTreeProps): AwsJsonTree {
 
     //TO-DO validate cloudControlType
     // Minimum length of 10. Maximum length of 196.

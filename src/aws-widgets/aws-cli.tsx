@@ -25,7 +25,7 @@ export class AwsCli extends BaseWidget {
     this._hasDataBeenFetched = false;
   }
 
-  fromJson (object: AwsCliProps): AwsCli {
+  static fromJson (object: AwsCliProps): AwsCli {
     return new AwsCli(object);
   }
   
