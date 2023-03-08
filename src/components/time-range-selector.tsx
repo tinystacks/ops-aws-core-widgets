@@ -1,8 +1,10 @@
 import React from 'react';
-import { Radio, RadioGroup, Stack } from '@chakra-ui/react';
-import { DateRangePicker } from 'rsuite';
+import { useState } from 'react';
+import { Stack } from '@chakra-ui/react';
 import { DateRange } from 'rsuite/esm/DateRangePicker';
-import { getTimes, RelativeTime, TimeRange, TimeUnitEnum } from '../utils/utils.js';
+import { RelativeTime, TimeRange, TimeUnitEnum } from '../utils/utils.js';
+import { RadioButtonGroup, RadioButton } from './radio-button-group';
+import { DateTimeSelectPopover } from './date-time-select-popover.js';
 
 const timeRangesToRadioValue: { [key: string]: RelativeTime } = {
   '5m': { time: 5, unit: TimeUnitEnum.m },
@@ -18,11 +20,13 @@ export type TimeRangeSelectorProps = {
   updateTimeRange: (timeRange: TimeRange) => void;
 }
 
+
 const CUSTOM = 'custom';
 export function TimeRangeSelector (props: TimeRangeSelectorProps) {
   const { timeRange, updateTimeRange } = props;
+  const [isTimePopoverOpen, setIsTimePopoverOpen] = useState(false);
 
-  function onRadioChange (value: string) {
+  function onChange (value: string) {
     if (value !== CUSTOM) {
       updateTimeRange(timeRangesToRadioValue[value]);
     }
@@ -42,7 +46,6 @@ export function TimeRangeSelector (props: TimeRangeSelectorProps) {
       timeRangeRadioValue = timeRangeSearch[0];
     }
   }
-  const { afterToday } = DateRangePicker;
   function onDateRangeChange (customDates: DateRange | null) {
     if (customDates !== null) {
       updateTimeRange({
@@ -52,27 +55,23 @@ export function TimeRangeSelector (props: TimeRangeSelectorProps) {
     }
   }
   return (
-    <Stack spacing="5">
-      <RadioGroup
-        size="sm"
-        name="time-range"
+    <Stack spacing='5'>
+      <RadioButtonGroup
+        size='sm'
+        name='time-range'
         value={timeRangeRadioValue}
-        onChange={onRadioChange}
+        onChange={onChange}
       >
         {Object.keys(timeRangesToRadioValue).map(k => (
-          <Radio value={k} key={`timeRange${k}`}>{k}</Radio>
+          <RadioButton value={k}>{k}</RadioButton>
         ))}
-        <Radio value={CUSTOM}>
-          <DateRangePicker
-            placeholder='Select time range'
-            format="MM/dd/yyyy HH:mm:ss"
-            onChange={onDateRangeChange}
-            disabledDate={afterToday && afterToday()}
-            placement="autoVerticalEnd"
-            value={[getTimes(timeRange).startTime, getTimes(timeRange).endTime]}
-          />
-        </Radio>
-      </RadioGroup>
+        <RadioButton value={CUSTOM} onClick={() => setIsTimePopoverOpen(true)}>
+          <DateTimeSelectPopover 
+            isOpen={isTimePopoverOpen} 
+            onClose={() => setIsTimePopoverOpen(false)} 
+            onChange={onDateRangeChange}/>
+        </RadioButton>
+      </RadioButtonGroup>
     </Stack>
   );
 }
