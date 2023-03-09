@@ -7,6 +7,7 @@ import isEmpty from 'lodash.isempty';
 
 type AwsCliProps = Widget & {
   command: string
+  commandResult?: {stdout: string, stderr: string}; 
   runOnStart?: boolean
 }
 
@@ -20,13 +21,13 @@ export class AwsCli extends BaseWidget {
   static type = 'AwsCli';
   command: string;
   runOnStart: boolean;
-  private _commandResult: {stdout: string, stderr: string}; 
+  commandResult: {stdout: string, stderr: string}; 
   
   constructor (props: AwsCliProps) {
     super(props);
     this.command = props.command;
     this.runOnStart = props.runOnStart || true;
-    this._commandResult = {
+    this.commandResult = props.commandResult || {
       stdout: '', 
       stderr: ''
     };
@@ -41,6 +42,7 @@ export class AwsCli extends BaseWidget {
     return { 
       ...super.toJson(),  
       command: this.command, 
+      commandResult: this.commandResult,
       runOnStart: this.runOnStart 
     };
   }
@@ -83,14 +85,6 @@ export class AwsCli extends BaseWidget {
       throw new Error(`Error executing command ${this.command}, ${e}`);
     }
     
-  }
-
-  get commandResult () {
-    return this._commandResult;
-  }
-
-  set commandResult (_commandResult) { 
-    this._commandResult = _commandResult;
   }
   
   render (_children?: any, overridesCallback?: (overrides: AwsCliOverrides) => void): JSX.Element { 
