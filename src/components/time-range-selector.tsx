@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Stack } from '@chakra-ui/react';
 import { DateRange } from 'rsuite/esm/DateRangePicker';
 import { RelativeTime, TimeRange, TimeUnitEnum } from '../utils/utils.js';
-import { RadioButtonGroup, RadioButton } from './radio-button-group';
+import { RadioButtonGroup, RadioButton } from './radio-button-group.js';
 import { DateTimeSelectPopover } from './date-time-select-popover.js';
 
 const timeRangesToRadioValue: { [key: string]: RelativeTime } = {
