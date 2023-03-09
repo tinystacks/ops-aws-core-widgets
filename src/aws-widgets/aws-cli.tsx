@@ -2,6 +2,7 @@ import React from 'react';
 import { Widget  } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { Box, Button, Heading, Stack } from '@chakra-ui/react';
+import isEmpty from 'lodash.isempty';
 
 
 type AwsCliProps = Widget & {
@@ -110,7 +111,7 @@ export class AwsCli extends BaseWidget {
       lineHeight: '21px', 
       borderRadius: '8px'  
     };
-    const commandResultRender = (this._commandResult.stderr || this._commandResult.stdout) ? 
+    const commandResultRender = (!isEmpty(this.commandResult.stderr) || !isEmpty(this.commandResult.stdout)) ? 
       <Box style={boxStyles}>
         {this.commandResult.stderr}
         {this.commandResult.stdout}
