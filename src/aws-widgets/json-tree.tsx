@@ -1,6 +1,6 @@
 import { Widget  } from '@tinystacks/ops-model';
 import { BaseWidget } from '@tinystacks/ops-core';
-import { Box, Heading, Stack, Text } from '@chakra-ui/react';
+import { Box, Stack, Text } from '@chakra-ui/react';
 import get from 'lodash.get';
 import isObject from 'lodash.isobject';
 import React from 'react';
@@ -11,7 +11,7 @@ type JsonTreeProps = Widget & {
     pathDisplayName: string,
     path: string
   }[],
-  filteredJson: {
+  filteredJson?: {
     pathDisplayName: string,
     json: string
   }[]
@@ -24,7 +24,7 @@ export class JsonTree extends BaseWidget {
     pathDisplayName: string,
     path: string
   }[];
-  private _filteredJson: {
+  filteredJson: {
     pathDisplayName: string,
     json: string
   }[];
@@ -54,39 +54,66 @@ export class JsonTree extends BaseWidget {
   
   getData (): void {
     this.filteredJson = [];
-    this.paths.forEach(({ path, pathDisplayName }) => { 
-      const value = get(this.jsonObject, path);
-      this.filteredJson.push({
-        pathDisplayName,
-        json: !value ?
-          `Value ${path} does not exist on source object` :
-          isObject(value) ?
-            JSON.stringify(value, undefined, 2) :
-            value
+    try{ 
+      this.paths.forEach(({ path, pathDisplayName }) => { 
+        const value = get(this.jsonObject, path);
+        this.filteredJson.push({
+          pathDisplayName,
+          json: !value ?
+            `Value ${path} does not exist on source object` :
+            isObject(value) ?
+              JSON.stringify(value, undefined, 2) :
+              value
+        });
       });
-    });
+      console.log('filetered json in getData: ', this.filteredJson);
+      return;
+    } catch(e){
+      console.error(e);
+      throw new Error(`Error getting data for json tree widger ${this.id}, ${e}`);
+    }
   }
 
-  get filteredJson () { return this._filteredJson; }
-  set filteredJson (_filteredJson) { this._filteredJson = _filteredJson; }
+  /*get filteredJson () { return this._filteredJson; }
+  set filteredJson (_filteredJson) { this._filteredJson = _filteredJson; }*/
 
   render (): JSX.Element {
+    console.log(' render this.filteredJson: ', this.filteredJson
+    );
+    const boxStyles = { 
+      overflow: 'scroll',
+      flex: 'none',
+      backgroundColor: '#EDF2F7',
+      color: '#000000',
+      height: '88px', 
+      margin: '14px',
+      padding: '24px', 
+      width: 'full',
+      alignSelf: 'stretch', 
+      fontFamily: 'monospace', 
+      fontStyle: 'normal',
+      fontSize: '14px',
+      fontWeight: '400',
+      lineHeight: '21px', 
+      borderRadius: '8px'  
+    };
     function KeyValueDisplay (props: { displayKey: string, value: string }) {
       return (
-        <Box p={5} key={props.displayKey}>
-          <Heading fontSize="s">{props.displayKey}</Heading>
-          <Text mt={4}>{props.value}</Text>
+        <Box>
+          <Text mt={4} style={{ color: '#5705D4' }}>{props.displayKey} : {props.value}</Text>
         </Box>
       );
     }
     return (
-      <Stack>
-        {this.filteredJson.map(({ pathDisplayName, json }) => (
-          <KeyValueDisplay
-            displayKey={pathDisplayName}
-            value={json}
-          />
-        ))}
+      <Stack style={{ backgroundColor: '#ffffff', width: '100%' }}>
+        <Box style={boxStyles}> 
+          {this.filteredJson.map(({ pathDisplayName, json }) => (
+            <KeyValueDisplay
+              displayKey={pathDisplayName}
+              value={json}
+            />
+          ))}
+        </Box>
       </Stack>
     );
   }

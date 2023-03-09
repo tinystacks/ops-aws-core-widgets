@@ -80,6 +80,6 @@
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-simple-code-editor": "^0.13.1",
-    "rsuite": "^5.28.0"
+    "rsuite": "^5.28.1"
   }
 }
