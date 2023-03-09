@@ -1,8 +1,9 @@
 import {
   Tr,
   Td,
-  Box,
-  Button
+  Button,
+  Collapse,
+  useDisclosure
 } from '@chakra-ui/react';
 import React from 'react';
 import { Deployment } from '../aws-widgets/aws-ecs-deployments.js';
@@ -12,29 +13,28 @@ export default function DeploymentRow (props: {
   children?: React.ReactNode;
 }) {
   const { deployment, children } = props;
-  const [isTaskDefinitionTableExpanded, setIsTaskDefinitionTableExpanded] =
-    React.useState<boolean>(false);
+  // const [ isTaskDefinitionTableExpanded, setIsTaskDefinitionTableExpanded] = React.useState<boolean>(false);
+  const { isOpen, onToggle } = useDisclosure();
 
   return (
-    <Tr>
-      <Td>{deployment.deploymentId}</Td>
-      <Td>{deployment.status}</Td>
-      <Td>{deployment.startTime?.toLocaleString()}</Td>
-      <Td>
-        {deployment.runningCount} / {deployment.pendingCount} /{' '}
-        {deployment.desiredCount}
-      </Td>
-      <Td>
-        {/* TODO: Add up and down icon depending on state */}
-        <Button
-          onClick={() =>
-            setIsTaskDefinitionTableExpanded(!isTaskDefinitionTableExpanded)
-          }
-        >
-          Expand
-        </Button>
-      </Td>
-      <Box hidden={!isTaskDefinitionTableExpanded}>{children}</Box>,
-    </Tr>
+    <React.Fragment>
+      <Tr>
+        <Td>{deployment.deploymentId}</Td>
+        <Td>{deployment.status}</Td>
+        <Td>{deployment.startTime?.toLocaleString()}</Td>
+        <Td>{deployment.runningCount} / {deployment.pendingCount} / {deployment.desiredCount}</Td>
+        <Td>
+          {/* TODO: Add up and down icon depending on state */}
+          <Button onClick={onToggle}>More details</Button>
+        </Td>
+      </Tr>
+      <Tr>
+        <Td colSpan={5}>
+          <Collapse in={isOpen}>
+            {children}
+          </Collapse>
+        </Td>
+      </Tr>
+    </React.Fragment>
   );
 }

@@ -22,7 +22,7 @@ type Task = {
   cwLogsArn?: string;
 }
 
-type TaskDefinition = {
+export type TaskDefinition = {
   taskDefinitionArn?: string;
   cpu?: string;
   memory?: string;
@@ -158,21 +158,8 @@ export class AwsEcsDeployments extends BaseWidget {
   }
 
   render (): JSX.Element {
-    // map deployments list
-    // map tasks
-
     const deploymentRows = this.deployments.map((deployment) => {
       const taskRows = deployment.taskDefinition.tasks.map((task) => {
-        // return (
-        //   <Flex alignItems='center' minH='78px' justifyContent='start' mb='5px'>
-        //     <Flex direction='column' h='100%'>
-        //       <Box w='2px' bg='gray.200' h='100%' />
-        //     </Flex>
-        //     <Flex direction='column' justifyContent='flex-start' h='100%'>
-        //         test
-        //     </Flex>
-        //   </Flex>
-        // );
         return (
           <Tr>
             <Td>{task.taskId}</Td>
@@ -185,49 +172,29 @@ export class AwsEcsDeployments extends BaseWidget {
         );
       });
       const taskTable = (
-        <Table variant='simple'>
-          <Thead>
-            <Tr>
-              <Th>TASK ID</Th>
-              <Th>STARTED</Th>
-              <Th>STOPPED</Th>
-              <Th>STATUS</Th>
-              <Th>GROUP</Th>
-              <Th>VERSION</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {taskRows}
-          </Tbody>
-        </Table>
+        <TableContainer>
+          <Table variant='simple'>
+            <Thead>
+              <Tr>
+                <Th>TASK ID</Th>
+                <Th>STARTED</Th>
+                <Th>STOPPED</Th>
+                <Th>STATUS</Th>
+                <Th>GROUP</Th>
+                <Th>VERSION</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {taskRows}
+            </Tbody>
+          </Table>
+        </TableContainer>
       );
 
       return (
         <DeploymentRow deployment={deployment}>
-          <TaskDefinitionRow deployment={deployment} taskTable={taskTable}/>
+          <TaskDefinitionRow taskDefinition={deployment?.taskDefinition} taskTable={taskTable}/>
         </DeploymentRow>
-
-
-       
-
-      // <Tr>
-      //   <Accordion allowMultiple>
-      //     <AccordionItem>
-      //       <h2>
-      //         <AccordionButton>
-      //           <Td>{deployment.deploymentId}</Td>
-      //           <Td>{deployment.status}</Td>
-      //           <Td>{deployment.startTime?.toLocaleString()}</Td>
-      //           <Td>{deployment.runningCount} / {deployment.pendingCount} / {deployment.desiredCount}</Td>
-      //           <AccordionIcon />
-      //         </AccordionButton>
-      //       </h2>
-      //       <AccordionPanel>
-      //         {taskDefinition}
-      //       </AccordionPanel>
-      //     </AccordionItem>
-      //   </Accordion>
-      // </Tr>
       );
     });
 
@@ -249,14 +216,6 @@ export class AwsEcsDeployments extends BaseWidget {
         </Table>
       </TableContainer>
     );
-
-    // return ( 
-    //   <Stack>
-    //     <Box bg='tomato' w='100%' p={4} color='white'>
-    //       This is the Box
-    //     </Box>
-    //   </Stack>
-    // );
   }
   
 }

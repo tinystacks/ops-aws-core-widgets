@@ -7,52 +7,54 @@ import {
   Td,
   Table,
   Button,
-  Box
+  useDisclosure,
+  Collapse
 } from '@chakra-ui/react';
 import React from 'react';
-import { Deployment } from '../aws-widgets/aws-ecs-deployments.js';
+import { TaskDefinition } from '../aws-widgets/aws-ecs-deployments.js';
 
 export default function TaskDefinitionRow (props: {
-  deployment: Deployment;
+  taskDefinition: TaskDefinition;
   taskTable: JSX.Element;
 }) {
-  const { deployment, taskTable } = props;
-  const [isTaskTableExpanded, setIsTaskTableExpanded] =
-    React.useState<boolean>(false);
+  const { taskDefinition, taskTable } = props;
+  const { isOpen, onToggle } = useDisclosure();
   return (
-    <Tr>
-      <TableContainer>
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>TASK DEFINITION</Th>
-              <Th>CPU LIMITS</Th>
-              <Th>MEMORY LIMITS</Th>
-              <Th>ROLE ARN</Th>
-              <Th>EXECUTION ROLE ARN</Th>
-              <Th>Expand</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            <Tr>
-              <Td>{deployment.taskDefinition.taskDefinitionArn}</Td>
-              <Td>{deployment.taskDefinition.cpu}</Td>
-              <Td>{deployment.taskDefinition.memory}</Td>
-              <Td>{deployment.taskDefinition.roleArn}</Td>
-              <Td>{deployment.taskDefinition.execRoleArn}</Td>
-              <Td>
-                {/* TODO: Add up and down icon depending on state */}
-                <Button
-                  onClick={() => setIsTaskTableExpanded(!isTaskTableExpanded)}
-                >
-                  Expand
-                </Button>
-              </Td>
-            </Tr>
-          </Tbody>
-        </Table>
-      </TableContainer>
-      <Box hidden={!isTaskTableExpanded}>{taskTable}</Box>
-    </Tr>
+    <React.Fragment>
+      <Tr>
+        <TableContainer>
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                <Th>TASK DEFINITION</Th>
+                <Th>CPU LIMITS</Th>
+                <Th>MEMORY LIMITS</Th>
+                <Th>ROLE ARN</Th>
+                <Th>EXECUTION ROLE ARN</Th>
+                <Th>Expand</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              <Tr>
+                <Td>{taskDefinition.taskDefinitionArn}</Td>
+                <Td>{taskDefinition.cpu}</Td>
+                <Td>{taskDefinition.memory}</Td>
+                <Td>{taskDefinition.roleArn}</Td>
+                <Td>{taskDefinition.execRoleArn}</Td>
+                <Td>
+                  {/* TODO: Add up and down icon depending on state */}
+                  <Button onClick={onToggle}>Show tasks</Button>
+                </Td>
+              </Tr>
+            </Tbody>
+          </Table>
+        </TableContainer>
+      </Tr>
+      <Tr>
+        <Collapse in={isOpen}>
+          {taskTable}
+        </Collapse>
+      </Tr>
+    </React.Fragment>
   );
 }

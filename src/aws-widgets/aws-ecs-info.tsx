@@ -1,3 +1,4 @@
+import React from 'react';
 import { Widget } from '@tinystacks/ops-model';
 import {
   ECS,
@@ -54,23 +55,28 @@ export class AwsEcsInfo extends BaseWidget {
   execRoleArn: string;
   images: Image[];
 
-  constructor (props: AwsEcsInfoProps) {
-    const {
-      region,
-      accountId,
-      clusterName,
-      serviceName
-    } = props;
-    super (
-      props
-    );
-    this.region = region;
-    this.accountId = accountId;
-    this.clusterName = clusterName;
-    this.serviceName = serviceName;
+  constructor (props: AwsEcsInfoType) {
+    super(props);
+    this.region = props.region;
+    this.accountId = props.accountId;
+    this.clusterName = props.clusterName;
+    this.serviceName = props.serviceName;
+    this.serviceArn = props.serviceArn;
+    this.clusterArn = props.clusterArn;
+    this.runningCount = props.runningCount;
+    this.desiredCount = props.desiredCount;
+    this.capacity = props.capacity;
+    this.asgArn = props.asgArn;
+    this.memory = props.memory;
+    this.cpu = props.cpu;
+    this.taskDefinitionArn = props.taskDefinitionArn;
+    this.status = props.status;
+    this.roleArn = props.roleArn;
+    this.execRoleArn = props.execRoleArn;
+    this.images = props.images;
   }
 
-  static fromJson (object: AwsEcsInfoProps): AwsEcsInfo {
+  static fromJson (object: AwsEcsInfoType): AwsEcsInfo {
     return new AwsEcsInfo(object);
   }
 
@@ -157,13 +163,26 @@ export class AwsEcsInfo extends BaseWidget {
   }
 
   render (): JSX.Element {
-    const imageRows = this.images.map((image) => {
+    const imageRows = this.images?.map((image) => {
+      const portMappings = (image?.portMappings?.map(portMapping =>
+        `${portMapping.hostPort}:${portMapping.containerPort}`
+      ));
+      const portMappingsString = portMappings ? portMappings.join('\n') : undefined;
+      const envVars = (image?.envVars?.map(envVar =>
+        `${envVar.name}: ${envVar.value}`
+      ));
+      const envVarsString = envVars ? envVars.join('\n') : undefined;
+      const secrets = (image?.secrets?.map(secret =>
+        `${secret.name}: ${secret.valueFrom}`
+      ));
+      const secretsString = secrets ? secrets.join('\n') : undefined;
       return (
         <Tr>
-          <Td>{image.containerName}</Td>
-          <Td>{image.portMappings.length}</Td>
-          <Td>{image.envVars.length}</Td>
-          <Td>{image.volumes[0].name}</Td>
+          <Td>{image?.containerName}</Td>
+          <Td>{portMappingsString}</Td>
+          <Td>{envVarsString}</Td>
+          <Td>{secretsString}</Td>
+          <Td>{_.get(image, 'volumes[0].name')}</Td>
         </Tr>
       );
     });
@@ -196,8 +215,9 @@ export class AwsEcsInfo extends BaseWidget {
             <Thead>
               <Tr>
                 <Th>CONTAINER ID</Th>
-                <Th>CPORT MAPPING</Th>
+                <Th>PORT MAPPINGS</Th>
                 <Th>ENV VARIABLES</Th>
+                <Th>SECRETS</Th>
                 <Th>VOLUME</Th>
                 <Th>View logs</Th>
               </Tr>
