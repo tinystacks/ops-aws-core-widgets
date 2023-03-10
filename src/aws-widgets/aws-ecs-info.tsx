@@ -107,7 +107,7 @@ export class AwsEcsInfo extends BaseWidget {
       credentials: credentials,
       region: this.region
     });
-    const accountId = (await stsClient.getCallerIdentity({}).then((res) => res.Account).catch((e) => console.log(e))) || '';
+    const accountId = await stsClient.getCallerIdentity({}).then(res => res.Account).catch(e => console.log(e)) || '';
     const ecsClient = new ECS({
       credentials,
       region: this.region
