@@ -6,6 +6,7 @@ import {
   DescribeCapacityProvidersCommandOutput,
   DescribeTasksCommandOutput
 } from '@aws-sdk/client-ecs';
+import { STS } from '@aws-sdk/client-sts';
 import _ from 'lodash';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
@@ -14,7 +15,6 @@ import { Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-
 
 type AwsEcsInfoProps = Widget & {
   region: string,
-  accountId: string,
   clusterName: string,
   serviceName: string
 }
@@ -38,7 +38,6 @@ type AwsEcsInfoType = AwsEcsInfoProps & {
 export class AwsEcsInfo extends BaseWidget {
   static type = 'AwsEcsInfo';
   region: string;
-  accountId: string;
   clusterName: string;
   serviceName: string;
   serviceArn: string;
@@ -58,7 +57,6 @@ export class AwsEcsInfo extends BaseWidget {
   constructor (props: AwsEcsInfoType) {
     super(props);
     this.region = props.region;
-    this.accountId = props.accountId;
     this.clusterName = props.clusterName;
     this.serviceName = props.serviceName;
     this.serviceArn = props.serviceArn;
@@ -84,7 +82,6 @@ export class AwsEcsInfo extends BaseWidget {
     return {
       ...super.toJson(),
       region: this.region,
-      accountId: this.accountId,
       clusterName: this.clusterName,
       serviceName: this.serviceName,
       serviceArn: this.serviceArn,
@@ -105,8 +102,14 @@ export class AwsEcsInfo extends BaseWidget {
 
   async getData (providers?: BaseProvider[]): Promise<void> {
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
+    const credentials = await awsCredentialsProvider.getCredentials();
+    const stsClient = new STS({
+      credentials: credentials,
+      region: this.region
+    });
+    const accountId = (await stsClient.getCallerIdentity({}).then((res) => res.Account).catch((e) => console.log(e))) || '';
     const ecsClient = new ECS({
-      credentials: await awsCredentialsProvider.getCredentials(),
+      credentials,
       region: this.region
     });
     const {
@@ -159,7 +162,7 @@ export class AwsEcsInfo extends BaseWidget {
 
     const tasks = describeTasksRes?.tasks;
     const associatedTasks = getTasksForTaskDefinition(tasks, this.taskDefinitionArn);
-    this.images = hydrateImages(associatedTasks, taskDefinition, this.accountId);
+    this.images = hydrateImages(associatedTasks, taskDefinition, accountId);
   }
 
   render (): JSX.Element {

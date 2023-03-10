@@ -6,6 +6,7 @@ import {
   Deployment as AwsDeployment,
   Task as AwsTask
 } from '@aws-sdk/client-ecs';
+import { STS } from '@aws-sdk/client-sts';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
@@ -44,7 +45,6 @@ export type Deployment = {
 
 type AwsEcsDeploymentsProps = Widget & {
   region: string;
-  accountId: string;
   clusterName: string;
   serviceName: string;
 }
@@ -56,7 +56,6 @@ type AwsEcsDeploymentsType = AwsEcsDeploymentsProps & {
 export class AwsEcsDeployments extends BaseWidget {
   static type = 'AwsEcsDeployments';
   region: string;
-  accountId: string;
   clusterName: string;
   serviceName: string;
   deployments?: Deployment[];
@@ -64,7 +63,6 @@ export class AwsEcsDeployments extends BaseWidget {
   constructor (props: AwsEcsDeploymentsType) {
     super (props);
     this.region = props.region;
-    this.accountId = props.accountId;
     this.clusterName = props.clusterName;
     this.serviceName = props.serviceName;
     this.deployments = props.deployments || [];
@@ -78,7 +76,6 @@ export class AwsEcsDeployments extends BaseWidget {
     return {
       ...super.toJson(),
       region: this.region,
-      accountId: this.accountId,
       clusterName: this.clusterName,
       serviceName: this.serviceName,
       deployments: this.deployments
@@ -125,8 +122,14 @@ export class AwsEcsDeployments extends BaseWidget {
 
   async getData (providers?: BaseProvider[]): Promise<void> {
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
+    const credentials = await awsCredentialsProvider.getCredentials();
+    const stsClient = new STS({
+      credentials: credentials,
+      region: this.region
+    });
+    const accountId = (await stsClient.getCallerIdentity({}).then((res) => res.Account).catch((e) => console.log(e))) || '';
     const ecsClient = new ECS({
-      credentials: await awsCredentialsProvider.getCredentials(),
+      credentials,
       region: this.region
     });
 
@@ -143,7 +146,7 @@ export class AwsEcsDeployments extends BaseWidget {
 
     const deploymentPromises: Promise<Deployment>[] = [];
     service.deployments.forEach((deployment) => {
-      deploymentPromises.push(this.hydrateDeployment(ecsClient, deployment, tasks, this.accountId));
+      deploymentPromises.push(this.hydrateDeployment(ecsClient, deployment, tasks, accountId));
     });
     const settledPromises = (await Promise.allSettled(deploymentPromises)).reduce((filtered, promise) => {
       if (promise.status === 'fulfilled') {
