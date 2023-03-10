@@ -72,17 +72,15 @@ export class AwsCli extends BaseWidget {
           stdout: stdout,
           stderr: stderr
         };
-        return;
-      }
-      if (overrides && overrides.clear === true) {
+      } else if (overrides && overrides.clear === true) {
         this.commandResult = {
           stdout: '',
           stderr: ''
         };
-        return;
       }
-    } catch (e) {
-      throw new Error(`Error executing command ${this.command}, ${e}`);
+    } catch (e: any) {
+      console.error(e);
+      this.commandResult = { stdout: '', stderr: e.toString() };
     }
 
   }
@@ -91,8 +89,10 @@ export class AwsCli extends BaseWidget {
     const commandResultRender = (!isEmpty(this.commandResult.stderr) || !isEmpty(this.commandResult.stdout)) ?
       <HStack spacing='24px'>
         <Box maxH='400px' w='100%' overflow='scroll'>
-          {this.commandResult.stderr}
-          {this.commandResult.stdout}
+          <pre>
+            {this.commandResult.stderr}
+            {this.commandResult.stdout}
+          </pre>
         </Box>
         <Spacer />
         <Button
@@ -109,7 +109,9 @@ export class AwsCli extends BaseWidget {
         <Code borderRadius='md' p='4'>
           <HStack spacing='24px'>
             <Box maxH='400px' w='100%' overflow='scroll'>
-              {this.command}
+              <pre>
+                {this.command}
+              </pre>
             </Box>
             <Spacer />
             <Button
