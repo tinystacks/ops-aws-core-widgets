@@ -11,7 +11,11 @@ import _ from 'lodash';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
-import { Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { HStack, Link, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import EcsPortsModal from '../components/ecs-ports-modal.js';
+import EcsEnvVarsModal from '../components/ecs-env-vars-modal.js';
+import { asgArnToUrl, cloudwatchLogsGroupArnToUrl, ecsClusterArnToUrl, ecsServiceArnToUrl, ecsTaskDefinitionArnToUrl } from '../utils/arn-utils.js';
+import KeyValueStat from '../components/key-value-stat.js';
 
 type AwsEcsInfoProps = Widget & {
   region: string,
@@ -33,6 +37,7 @@ type AwsEcsInfoType = AwsEcsInfoProps & {
   roleArn: string;
   execRoleArn: string;
   images: Image[];
+  capacityType: 'EC2' | 'Fargate';
 }
 
 export class AwsEcsInfo extends BaseWidget {
@@ -53,6 +58,7 @@ export class AwsEcsInfo extends BaseWidget {
   roleArn: string;
   execRoleArn: string;
   images: Image[];
+  capacityType: 'EC2' | 'Fargate';
 
   constructor (props: AwsEcsInfoType) {
     super(props);
@@ -72,6 +78,7 @@ export class AwsEcsInfo extends BaseWidget {
     this.roleArn = props.roleArn;
     this.execRoleArn = props.execRoleArn;
     this.images = props.images;
+    this.capacityType = props.capacityType;
   }
 
   static fromJson (object: AwsEcsInfoType): AwsEcsInfo {
@@ -96,7 +103,8 @@ export class AwsEcsInfo extends BaseWidget {
       status: this.status,
       roleArn: this.roleArn,
       execRoleArn: this.execRoleArn,
-      images: this.images
+      images: this.images,
+      capacityType: this.capacityType
     };
   }
 
@@ -158,7 +166,8 @@ export class AwsEcsInfo extends BaseWidget {
 
     const capacityProvider = _.get(describeCapacityProvidersRes, 'capacityProviders[0]');
     this.asgArn = capacityProvider?.autoScalingGroupProvider?.autoScalingGroupArn;
-    this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity;
+    this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity | this.desiredCount;
+    this.capacityType = capacityProvider?.autoScalingGroupProvider ? 'EC2' : 'Fargate';
 
     const tasks = describeTasksRes?.tasks;
     const associatedTasks = getTasksForTaskDefinition(tasks, this.taskDefinitionArn);
@@ -167,61 +176,73 @@ export class AwsEcsInfo extends BaseWidget {
 
   render (): JSX.Element {
     const imageRows = this.images?.map((image) => {
-      const portMappings = (image?.portMappings?.map(portMapping =>
-        `${portMapping.hostPort}:${portMapping.containerPort}`
-      ));
-      const portMappingsString = portMappings ? portMappings.join('\n') : undefined;
-      const envVars = (image?.envVars?.map(envVar =>
-        `${envVar.name}: ${envVar.value}`
-      ));
-      const envVarsString = envVars ? envVars.join('\n') : undefined;
-      const secrets = (image?.secrets?.map(secret =>
-        `${secret.name}: ${secret.valueFrom}`
-      ));
-      const secretsString = secrets ? secrets.join('\n') : undefined;
       return (
         <Tr>
           <Td>{image?.containerName}</Td>
-          <Td>{portMappingsString}</Td>
-          <Td>{envVarsString}</Td>
-          <Td>{secretsString}</Td>
-          <Td>{_.get(image, 'volumes[0].name')}</Td>
+          <Td>
+            <EcsPortsModal image={image} />
+          </Td>
+          <Td>
+            <EcsEnvVarsModal image={image} />
+          </Td>
+          <Td>{(image.volumes || []).map(v => v.name).join(', ')}</Td>
+          <Td><Link color='purple' href={cloudwatchLogsGroupArnToUrl(image.cwLogsGroupArn)} target='_blank'>View logs</Link></Td>
         </Tr>
       );
     });
     return (
-      <Stack>
-        <TableContainer>
-          <Table variant='simple'>
-            <Thead>
+      <Stack p='20px'>
+        <HStack alignItems='start'>
+          <KeyValueStat
+            label='Cluster Arn'
+            value={this.clusterArn}
+            href={ecsClusterArnToUrl(this.clusterArn)}
+          />
+          <KeyValueStat
+            label='Service Arn'
+            value={this.serviceArn}
+            href={ecsServiceArnToUrl(this.serviceArn)}
+          />
+          <KeyValueStat
+            label='Tasks Running/Desired'
+            value={`${this.runningCount}/${this.desiredCount}`}
+          />
+          <KeyValueStat
+            label='Active Task Def Id'
+            value={this.taskDefinitionArn}
+            href={ecsTaskDefinitionArnToUrl(this.taskDefinitionArn)}
+          />
+        </HStack>
+        <HStack pl='20px' pr='20px'>
+          <KeyValueStat
+            label='Provisioned CPU'
+            value={this.cpu}
+          />
+          <KeyValueStat
+            label='Provisioned Memory'
+            value={this.memory}
+          />
+          <KeyValueStat
+            label='Capacity'
+            value={`${this.capacity} (${this.capacityType})`}
+          />
+          {
+            this.asgArn && 
+              <KeyValueStat
+                label='ASG'
+                value={this.asgArn}
+                href={asgArnToUrl(this.asgArn)}
+              />
+          }
+        </HStack>
+        <TableContainer border='1px' borderRadius='6px' borderColor='gray.100'>
+          <Table variant="simple">
+            <Thead bgColor='gray.50'>
               <Tr>
-                <Th>SERVICE ARN</Th>
-                <Th>CLUSTER ARN</Th>
-                <Th>TASKS RUNNING/DESIRED</Th>
-                <Th>CAPACITY</Th>
-                <Th>ACTIVE TASK DEF ARN</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              <Tr>
-                <Td>{this.serviceArn}</Td>
-                <Td>{this.clusterArn}</Td>
-                <Td>{this.runningCount}/{this.desiredCount}</Td>
-                <Td>{this.capacity}</Td>
-                <Td>{this.taskDefinitionArn}</Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </TableContainer>
-        <TableContainer>
-          <Table variant='simple'>
-            <Thead>
-              <Tr>
-                <Th>CONTAINER ID</Th>
-                <Th>PORT MAPPINGS</Th>
-                <Th>ENV VARIABLES</Th>
-                <Th>SECRETS</Th>
-                <Th>VOLUME</Th>
+                <Th>Container Id</Th>
+                <Th>Port Mappings</Th>
+                <Th>Environment Variables</Th>
+                <Th>Volumes</Th>
                 <Th>View logs</Th>
               </Tr>
             </Thead>

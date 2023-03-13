@@ -9,8 +9,8 @@ import {
 import { STS } from '@aws-sdk/client-sts';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
-import TaskDefinitionRow from '../components/task-definition-row.js';
+import { Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import TaskDefinitionBody from '../components/task-definition-body.js';
 import DeploymentRow from '../components/deployment-row.js';
 
 type Task = {
@@ -166,7 +166,7 @@ export class AwsEcsDeployments extends BaseWidget {
         return (
           <Tr>
             <Td>{task.taskId}</Td>
-            <Td>{task.startTime?.toLocaleString()}</Td>
+            <Td >{task.startTime?.toLocaleString()}</Td>
             <Td>{task.stopTime?.toLocaleString()}</Td>
             <Td>{task.status}</Td>
             <Td>{task.group}</Td>
@@ -175,49 +175,53 @@ export class AwsEcsDeployments extends BaseWidget {
         );
       });
       const taskTable = (
-        <TableContainer>
-          <Table variant='simple'>
-            <Thead>
-              <Tr>
-                <Th>TASK ID</Th>
-                <Th>STARTED</Th>
-                <Th>STOPPED</Th>
-                <Th>STATUS</Th>
-                <Th>GROUP</Th>
-                <Th>VERSION</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {taskRows}
-            </Tbody>
-          </Table>
-        </TableContainer>
+        <Stack>
+          <TableContainer border='1px' borderRadius='6px' borderColor='gray.100'>
+            <Table variant="simple">
+              <Thead bgColor='gray.50'>
+                <Tr>
+                  <Th>Task Id</Th>
+                  <Th>Started</Th>
+                  <Th>Stopped</Th>
+                  <Th>Status</Th>
+                  <Th>Group</Th>
+                  <Th>Version</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {taskRows}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </Stack>
       );
 
       return (
         <DeploymentRow deployment={deployment}>
-          <TaskDefinitionRow taskDefinition={deployment?.taskDefinition} taskTable={taskTable}/>
+          <TaskDefinitionBody taskDefinition={deployment?.taskDefinition} taskTable={taskTable}/>
         </DeploymentRow>
       );
     });
 
     return (
-      <TableContainer>
-        <Table variant='simple'>
-          <Thead>
-            <Tr>
-              <Th>DEPLOYMENT ID</Th>
-              <Th>DEPLOYMENT STATUS</Th>
-              <Th>STARTED</Th>
-              <Th>RUNNING / PENDING / DESIRED</Th>
-              <Th>Expand</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {deploymentRows}
-          </Tbody>
-        </Table>
-      </TableContainer>
+      <Stack pt='20px' pb='20px' w='100%'>
+        <TableContainer border='1px' borderColor='gray.100'>
+          <Table variant='simple'>
+            <Thead bgColor='gray.50'>
+              <Tr>
+                <Th>Deployment Id</Th>
+                <Th>Deployment Status</Th>
+                <Th>Started</Th>
+                <Th>Running/Pending/Desired</Th>
+                <Th/>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {deploymentRows}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      </Stack>
     );
   }
   
