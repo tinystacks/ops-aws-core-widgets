@@ -9,7 +9,7 @@ import {
 import { STS } from '@aws-sdk/client-sts';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
-import { Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { Button, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import TaskDefinitionBody from '../components/task-definition-body.js';
 import DeploymentRow from '../components/deployment-row.js';
 
@@ -51,6 +51,10 @@ type AwsEcsDeploymentsProps = Widget & {
 
 type AwsEcsDeploymentsType = AwsEcsDeploymentsProps & {
   deployments?: Deployment[];
+}
+
+type AwsEcsDeploymentsOverrides = {
+  stoppedTaskId?: string
 }
 
 export class AwsEcsDeployments extends BaseWidget {
@@ -120,7 +124,7 @@ export class AwsEcsDeployments extends BaseWidget {
     return deployment;
   }
 
-  async getData (providers?: BaseProvider[]): Promise<void> {
+  async getData (providers?: BaseProvider[], overrides?: AwsEcsDeploymentsOverrides): Promise<void> {
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const credentials = await awsCredentialsProvider.getCredentials();
     const stsClient = new STS({
@@ -132,6 +136,11 @@ export class AwsEcsDeployments extends BaseWidget {
       credentials,
       region: this.region
     });
+
+    if (overrides?.stoppedTaskId) {
+      console.log(`KILLING ${overrides.stoppedTaskId}`);
+      await ecsClient.stopTask({ task: overrides.stoppedTaskId });
+    }
 
     const {
       service,
@@ -160,17 +169,25 @@ export class AwsEcsDeployments extends BaseWidget {
     this.deployments = settledPromises;
   }
 
-  render (): JSX.Element {
+  render (_children?: any, overridesCallback?: (overrides: AwsEcsDeploymentsOverrides) => void): JSX.Element {
     const deploymentRows = this.deployments.map((deployment) => {
       const taskRows = deployment.taskDefinition.tasks.map((task) => {
         return (
           <Tr>
             <Td>{task.taskId}</Td>
-            <Td >{task.startTime?.toLocaleString()}</Td>
+            <Td>{task.startTime?.toLocaleString()}</Td>
             <Td>{task.stopTime?.toLocaleString()}</Td>
             <Td>{task.status}</Td>
             <Td>{task.group}</Td>
             <Td>{task.version}</Td>
+            <Td>
+              <Button
+                variant='outline'
+                onClick={() => overridesCallback({ stoppedTaskId: task.taskId })}
+              >
+                Kill task
+              </Button>
+            </Td>
           </Tr>
         );
       });
