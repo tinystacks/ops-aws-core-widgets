@@ -1,4 +1,4 @@
-function arnSplitter (arn: string) {
+export function arnSplitter (arn: string) {
   if (!arn) return undefined;
   const splitArn = arn.split(':');
   if (arn.length < 6) return undefined;
@@ -17,6 +17,10 @@ function arnSplitter (arn: string) {
     arnMap['extra'] = splitArn[7];
   }
   return arnMap;
+}
+
+export function isArn (arn: string) {
+  return arn.startsWith('arn:aws') && arn.split('').length >= 6;
 }
 
 export function cloudwatchLogsGroupArnToUrl (arn: string) {
