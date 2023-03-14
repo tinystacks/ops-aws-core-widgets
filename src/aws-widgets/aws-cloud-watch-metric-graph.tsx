@@ -6,7 +6,7 @@ import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 import { getAwsCredentialsProvider, getTimes, TimeUnitEnum, TimeRange, TimeRangeOverrides, cleanTimeRange } from '../utils/utils.js';
-import { Box, HStack } from '@chakra-ui/react';
+import { Box, Stack } from '@chakra-ui/react';
 import { TimeRangeSelector } from '../components/time-range-selector.js';
 import { Line } from 'react-chartjs-2';
 import {
@@ -194,69 +194,71 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
       };
     });
 
-    const graph = (<Line
-      datasetIdKey='label'
-      data={{
-        datasets
-      }}
-      options={{
-        scales: {
-          x: {
-            type: 'linear',
-            grace: '5%',
-            ticks: {
-              callback: function (label) {
-                return new Date(label).toLocaleString();
-              },
-              minRotation: 15
-            }
-          },
-          y: {
-            type: 'linear',
-            grace: '5%'
-          }
-        },
-        hover: {
-          mode: 'index',
-          intersect: false
-        },
-        plugins: {
-          colors: {
-            enabled: true
-          },
-          tooltip: {
-            callbacks: {
-              title: function (this: TooltipModel<'line'>, items: TooltipItem<'line'>[]) {
-                return items.map(i => new Date(get(i.raw, 'x')).toLocaleString());
-              },
-              label: function (this: TooltipModel<'line'>, item: TooltipItem<'line'>) {
-                const datasetLabel = item.dataset.label || '';
-                const dataPoint = item.formattedValue;
-                return datasetLabel + ': ' + dataPoint + ' ' + get(item.raw, 'unit');
+    const graph = (
+      <Line
+        datasetIdKey='label'
+        data={{
+          datasets
+        }}
+        options={{
+          scales: {
+            x: {
+              type: 'linear',
+              grace: '5%',
+              ticks: {
+                callback: function (label) {
+                  return new Date(label).toLocaleString();
+                },
+                minRotation: 15
               }
             },
+            y: {
+              type: 'linear',
+              grace: '5%'
+            }
+          },
+          hover: {
             mode: 'index',
             intersect: false
           },
-          legend: {
-            display: true,
-            position: 'bottom'
+          plugins: {
+            colors: {
+              enabled: true
+            },
+            tooltip: {
+              callbacks: {
+                title: function (this: TooltipModel<'line'>, items: TooltipItem<'line'>[]) {
+                  return items.map(i => new Date(get(i.raw, 'x')).toLocaleString());
+                },
+                label: function (this: TooltipModel<'line'>, item: TooltipItem<'line'>) {
+                  const datasetLabel = item.dataset.label || '';
+                  const dataPoint = item.formattedValue;
+                  return datasetLabel + ': ' + dataPoint + ' ' + get(item.raw, 'unit');
+                }
+              },
+              mode: 'index',
+              intersect: false
+            },
+            legend: {
+              display: true,
+              position: 'bottom'
+            }
           }
-        }
-      }}
-    />);
+        }}
+      />
+    );
     return (
-      <HStack>
+      <Stack w='100%' p='20px'>
         <Box>
           <TimeRangeSelector
             timeRange={this.timeRange}
             updateTimeRange={timeRange => overridesCallback({ timeRange })}
           />
         </Box>
-        <Box>
+        <Box maxW='500px' maxH='300px'>
           {graph}
         </Box>
-      </HStack>
+      </Stack>
     );
   }
 }
