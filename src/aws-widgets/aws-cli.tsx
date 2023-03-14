@@ -1,82 +1,136 @@
-import { Widget  } from '@tinystacks/ops-model';
+import React from 'react';
+import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
-import { exec } from 'child_process';
-import util from 'node:util';
-
-const execPromise = util.promisify(exec);
+import { Box, Button, Code, Heading, HStack, Spacer, Stack } from '@chakra-ui/react';
+import isEmpty from 'lodash.isempty';
 
 type AwsCliProps = Widget & {
   command: string
+  commandResult?: { stdout: string, stderr: string };
+  runOnStart?: boolean
+  hasRun?: boolean
+}
+
+type AwsCliOverrides = {
+  clear?: boolean,
+  run?: boolean
 }
 
 export class AwsCli extends BaseWidget {
   static type = 'AwsCli';
   command: string;
-  private _commandResult: {stdout: string, stderr: string}; 
-  private _hasDataBeenFetched: boolean;
-  
+  runOnStart: boolean;
+  commandResult: { stdout: string, stderr: string };
+  hasRun: boolean;
+
   constructor (props: AwsCliProps) {
     super(props);
     this.command = props.command;
-    this._commandResult = {
-      stdout: '', 
+    this.runOnStart = props.runOnStart === true;
+    this.commandResult = props.commandResult || {
+      stdout: '',
       stderr: ''
     };
-    this._hasDataBeenFetched = false;
+    this.hasRun = props.hasRun === true;
   }
 
-  fromJson (object: AwsCliProps): AwsCli {
+  static fromJson (object: AwsCliProps): AwsCli {
     return new AwsCli(object);
   }
-  
+
 
   toJson (): AwsCliProps {
-    return { 
-      ...super.toJson(),  
-      command: this.command 
+    return {
+      ...super.toJson(),
+      command: this.command,
+      commandResult: this.commandResult,
+      runOnStart: this.runOnStart,
+      hasRun: this.hasRun
     };
   }
 
-  async getData (providers?: BaseProvider[], overrides?: { [key: string]: any; }): Promise<void> {
-    this._hasDataBeenFetched = true;
-    try{ 
-      if(overrides && (overrides['runOnStart'] || overrides['run'])){ 
+  async getData (providers?: BaseProvider[], overrides?: AwsCliOverrides): Promise<void> {
+    const depMap = {
+      childproc: 'child_process',
+      nodeutil: 'node:util'
+    };
+
+    const exec = (await import(depMap['childproc']))['exec'];
+    const promisify = (await import(depMap['nodeutil']))['promisify'];
+    const execPromise = promisify(exec);
+
+    const shouldRun =
+      // if this is the first load and runOnStart is true
+      (!this.hasRun && this.runOnStart === true)
+      // if an override told it to run
+      || (overrides && overrides.run === true);
+
+    try {
+      if (shouldRun) {
         const { stdout, stderr } = await execPromise(this.command);
-        this._commandResult = { 
-          stdout: stdout,  
+        this.commandResult = {
+          stdout: stdout,
           stderr: stderr
         };
-        return;
-      }
-      if(overrides && overrides['clear']){ 
-        this._commandResult = {
-          stdout: '', 
+        this.hasRun = true;
+      } else if (overrides && overrides.clear === true) {
+        this.commandResult = {
+          stdout: '',
           stderr: ''
         };
-        return;
       }
-      if(!overrides){ 
-        const { stdout, stderr } = await execPromise(this.command);
-        this._commandResult = { 
-          stdout: stdout,  
-          stderr: stderr
-        };
-        return;
-      }
-    } catch(e){ 
-      throw new Error(`Error executing command ${this.command}, ${e}`);
+    } catch (e: any) {
+      console.error(e);
+      this.commandResult = { stdout: '', stderr: e.toString() };
     }
-    
+
   }
 
-  get commandResult () {
-    return this._commandResult;
-  }
+  render (_children?: any, overridesCallback?: (overrides: AwsCliOverrides) => void): JSX.Element {
+    const commandResultRender = (!isEmpty(this.commandResult.stderr) || !isEmpty(this.commandResult.stdout)) ?
+      <HStack spacing='24px'>
+        <Box maxH='400px' w='100%' overflow='scroll'>
+          <pre>
+            {this.commandResult.stderr}
+            {this.commandResult.stdout}
+          </pre>
+        </Box>
+        <Spacer />
+        <Button
+          color='black' bg='white' m='2' borderColor='gray.300' borderWidth='1px'
+          onClick={() => overridesCallback({ clear: true })}
+        >
+          Clear
+        </Button>
+      </HStack>
+      : 'Command has not been run yet!';
 
-  get hasDataBeenFetched (){ 
-    return this._hasDataBeenFetched; 
+    return (
+      <Stack w='100%' p='4'>
+        <Code borderRadius='md' p='4'>
+          <HStack spacing='24px'>
+            <Box maxH='400px' w='100%' overflow='scroll'>
+              <pre>
+                {this.command}
+              </pre>
+            </Box>
+            <Spacer />
+            <Button
+              colorScheme='purple' m='2'
+              onClick={() => overridesCallback({ run: true })}
+            >
+              Run
+            </Button>
+          </HStack>
+        </Code>
+        <Heading size='sm'>
+          Response:
+        </Heading>
+        <Code borderRadius='md' p='4'>
+          {commandResultRender}
+        </Code>
+      </Stack>
+    );
   }
-  
-  render (): JSX.Element { return <>TODO</>; }
 
 }

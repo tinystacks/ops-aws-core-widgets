@@ -1,3 +1,4 @@
+import React from 'react';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { Widget } from '@tinystacks/ops-model';
 import { 
@@ -5,8 +6,12 @@ import {
   Deployment as AwsDeployment,
   Task as AwsTask
 } from '@aws-sdk/client-ecs';
+import { STS } from '@aws-sdk/client-sts';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
+import { Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import TaskDefinitionBody from '../components/task-definition-body.js';
+import DeploymentRow from '../components/deployment-row.js';
 
 type Task = {
   taskId?: string;
@@ -18,7 +23,7 @@ type Task = {
   cwLogsArn?: string;
 }
 
-type TaskDefinition = {
+export type TaskDefinition = {
   taskDefinitionArn?: string;
   cpu?: string;
   memory?: string;
@@ -28,7 +33,7 @@ type TaskDefinition = {
   tasks?: Task[];
 }
 
-type Deployment = {
+export type Deployment = {
   deploymentId?: string;
   status?: string;
   startTime?: Date;
@@ -40,7 +45,6 @@ type Deployment = {
 
 type AwsEcsDeploymentsProps = Widget & {
   region: string;
-  accountId: string;
   clusterName: string;
   serviceName: string;
 }
@@ -52,25 +56,16 @@ type AwsEcsDeploymentsType = AwsEcsDeploymentsProps & {
 export class AwsEcsDeployments extends BaseWidget {
   static type = 'AwsEcsDeployments';
   region: string;
-  accountId: string;
   clusterName: string;
   serviceName: string;
   deployments?: Deployment[];
 
   constructor (props: AwsEcsDeploymentsType) {
-    const {
-      region,
-      accountId,
-      clusterName,
-      serviceName,
-      deployments
-    } = props;
     super (props);
-    this.region = region;
-    this.accountId = accountId;
-    this.clusterName = clusterName;
-    this.serviceName = serviceName;
-    this.deployments = deployments || [];
+    this.region = props.region;
+    this.clusterName = props.clusterName;
+    this.serviceName = props.serviceName;
+    this.deployments = props.deployments || [];
   }
 
   static fromJson (object: AwsEcsDeploymentsType): AwsEcsDeployments {
@@ -81,7 +76,6 @@ export class AwsEcsDeployments extends BaseWidget {
     return {
       ...super.toJson(),
       region: this.region,
-      accountId: this.accountId,
       clusterName: this.clusterName,
       serviceName: this.serviceName,
       deployments: this.deployments
@@ -128,8 +122,14 @@ export class AwsEcsDeployments extends BaseWidget {
 
   async getData (providers?: BaseProvider[]): Promise<void> {
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
+    const credentials = await awsCredentialsProvider.getCredentials();
+    const stsClient = new STS({
+      credentials: credentials,
+      region: this.region
+    });
+    const accountId = await stsClient.getCallerIdentity({}).then(res => res.Account).catch(e => console.log(e)) || '';
     const ecsClient = new ECS({
-      credentials: await awsCredentialsProvider.getCredentials(),
+      credentials,
       region: this.region
     });
 
@@ -146,7 +146,7 @@ export class AwsEcsDeployments extends BaseWidget {
 
     const deploymentPromises: Promise<Deployment>[] = [];
     service.deployments.forEach((deployment) => {
-      deploymentPromises.push(this.hydrateDeployment(ecsClient, deployment, tasks, this.accountId));
+      deploymentPromises.push(this.hydrateDeployment(ecsClient, deployment, tasks, accountId));
     });
     const settledPromises = (await Promise.allSettled(deploymentPromises)).reduce((filtered, promise) => {
       if (promise.status === 'fulfilled') {
@@ -161,7 +161,68 @@ export class AwsEcsDeployments extends BaseWidget {
   }
 
   render (): JSX.Element {
-    throw new Error('Method not implemented.');
+    const deploymentRows = this.deployments.map((deployment) => {
+      const taskRows = deployment.taskDefinition.tasks.map((task) => {
+        return (
+          <Tr>
+            <Td>{task.taskId}</Td>
+            <Td >{task.startTime?.toLocaleString()}</Td>
+            <Td>{task.stopTime?.toLocaleString()}</Td>
+            <Td>{task.status}</Td>
+            <Td>{task.group}</Td>
+            <Td>{task.version}</Td>
+          </Tr>
+        );
+      });
+      const taskTable = (
+        <Stack>
+          <TableContainer border='1px' borderRadius='6px' borderColor='gray.100'>
+            <Table variant="simple">
+              <Thead bgColor='gray.50'>
+                <Tr>
+                  <Th>Task Id</Th>
+                  <Th>Started</Th>
+                  <Th>Stopped</Th>
+                  <Th>Status</Th>
+                  <Th>Group</Th>
+                  <Th>Version</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {taskRows}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </Stack>
+      );
+
+      return (
+        <DeploymentRow deployment={deployment}>
+          <TaskDefinitionBody taskDefinition={deployment?.taskDefinition} taskTable={taskTable}/>
+        </DeploymentRow>
+      );
+    });
+
+    return (
+      <Stack pt='20px' pb='20px' w='100%'>
+        <TableContainer border='1px' borderColor='gray.100'>
+          <Table variant='simple'>
+            <Thead bgColor='gray.50'>
+              <Tr>
+                <Th>Deployment Id</Th>
+                <Th>Deployment Status</Th>
+                <Th>Started</Th>
+                <Th>Running/Pending/Desired</Th>
+                <Th/>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {deploymentRows}
+            </Tbody>
+          </Table>
+        </TableContainer>
+      </Stack>
+    );
   }
   
 }
