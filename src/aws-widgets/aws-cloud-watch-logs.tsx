@@ -10,6 +10,7 @@ import {
 } from '../utils/utils.js';
 import { Box, Code, Stack } from '@chakra-ui/react';
 import { TimeRangeSelector } from '../components/time-range-selector.js';
+
 type AwsCloudWatchLogsProps = Widget & {
   region: string,
   logGroupName: string,
@@ -108,22 +109,17 @@ export class AwsCloudWatchLogs extends BaseWidget {
 
   render (_children?: any, overridesCallback?: (overrides: AwsCloudWatchLogsOverrides) => void): JSX.Element {
     const eventsRender = isEmpty(this.events) ?
-      <Stack direction='row' style={{ backgroundColor: '#101828' }}>
+      <Stack direction='row' bgColor='#101828'>
         <Box style={{ color: '#E1E4E8', padding: '0px 10px' }}>
           There are no logs in this logGroup and logStream during this timeframe
         </Box>
       </Stack> :
       this.events.map(event => (
-        <Stack direction='row' style={{ backgroundColor: '#101828' }}>
-          <Box style={{
-            backgroundColor: '#1D2939',
-            color: '#D0D5DD',
-            padding: '0px 10px',
-            width: '134px'
-          }}>
+        <Stack direction='row' bgColor='#101828'>
+          <Box bgColor='#1D2939' color='#D0D5DD' p='0px 10px' width='134px'>
             {new Date(event.timestamp).toLocaleTimeString()}
           </Box>
-          <Box style={{ color: '#E1E4E8', padding: '0px 10px' }}>
+          <Box color='#E1E4E8' p='0px 10px'>
             {event.message}
           </Box>
         </Stack>
