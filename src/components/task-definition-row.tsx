@@ -18,7 +18,8 @@ export default function TaskDefinitionRow (props: {
   taskTable: JSX.Element;
 }) {
   const { taskDefinition, taskTable } = props;
-  const { isOpen, onToggle } = useDisclosure();
+  const tasksToggle = useDisclosure({ id: 'tasks' });
+  
   return (
     <React.Fragment>
       <Tr>
@@ -43,7 +44,7 @@ export default function TaskDefinitionRow (props: {
                 <Td>{taskDefinition.execRoleArn}</Td>
                 <Td>
                   {/* TODO: Add up and down icon depending on state */}
-                  <Button onClick={onToggle}>Show tasks</Button>
+                  <Button onClick={tasksToggle.onToggle}>Show tasks</Button>
                 </Td>
               </Tr>
             </Tbody>
@@ -51,7 +52,7 @@ export default function TaskDefinitionRow (props: {
         </TableContainer>
       </Tr>
       <Tr>
-        <Collapse in={isOpen}>
+        <Collapse in={tasksToggle.isOpen}>
           {taskTable}
         </Collapse>
       </Tr>

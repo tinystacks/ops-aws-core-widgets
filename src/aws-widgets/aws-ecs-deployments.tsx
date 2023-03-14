@@ -106,7 +106,7 @@ export class AwsEcsDeployments extends BaseWidget {
         version: task.version
       } as Task;
     });
-    const containers = hydrateImages(associatedAwsTasks, taskDefinition, accountId);
+    const containers = hydrateImages(taskDefinition, accountId);
     deployment.taskDefinition = {
       taskDefinitionArn: awsDeployment.taskDefinition,
       cpu: taskDefinition?.cpu,
@@ -127,7 +127,7 @@ export class AwsEcsDeployments extends BaseWidget {
       credentials: credentials,
       region: this.region
     });
-    const accountId = await stsClient.getCallerIdentity({}).then(res => res.Account).catch(e => console.log(e)) || '';
+    const accountId = await stsClient.getCallerIdentity({}).then(res => res.Account).catch(e => console.error(e)) || '';
     const ecsClient = new ECS({
       credentials,
       region: this.region
