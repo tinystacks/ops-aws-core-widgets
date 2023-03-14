@@ -183,7 +183,6 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
         data: (m.data || [])
           // .sort((d1: MetricData, d2: MetricData) => d1.timestamp - d2.timestamp)
           .map((d: MetricData)=> ({
-            // x: new Date(d.timestamp).toLocaleDateString(),
             x: d.timestamp,
             y: d.value,
             unit: d.unit
@@ -195,10 +194,9 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
       };
     });
 
-    const graph = (<Line width="100%" height="100%"
+    const graph = (<Line
       datasetIdKey='label'
       data={{
-        // labels: sortedTimestamps.map(timestamp => new Date(toNumber(timestamp)).toLocaleTimeString()),
         datasets
       }}
       options={{

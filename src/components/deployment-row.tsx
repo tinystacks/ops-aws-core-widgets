@@ -1,8 +1,8 @@
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import {
   Tr,
   Td,
   Button,
-  Collapse,
   useDisclosure
 } from '@chakra-ui/react';
 import React from 'react';
@@ -24,15 +24,20 @@ export default function DeploymentRow (props: {
         <Td>{deployment.startTime?.toLocaleString()}</Td>
         <Td>{deployment.runningCount} / {deployment.pendingCount} / {deployment.desiredCount}</Td>
         <Td>
-          {/* TODO: Add up and down icon depending on state */}
-          <Button onClick={onToggle}>More details</Button>
+          <Button
+            variant='link'
+            onClick={onToggle}
+            aria-label={isOpen ? 'upCaret' : 'downCaret'}
+            rightIcon={isOpen ? <ChevronUpIcon />: <ChevronDownIcon/>}
+            size='sm'
+          >
+            More Details
+          </Button>
         </Td>
       </Tr>
-      <Tr>
+      <Tr hidden={!isOpen}>
         <Td colSpan={5}>
-          <Collapse in={isOpen}>
-            {children}
-          </Collapse>
+          {children}
         </Td>
       </Tr>
     </React.Fragment>

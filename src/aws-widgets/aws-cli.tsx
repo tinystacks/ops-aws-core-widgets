@@ -72,6 +72,7 @@ export class AwsCli extends BaseWidget {
           stdout: stdout,
           stderr: stderr
         };
+        this.hasRun = true;
       } else if (overrides && overrides.clear === true) {
         this.commandResult = {
           stdout: '',

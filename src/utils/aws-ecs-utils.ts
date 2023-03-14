@@ -18,7 +18,7 @@ export type Image = {
   envVars: KeyValuePair[];
   secrets: Secret[],
   volumes: Volume[],
-  cwLogsArn: string,
+  cwLogsGroupArn: string,
   memory: number,
   cpu: number
 }
@@ -70,8 +70,8 @@ export function hydrateImages (taskDefinition: TaskDefinition, accountId: string
       secrets: containerDefinition?.secrets,
       volumes: taskDefinition?.volumes,
       memory: containerDefinition?.memory,
-      cwLogsArn: `arn:aws:logs:${logConfigOptions['awslogs-region']}:${accountId}:${logConfigOptions['awslogs-group']}:*`,
-      cpu: containerDefinition.cpu
+      cwLogsGroupArn: `arn:aws:logs:${logConfigOptions['awslogs-region']}:${accountId}:log-group:${logConfigOptions['awslogs-group']}:*`,
+      cpu: containerDefinition?.cpu
     });
   });
 
