@@ -178,8 +178,6 @@ export class AwsEcsDeployments extends BaseWidget {
             <Td>{task.startTime?.toLocaleString()}</Td>
             <Td>{task.stopTime?.toLocaleString()}</Td>
             <Td>{task.status}</Td>
-            <Td>{task.group}</Td>
-            <Td>{task.version}</Td>
             <Td>
               <Button
                 variant='outline'
@@ -201,8 +199,6 @@ export class AwsEcsDeployments extends BaseWidget {
                   <Th>Started</Th>
                   <Th>Stopped</Th>
                   <Th>Status</Th>
-                  <Th>Group</Th>
-                  <Th>Version</Th>
                 </Tr>
               </Thead>
               <Tbody>
