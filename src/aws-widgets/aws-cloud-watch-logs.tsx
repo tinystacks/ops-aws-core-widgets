@@ -10,6 +10,7 @@ import {
 } from '../utils/utils.js';
 import { Box, Code, Stack } from '@chakra-ui/react';
 import { TimeRangeSelector } from '../components/time-range-selector.js';
+import { arnSplitter, isArn } from '../utils/arn-utils.js';
 
 type AwsCloudWatchLogsProps = Widget & {
   region: string,
@@ -80,8 +81,8 @@ export class AwsCloudWatchLogs extends BaseWidget {
     } = getTimes(this.timeRange);
 
     this.events = (await cwLogsClient.filterLogEvents({
-      logGroupName: this.logGroupName,
-      logStreamNames: [this.logStreamName],
+      logGroupName: isArn(this.logGroupName) ? arnSplitter(this.logGroupName).resourceName : this.logGroupName,
+      logStreamNames: this.logStreamName ? [this.logStreamName] : undefined,
       startTime: startTime.getTime(),
       endTime: endTime.getTime()
     })).events;
@@ -126,14 +127,14 @@ export class AwsCloudWatchLogs extends BaseWidget {
       ));
 
     return (
-      <Stack>
+      <Stack w='100%' p='20px'>
         <Box>
           <TimeRangeSelector
             timeRange={this.timeRange}
             updateTimeRange={timeRange => overridesCallback({ timeRange })}
           />
         </Box>
-        <Box className='logscontainer' style={{
+        <Box w='100%' style={{
           overflow: 'scroll',
           fontFamily: 'monospace',
           fontSize: '14px',
@@ -146,7 +147,7 @@ export class AwsCloudWatchLogs extends BaseWidget {
           maxHeight: '400px'
         }}>
 
-          <Code>
+          <Code w='100%'>
             {eventsRender}
           </Code>
         </Box>
