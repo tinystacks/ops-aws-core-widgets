@@ -1,4 +1,5 @@
 import React from 'react';
+import { HStack, Link, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { Widget } from '@tinystacks/ops-model';
 import {
   ECS,
@@ -10,7 +11,6 @@ import _ from 'lodash';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { getCoreEcsData, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
-import { HStack, Link, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import EcsPortsModal from '../components/ecs-ports-modal.js';
 import EcsEnvVarsModal from '../components/ecs-env-vars-modal.js';
 import { asgArnToUrl, cloudwatchLogsGroupArnToUrl, ecsClusterArnToUrl, ecsServiceArnToUrl, ecsTaskDefinitionArnToUrl } from '../utils/arn-utils.js';
