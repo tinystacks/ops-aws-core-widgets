@@ -163,7 +163,6 @@ export class AwsEcsInfo extends BaseWidget {
     this.capacityType = capacityProvider?.autoScalingGroupProvider ? 'EC2' : 'Fargate';
 
     this.images = hydrateImages(taskDefinition, accountId);
-    console.log(this);
   }
 
   render (): JSX.Element {
