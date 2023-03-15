@@ -139,7 +139,10 @@ export class AwsEcsDeployments extends BaseWidget {
 
     if (overrides?.stoppedTaskId) {
       console.log(`KILLING ${overrides.stoppedTaskId}`);
-      await ecsClient.stopTask({ task: overrides.stoppedTaskId });
+      await ecsClient.stopTask({ 
+        task: overrides.stoppedTaskId,
+        cluster: this.clusterName 
+      });
     }
 
     const {
