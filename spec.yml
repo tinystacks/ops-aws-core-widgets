@@ -1,56 +1,5 @@
 spec:
   widgets:
-    Cli:
-      description: >
-        This widget runs a bash command. The command may be multiple commands separated by ';'
-        You can also reference scripts that exist in the same directory as your config.
-
-      props:
-        displayName:
-          type: string
-          required: true
-        environmentVariables:
-          description: A set of Key-Value pairs that set the environm
-          example: >
-            A CLI defined as
-            ExampleCli:
-              displayName: example
-              type: Cli
-              environmentVariables:
-                VAR1: 10,
-                VAR2: 9
-              command: 'echo $VAR1'
-            Would result in '10'.
-          type: object
-          additionalProperties:
-            type: string
-          required: false
-        providers:
-          description: >
-            A list of providers. Providers will only be used if they implement CliEnvironmentProvider.
-            Each environment variable from compatible providers will be exported to the shell.
-          type: array
-          items:
-            type: Provider
-          required: false
-        command:
-          description: A semi-colon seperated set of commands.
-          type: string
-          required: true
-        runOnStart:
-          description: >
-            Whether or not to run the command when the dashboard and widget are first rendered.
-            If disabled, the command will not run until the run button is pressed.
-          type: boolean
-          default: false
-          required: false
-      data:
-        commandResult:
-          stdout:
-            type: string
-          stderr:
-            type: string
-
     AwsCloudWatchLogs:
       description: Renders a widget containing logs from a CloudWatchLogs log group or log stream.
       inputs:
