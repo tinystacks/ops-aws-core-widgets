@@ -161,6 +161,8 @@ spec:
         period:
           description: The period, in seconds, used to poopulate data from CloudWatch
           type: number
+          required: false
+          default: 300
         showTimeRangeSelector:
           description: Whether to show the time range selector which supplies time-range overrides
           type: boolean
