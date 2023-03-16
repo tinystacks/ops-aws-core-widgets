@@ -45,7 +45,7 @@ export async function getCoreEcsData (ecsClient: ECS, clusterName: string, servi
   });
   const service = _.get((settledPromises[0] as DescribeServicesCommandOutput), 'services[0]');
   const cluster = _.get((settledPromises[1] as DescribeClustersCommandOutput), 'clusters[0]');
-  const taskArns = _.get((settledPromises[2] as ListTasksCommandOutput), 'taskArns');
+  const taskArns = _.get((settledPromises[2] as ListTasksCommandOutput), 'taskArns', [] as string[]);
  
   return {
     service,
