@@ -17,6 +17,21 @@ export function getAwsCredentialsProvider (providers?: BaseProvider[]): AwsCrede
   return provider as AwsCredentialsProvider;
 }
 
+export function getFirstAwsCredentialsProviderFromProviders (
+  providers?: BaseProvider[]
+): AwsCredentialsProvider | undefined {
+  if (!providers || isEmpty(providers)) {
+    return undefined;
+  }
+
+  const provider = providers.find(p => p.type === AwsCredentialsProvider.type);
+  if (!provider) {
+    return undefined;
+  }
+
+  return provider as AwsCredentialsProvider;
+}
+
 // eslint-disable-next-line no-shadow
 export enum TimeUnitEnum {
   ns = 'ns',
