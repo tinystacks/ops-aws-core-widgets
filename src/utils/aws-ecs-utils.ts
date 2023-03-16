@@ -1,7 +1,6 @@
 import { 
   ECS,
   Task,
-  Container,
   TaskDefinition,
   PortMapping,
   KeyValuePair,
@@ -9,20 +8,19 @@ import {
   Volume,
   DescribeServicesCommandOutput,
   DescribeClustersCommandOutput,
-  ListTasksCommandOutput,
-  ContainerDefinition
+  ListTasksCommandOutput
 } from '@aws-sdk/client-ecs';
 import _ from 'lodash';
 
 export type Image = {
-  containerName: string;
+  containerId: string;
   portMappings: PortMapping[];
   envVars: KeyValuePair[];
   secrets: Secret[],
   volumes: Volume[],
   cwLogsGroupArn: string,
-  memory: string,
-  cpu: string
+  memory: number,
+  cpu: number
 }
 
 export async function getCoreEcsData (ecsClient: ECS, clusterName: string, serviceName: string) {
@@ -47,7 +45,7 @@ export async function getCoreEcsData (ecsClient: ECS, clusterName: string, servi
   });
   const service = _.get((settledPromises[0] as DescribeServicesCommandOutput), 'services[0]');
   const cluster = _.get((settledPromises[1] as DescribeClustersCommandOutput), 'clusters[0]');
-  const taskArns = _.get((settledPromises[2] as ListTasksCommandOutput), 'taskArns');
+  const taskArns = _.get((settledPromises[2] as ListTasksCommandOutput), 'taskArns', [] as string[]);
  
   return {
     service,
@@ -60,26 +58,20 @@ export function getTasksForTaskDefinition (tasks: Task[], taskDefinitionArn: str
   return tasks.filter(task => task.taskDefinitionArn === taskDefinitionArn);
 }
 
-export function hydrateImages (tasks: Task[], taskDefinition: TaskDefinition, accountId: string) {
+export function hydrateImages (taskDefinition: TaskDefinition, accountId: string) {
   const images: Image[] = [];
-  let containers: Container[] = [];
-  tasks.forEach((task) => {
-    containers = [...containers, ...task.containers];
-  });
-  containers.forEach((container) => {
-    const containerDefinition = taskDefinition.containerDefinitions.find((cd: ContainerDefinition) => {
-      return cd.name === container.name;
-    });
+  const containerDefinitions = taskDefinition?.containerDefinitions;
+  containerDefinitions.forEach((containerDefinition) => {
     const logConfigOptions = containerDefinition?.logConfiguration?.options;
     images.push({
-      containerName: container.name,
+      containerId: containerDefinition?.name,
       portMappings: containerDefinition?.portMappings,
       envVars: containerDefinition?.environment,
       secrets: containerDefinition?.secrets,
       volumes: taskDefinition?.volumes,
-      memory: container.memory,
+      memory: containerDefinition?.memory,
       cwLogsGroupArn: `arn:aws:logs:${logConfigOptions['awslogs-region']}:${accountId}:log-group:${logConfigOptions['awslogs-group']}:*`,
-      cpu: container.cpu
+      cpu: containerDefinition?.cpu
     });
   });
 

@@ -1,15 +1,31 @@
 import React from 'react';
+import {
+  Button,
+  Stack,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr
+} from '@chakra-ui/react';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { Widget } from '@tinystacks/ops-model';
-import { 
+import {
   ECS,
   Deployment as AwsDeployment,
   Task as AwsTask
 } from '@aws-sdk/client-ecs';
 import { STS } from '@aws-sdk/client-sts';
-import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
+import _ from 'lodash';
+import {
+  getCoreEcsData,
+  getTasksForTaskDefinition,
+  hydrateImages,
+  Image
+} from '../utils/aws-ecs-utils.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
-import { Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import TaskDefinitionBody from '../components/task-definition-body.js';
 import DeploymentRow from '../components/deployment-row.js';
 
@@ -21,7 +37,7 @@ type Task = {
   group?: string;
   version?: number;
   cwLogsArn?: string;
-}
+};
 
 export type TaskDefinition = {
   taskDefinitionArn?: string;
@@ -31,7 +47,7 @@ export type TaskDefinition = {
   execRoleArn?: string;
   containers?: Image[];
   tasks?: Task[];
-}
+};
 
 export type Deployment = {
   deploymentId?: string;
@@ -41,17 +57,21 @@ export type Deployment = {
   pendingCount?: number;
   desiredCount?: number;
   taskDefinition?: TaskDefinition;
-}
+};
 
 type AwsEcsDeploymentsProps = Widget & {
   region: string;
   clusterName: string;
   serviceName: string;
-}
+};
 
 type AwsEcsDeploymentsType = AwsEcsDeploymentsProps & {
   deployments?: Deployment[];
-}
+};
+
+type AwsEcsDeploymentsOverrides = {
+  stoppedTaskId?: string;
+};
 
 export class AwsEcsDeployments extends BaseWidget {
   static type = 'AwsEcsDeployments';
@@ -61,7 +81,7 @@ export class AwsEcsDeployments extends BaseWidget {
   deployments?: Deployment[];
 
   constructor (props: AwsEcsDeploymentsType) {
-    super (props);
+    super(props);
     this.region = props.region;
     this.clusterName = props.clusterName;
     this.serviceName = props.serviceName;
@@ -82,7 +102,12 @@ export class AwsEcsDeployments extends BaseWidget {
     };
   }
 
-  private async hydrateDeployment (ecsClient: ECS, awsDeployment: AwsDeployment, awsTasks: AwsTask[], accountId: string) {
+  private async hydrateDeployment (
+    ecsClient: ECS,
+    awsDeployment: AwsDeployment,
+    awsTasks: AwsTask[],
+    accountId: string
+  ) {
     const deployment: Deployment = {
       deploymentId: awsDeployment.id,
       status: awsDeployment.status,
@@ -95,7 +120,10 @@ export class AwsEcsDeployments extends BaseWidget {
       taskDefinition: awsDeployment.taskDefinition
     });
     const taskDefinition = describeTaskDefinitionRes?.taskDefinition;
-    const associatedAwsTasks = getTasksForTaskDefinition(awsTasks, awsDeployment.taskDefinition);
+    const associatedAwsTasks = getTasksForTaskDefinition(
+      awsTasks,
+      awsDeployment.taskDefinition
+    );
     const tasks = associatedAwsTasks.map((task) => {
       return {
         taskId: task.taskArn?.split('/').at(-1),
@@ -106,7 +134,7 @@ export class AwsEcsDeployments extends BaseWidget {
         version: task.version
       } as Task;
     });
-    const containers = hydrateImages(associatedAwsTasks, taskDefinition, accountId);
+    const containers = hydrateImages(taskDefinition, accountId);
     deployment.taskDefinition = {
       taskDefinitionArn: awsDeployment.taskDefinition,
       cpu: taskDefinition?.cpu,
@@ -120,35 +148,58 @@ export class AwsEcsDeployments extends BaseWidget {
     return deployment;
   }
 
-  async getData (providers?: BaseProvider[]): Promise<void> {
+  async getData (
+    providers?: BaseProvider[],
+    overrides?: AwsEcsDeploymentsOverrides
+  ): Promise<void> {
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const credentials = await awsCredentialsProvider.getCredentials();
     const stsClient = new STS({
       credentials: credentials,
       region: this.region
     });
-    const accountId = await stsClient.getCallerIdentity({}).then(res => res.Account).catch(e => console.log(e)) || '';
+    const accountId =
+      (await stsClient
+        .getCallerIdentity({})
+        .then(res => res.Account)
+        .catch(e => console.error(e))) || '';
     const ecsClient = new ECS({
       credentials,
       region: this.region
     });
 
-    const {
-      service,
-      taskArns
-    } = await getCoreEcsData(ecsClient, this.clusterName, this.serviceName);
+    if (overrides?.stoppedTaskId) {
+      console.log(`KILLING ${overrides.stoppedTaskId}`);
+      await ecsClient.stopTask({
+        task: overrides.stoppedTaskId,
+        cluster: this.clusterName
+      });
+    }
 
-    const describeTasksRes = await ecsClient.describeTasks({
-      cluster: this.clusterName,
-      tasks: taskArns
-    });
-    const tasks = describeTasksRes.tasks;
+    const { service, taskArns } = await getCoreEcsData(
+      ecsClient,
+      this.clusterName,
+      this.serviceName
+    );
+
+    let tasks: AwsTask[] = [];
+    if (!_.isEmpty(taskArns)) {
+      const describeTasksRes = await ecsClient.describeTasks({
+        cluster: this.clusterName,
+        tasks: taskArns
+      });
+      tasks = describeTasksRes.tasks;
+    }
 
     const deploymentPromises: Promise<Deployment>[] = [];
     service.deployments.forEach((deployment) => {
-      deploymentPromises.push(this.hydrateDeployment(ecsClient, deployment, tasks, accountId));
+      deploymentPromises.push(
+        this.hydrateDeployment(ecsClient, deployment, tasks, accountId)
+      );
     });
-    const settledPromises = (await Promise.allSettled(deploymentPromises)).reduce((filtered, promise) => {
+    const settledPromises = (
+      await Promise.allSettled(deploymentPromises)
+    ).reduce((filtered, promise) => {
       if (promise.status === 'fulfilled') {
         filtered.push(promise.value);
       } else {
@@ -160,37 +211,52 @@ export class AwsEcsDeployments extends BaseWidget {
     this.deployments = settledPromises;
   }
 
-  render (): JSX.Element {
+  render (
+    _children?: any,
+    overridesCallback?: (overrides: AwsEcsDeploymentsOverrides) => void
+  ): JSX.Element {
     const deploymentRows = this.deployments.map((deployment) => {
       const taskRows = deployment.taskDefinition.tasks.map((task) => {
         return (
           <Tr>
             <Td>{task.taskId}</Td>
-            <Td >{task.startTime?.toLocaleString()}</Td>
+            <Td>{task.startTime?.toLocaleString()}</Td>
             <Td>{task.stopTime?.toLocaleString()}</Td>
             <Td>{task.status}</Td>
-            <Td>{task.group}</Td>
-            <Td>{task.version}</Td>
+            <Td>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  overridesCallback({ stoppedTaskId: task.taskId })
+                }
+                colorScheme="red"
+              >
+                Kill task
+              </Button>
+            </Td>
           </Tr>
         );
       });
-      const taskTable = (
+      const taskTable = _.isEmpty(deployment.taskDefinition.tasks) ? (
+        <Stack/>
+      ) : (
         <Stack>
-          <TableContainer border='1px' borderRadius='6px' borderColor='gray.100'>
+          <TableContainer
+            border="1px"
+            borderRadius="6px"
+            borderColor="gray.100"
+          >
             <Table variant="simple">
-              <Thead bgColor='gray.50'>
+              <Thead bgColor="gray.50">
                 <Tr>
                   <Th>Task Id</Th>
                   <Th>Started</Th>
                   <Th>Stopped</Th>
                   <Th>Status</Th>
-                  <Th>Group</Th>
-                  <Th>Version</Th>
+                  <Th />
                 </Tr>
               </Thead>
-              <Tbody>
-                {taskRows}
-              </Tbody>
+              <Tbody>{taskRows}</Tbody>
             </Table>
           </TableContainer>
         </Stack>
@@ -198,31 +264,31 @@ export class AwsEcsDeployments extends BaseWidget {
 
       return (
         <DeploymentRow deployment={deployment}>
-          <TaskDefinitionBody taskDefinition={deployment?.taskDefinition} taskTable={taskTable}/>
+          <TaskDefinitionBody
+            taskDefinition={deployment?.taskDefinition}
+            taskTable={taskTable}
+          />
         </DeploymentRow>
       );
     });
 
     return (
-      <Stack pt='20px' pb='20px' w='100%'>
-        <TableContainer border='1px' borderColor='gray.100'>
-          <Table variant='simple'>
-            <Thead bgColor='gray.50'>
+      <Stack pt="20px" pb="20px" w="100%">
+        <TableContainer border="1px" borderColor="gray.100">
+          <Table variant="simple">
+            <Thead bgColor="gray.50">
               <Tr>
                 <Th>Deployment Id</Th>
                 <Th>Deployment Status</Th>
                 <Th>Started</Th>
                 <Th>Running/Pending/Desired</Th>
-                <Th/>
+                <Th />
               </Tr>
             </Thead>
-            <Tbody>
-              {deploymentRows}
-            </Tbody>
+            <Tbody>{deploymentRows}</Tbody>
           </Table>
         </TableContainer>
       </Stack>
     );
   }
-  
 }
