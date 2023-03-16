@@ -220,14 +220,14 @@ spec:
           description: The AWS region to request ecs information from.
           type: string
           required: true
-          clusterName:
-            type: string
-            required: true
-            description: The name of the ECS Cluster
-          serviceName:
-            type: string
-            required: true
-            description: The name of the ECS Service
+        clusterName:
+          type: string
+          required: true
+          description: The name of the ECS Cluster
+        serviceName:
+          type: string
+          required: true
+          description: The name of the ECS Service
       outputs:
         serviceArn: 
           type: string
