@@ -1,0 +1,358 @@
+spec:
+  widgets:
+    Cli:
+      description: >
+        This widget runs a bash command. The command may be multiple commands separated by ';'
+        You can also reference scripts that exist in the same directory as your config.
+
+      props:
+        displayName:
+          type: string
+          required: true
+        environmentVariables:
+          description: A set of Key-Value pairs that set the environm
+          example: >
+            A CLI defined as
+            ExampleCli:
+              displayName: example
+              type: Cli
+              environmentVariables:
+                VAR1: 10,
+                VAR2: 9
+              command: 'echo $VAR1'
+            Would result in '10'.
+          type: object
+          additionalProperties:
+            type: string
+          required: false
+        providers:
+          description: >
+            A list of providers. Providers will only be used if they implement CliEnvironmentProvider.
+            Each environment variable from compatible providers will be exported to the shell.
+          type: array
+          items:
+            type: Provider
+          required: false
+        command:
+          description: A semi-colon seperated set of commands.
+          type: string
+          required: true
+        runOnStart:
+          description: >
+            Whether or not to run the command when the dashboard and widget are first rendered.
+            If disabled, the command will not run until the run button is pressed.
+          type: boolean
+          default: false
+          required: false
+      data:
+        commandResult:
+          stdout:
+            type: string
+          stderr:
+            type: string
+
+    AwsCloudWatchLogs:
+      description: Renders a widget containing logs from a CloudWatchLogs log group or log stream.
+      inputs:
+        displayName:
+          type: string
+          required: true
+        providers:
+          description: >
+            A list of providers. The first provider must be of type AwsCredentialsProvider or results will not be retrieved.
+          type: array
+          items:
+            type: Provider
+          required: true
+        region: 
+          description: The AWS region to request logs from.
+          type: string
+          required: true
+        logGroupName: 
+          description: The AWS LogGroup name to request logs from
+          type: string
+          required: true
+        logStreamName:
+          description: >
+            The AWS LogStream name to request logs from.
+            If this field is not specified, this widget will retrieve all log events in the LogGroup.
+          type: string
+          required: false
+        timeRange:
+          type:
+            anyOf:
+              - $ref: '#/spec/parameters/AbsoluteTimeRange' 
+              - $ref: '#/spec/parameters/RelativeTime'
+          required: false
+          default:
+            time: 5
+            unit: m
+          description: The time range in which to look for logs
+        showTimeRangeSelector:
+          description: Whether to show the time range selector which supplies time-range overrides
+          type: boolean
+          required: false
+      
+      data:
+        events:
+          type: object
+          properties:
+            timestamp: 
+              type: number
+            message:
+              type: string
+            ingestionTime:
+              type: number
+
+    AwsCloudWatchMetricGraph:
+      description: Renders a widget containing graphs populated by one or many CloudWatch metrics
+      inputs:
+        displayName:
+          type: string
+          required: true
+        providers:
+          description: >
+            A list of providers. The first provider must be of type AwsCredentialsProvider or results will not be retrieved.
+          type: array
+          items:
+            type: Provider
+          required: true
+        region: 
+          description: The AWS region to request metrics from.
+          type: string
+          required: true
+        metrics:
+          description: Details of metrics to fetch
+          type: object
+          required: true
+          properties:
+            metricNamespace:
+              type: string
+            metricName: 
+              type: string
+            metricDisplayName: 
+              type: string
+              description: The name to use that shows up in the legend and hoverover. metricDisplayName should be unique per metric
+            statistic:
+              type:
+                anyOf:
+                  - Maximum
+                  - Minimum
+                  - Average
+                  - SampleCount
+            dimensions: 
+              type: array
+              items:
+                properties:
+                  name:
+                    type: string
+                  value:
+                    type: string
+        timeRange:
+          type:
+            anyOf:
+              - $ref: '#/spec/parameters/AbsoluteTimeRange' 
+              - $ref: '#/spec/parameters/RelativeTime'
+          required: false
+          default:
+            time: 5
+            unit: m
+          description: The time range in which to look for metrics
+        period:
+          description: The period, in seconds, used to poopulate data from CloudWatch
+          type: number
+        showTimeRangeSelector:
+          description: Whether to show the time range selector which supplies time-range overrides
+          type: boolean
+          required: false
+      
+      data:
+        metrics:
+          metricNamespace:
+              type: string
+          metricName: 
+            type: string
+          metricDisplayName: 
+            type: string
+            description: The name to use that shows up in the legend and hoverover. metricDisplayName should be unique per metric
+          statistic:
+            type:
+              anyOf:
+                - Maximum
+                - Minimum
+                - Average
+                - SampleCount
+          dimensions: 
+            type: array
+            items:
+              properties:
+                key:
+                  type: string
+                value:
+                  type: string
+          data: 
+            type: array
+            items:
+              properties:
+                value: 
+                  type: number
+                unit:
+                  type: string
+                timestamp: 
+                  type: number
+
+    AwsEcsInfo:
+      description: Renders a widget containing information about an ECS Service
+      inputs:
+        displayName:
+          type: string
+          required: true
+        providers:
+          description: >
+            A list of providers. The first provider must be of type AwsCredentialsProvider or results will not be retrieved.
+          type: array
+          items:
+            type: Provider
+          required: true
+        region: 
+          description: The AWS region to request ecs information from.
+          type: string
+          required: true
+          clusterName:
+            type: string
+            required: true
+            description: The name of the ECS Cluster
+          serviceName:
+            type: string
+            required: true
+            description: The name of the ECS Service
+      outputs:
+        serviceArn: 
+          type: string
+        clusterArn: 
+          type: string
+        runningCount: 
+          type: number
+        desiredCount: 
+          type: number
+        capacity: 
+          type: number
+        asgArn: 
+          type: string
+        memory: 
+          type: string
+        cpu: 
+          type: string
+        taskDefinitionArn: 
+          type: string
+        status: 
+          type: string
+        roleArn: 
+          type: string
+        execRoleArn:
+          type: string
+        images:
+          type: array
+          items:
+            properties:
+              containerName: 
+                type: string
+              portMappings:
+                type: array
+                items: 
+                  properties:
+                    containerPort:
+                      type: number
+                    hostPort:
+                      type: number
+              envVars:
+                type: array
+                items:
+                  type:
+                    name:
+                      type: string
+                    value:
+                      type: string
+              secrets:
+                type: array
+                items:
+                  properties:
+                    name:
+                      type: string
+                    valueFrom:
+                      type: string
+              volumes:
+                type: array
+                items:
+                  properties:
+                    name:
+                      type: string
+                    host:
+                      type: object
+                      properties:
+                        sourcePath:
+                          type: string
+              cwLogsGroupArn: 
+                type: string
+              memory:
+                type: string
+              cpu: 
+                type: string
+        capacityType:
+          type:
+            oneOf:
+              - EC2
+              - Fargate
+
+
+    AwsEcsDeployments:
+      description: Renders a widget containing information about an ECS Service's current deployments
+      inputs:
+        displayName:
+          type: string
+          required: true
+        providers:
+          description: >
+            A list of providers. The first provider must be of type AwsCredentialsProvider or results will not be retrieved.
+          type: array
+          items:
+            type: Provider
+          required: true
+        region: 
+          description: The AWS region to request ecs information from.
+          type: string
+          required: true
+          clusterName:
+            type: string
+            required: true
+            description: The name of the ECS Cluster
+          serviceName:
+            type: string
+            required: true
+            description: The name of the ECS Service
+  
+  providers:
+    AwsCredentialsProvider
+    
+
+  parameters:
+    AbsoluteTimeRange:
+      startTime: 
+        description: the beginning of the time range as UNIX time
+        type: number
+        required: true
+      endTime:
+        description: the end of the time range as UNIX time
+        type: number
+        required: true
+
+
+    RelativeTime:
+      time: 
+        type: number
+        required: true
+        description: A number expressing how many units of time ago to start looing
+      unit:
+        type: ns | ms | s | m | h | d | w | mo | yr
+        description: Units of time
+        required: true
