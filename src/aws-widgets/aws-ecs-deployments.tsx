@@ -185,6 +185,7 @@ export class AwsEcsDeployments extends BaseWidget {
               <Button
                 variant='outline'
                 onClick={() => overridesCallback({ stoppedTaskId: task.taskId })}
+                colorScheme='red'
               >
                 Kill task
               </Button>
@@ -202,6 +203,7 @@ export class AwsEcsDeployments extends BaseWidget {
                   <Th>Started</Th>
                   <Th>Stopped</Th>
                   <Th>Status</Th>
+                  <Th/>
                 </Tr>
               </Thead>
               <Tbody>
