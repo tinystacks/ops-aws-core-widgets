@@ -10,6 +10,9 @@ This package contains a list of core AWS widgets.
 |ECS Deployments|Renders a widget containing information about an ECS Service's current deployments.
 
 ### CloudWatch Logs
+
+<img width="1435" alt="cw-logs" src="https://user-images.githubusercontent.com/843204/226066821-13205d1c-f452-432f-b0a5-42d7ff1e187a.png">
+
 Renders a widget containing logs from a CloudWatchLogs log group or log stream.
 
 |Parameter|Required|Type|Description|
@@ -23,6 +26,9 @@ Renders a widget containing logs from a CloudWatchLogs log group or log stream.
 |showTimeRangeSelector|No|boolean|Whether to show the time range selector which supplies time-range overrides
 
 ### CloudWatch Metric Graph
+
+![cw-metrics](https://user-images.githubusercontent.com/843204/226066808-bc94be2a-99d2-411b-a01b-423e301f14bf.png)
+
 Renders a widget containing graphs populated by one or many CloudWatch metrics.
 
 |Parameter|Required|Type|Description|
@@ -35,6 +41,9 @@ Renders a widget containing graphs populated by one or many CloudWatch metrics.
 |showTimeRangeSelector|No|boolean|Whether to show the time range selector which supplies time-range overrides.
 
 ### ECS Info
+
+<img width="1435" alt="ecs-info" src="https://user-images.githubusercontent.com/843204/226066653-9830ae76-2a09-4d16-a095-8093aed8ad66.png">
+
 Renders a widget containing information about an ECS Service.
 
 |Parameter|Required|Type|Description|
@@ -46,6 +55,9 @@ Renders a widget containing information about an ECS Service.
 |serviceName|Yes|string|The name of the ECS Service.
 
 ### ECS Deployments
+
+<img width="1435" alt="ecs-deployments" src="https://user-images.githubusercontent.com/843204/226066794-e9d20ef3-7291-46d4-a680-5f340f2d3e12.png">
+
 Renders a widget containing information about an ECS Service's current deployments.
 
 |Parameter|Required|Type|Description|
