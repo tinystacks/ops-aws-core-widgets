@@ -1,6 +1,5 @@
 import React from 'react';
-import { Link } from '@chakra-ui/layout';
-import { Stat, StatHelpText, StatLabel } from '@chakra-ui/stat';
+import { Link, Stack, Text } from '@chakra-ui/react';
 
 export default function KeyValueStat (props: { label: string, value: string, href?: string}) {
   const renderedValue = props.href ? (
@@ -9,11 +8,16 @@ export default function KeyValueStat (props: { label: string, value: string, hre
     </Link>
   ) : props.value;
   return (
-    <Stat>
-      <StatHelpText>{props.label}</StatHelpText>
-      <StatLabel>
+    <Stack>
+      <Text fontSize='sm'>{props.label}</Text>
+      <Text
+        fontSize='md'
+        whiteSpace='nowrap'
+        overflow='hidden'
+        textOverflow='ellipsis'
+      >
         {renderedValue}
-      </StatLabel>
-    </Stat>
+      </Text>
+    </Stack>
   );
 }

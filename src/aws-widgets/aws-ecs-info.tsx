@@ -1,5 +1,5 @@
 import React from 'react';
-import { HStack, Link, Stack, Table, TableContainer, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { Link, SimpleGrid, Stack, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react';
 import { Widget } from '@tinystacks/ops-model';
 import {
   ECS,
@@ -183,7 +183,7 @@ export class AwsEcsInfo extends BaseWidget {
     });
     return (
       <Stack p='20px'>
-        <HStack alignItems='start'>
+        <SimpleGrid columns={4} spacing={10}>
           <KeyValueStat
             label='Cluster Arn'
             value={this.clusterArn}
@@ -203,8 +203,6 @@ export class AwsEcsInfo extends BaseWidget {
             value={this.taskDefinitionArn}
             href={ecsTaskDefinitionArnToUrl(this.taskDefinitionArn)}
           />
-        </HStack>
-        <HStack pl='20px' pr='20px'>
           <KeyValueStat
             label='Provisioned CPU'
             value={this.cpu}
@@ -215,7 +213,7 @@ export class AwsEcsInfo extends BaseWidget {
           />
           <KeyValueStat
             label='Capacity'
-            value={`${this.capacity} (${this.capacityType})`}
+            value={`${this.capacity} (${this.capacityType || 'Fargate'})`}
           />
           {
             this.asgArn && 
@@ -225,23 +223,26 @@ export class AwsEcsInfo extends BaseWidget {
                 href={asgArnToUrl(this.asgArn)}
               />
           }
-        </HStack>
-        <TableContainer border='1px' borderRadius='6px' borderColor='gray.100'>
-          <Table variant="simple">
-            <Thead bgColor='gray.50'>
-              <Tr>
-                <Th>Container Id</Th>
-                <Th>Port Mappings</Th>
-                <Th>Environment Variables</Th>
-                <Th>Volumes</Th>
-                <Th>View logs</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {imageRows}
-            </Tbody>
-          </Table>
-        </TableContainer>
+        </SimpleGrid>
+        <Stack pt='10px'>
+          <Text fontSize='xl'>Containers</Text>
+          <TableContainer border='1px' borderRadius='6px' borderColor='gray.100'>
+            <Table variant="simple">
+              <Thead bgColor='gray.50'>
+                <Tr>
+                  <Th>Container Id</Th>
+                  <Th>Port Mappings</Th>
+                  <Th>Environment Variables</Th>
+                  <Th>Volumes</Th>
+                  <Th>View logs</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {imageRows}
+              </Tbody>
+            </Table>
+          </TableContainer>
+        </Stack>
       </Stack>
     );
   }
