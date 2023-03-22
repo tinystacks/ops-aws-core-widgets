@@ -11,7 +11,7 @@ This package contains a list of core AWS widgets.
 
 ### CloudWatch Logs
 
-<img width="1435" alt="cw-logs" src="https://user-images.githubusercontent.com/843204/226066821-13205d1c-f452-432f-b0a5-42d7ff1e187a.png">
+<img width="1435" alt="cw-logs" src="https://user-images.githubusercontent.com/843204/227012413-20db9aa7-c19c-402b-ba6c-f7a3e2f3ce6f.png">
 
 Renders a widget containing logs from a CloudWatchLogs log group or log stream.
 
@@ -42,7 +42,7 @@ Renders a widget containing graphs populated by one or many CloudWatch metrics.
 
 ### ECS Info
 
-<img width="1435" alt="ecs-info" src="https://user-images.githubusercontent.com/843204/226066653-9830ae76-2a09-4d16-a095-8093aed8ad66.png">
+<img width="1435" alt="ecs-info" src="https://user-images.githubusercontent.com/843204/227012373-eca26676-0e9a-4df1-9ba0-f602c1de41ff.png">
 
 Renders a widget containing information about an ECS Service.
 
@@ -56,7 +56,7 @@ Renders a widget containing information about an ECS Service.
 
 ### ECS Deployments
 
-<img width="1435" alt="ecs-deployments" src="https://user-images.githubusercontent.com/843204/226066794-e9d20ef3-7291-46d4-a680-5f340f2d3e12.png">
+<img width="1435" alt="ecs-deployments" src="https://user-images.githubusercontent.com/843204/227012354-060d9560-b327-4211-a95f-042c6eaf4eb0.png">
 
 Renders a widget containing information about an ECS Service's current deployments.
 
