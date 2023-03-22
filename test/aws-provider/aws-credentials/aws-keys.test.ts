@@ -1,7 +1,6 @@
-import { AwsCredentialIdentity } from "@aws-sdk/types";
 import AWS from "aws-sdk";
-import { AwsSdkVersionEnum } from "../../../src/aws-provider/aws-credentials/aws-credentials-type";
-import { AwsKeys } from "../../../src/aws-provider/aws-credentials/aws-keys";
+import { AwsSdkVersionEnum } from "../../../src/aws-provider/aws-credentials/aws-credentials-type.js";
+import { AwsKeys } from "../../../src/aws-provider/aws-credentials/aws-keys.js";
 
 const mockV2Credentials = new AWS.Credentials({
   accessKeyId: 'test-access-key',
@@ -12,7 +11,7 @@ const mockV3Credentials = {
   accessKeyId: 'test-access-key',
   secretAccessKey: 'test-secret-key',
   sessionToken: 'test-session-token'
-} as AwsCredentialIdentity;
+};
 
 describe('fromJson', () => {
   afterEach(() => {
@@ -34,7 +33,7 @@ describe('fromJson', () => {
       AwsSessionToken: 'test-session-token'
     });
 
-    const result = AwsKeys.fromJson(mockfromJsonArgs);
+    const result = new AwsKeys(mockfromJsonArgs);
     expect(result).toEqual(mockfromJsonResult);   
   });
 });

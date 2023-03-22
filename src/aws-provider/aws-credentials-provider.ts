@@ -48,11 +48,11 @@ export class AwsCredentialsProvider extends BaseProvider implements CliEnvironme
     const { credentials } = this;
     let creds: AwsAssumedRole | AwsKeys | LocalAwsProfile;
     if (AwsAssumedRole.isAwsAssumedRole(credentials)) {
-      creds = AwsAssumedRole.fromJson({ ...(credentials as AwsAssumedRole) });
+      creds = new AwsAssumedRole({ ...(credentials as AwsAssumedRole) });
     } else if (AwsKeys.isAwsKeys(credentials)) {
-      creds = AwsKeys.fromJson({ ...(credentials as AwsKeysType) });
+      creds = new AwsKeys({ ...(credentials as AwsKeysType) });
     } else {
-      creds = LocalAwsProfile.fromJson({ ...(credentials as LocalAwsProfileType) });
+      creds = new LocalAwsProfile({ ...(credentials as LocalAwsProfileType) });
     }
     return await creds.getCredentials(awsSdkVersion);
   }

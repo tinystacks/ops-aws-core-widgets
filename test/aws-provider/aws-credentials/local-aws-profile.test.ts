@@ -41,7 +41,7 @@ describe('fromJson', () => {
       profileName: 'default'
     });
 
-    const result = LocalAwsProfile.fromJson(mockfromJsonArgs);
+    const result = new LocalAwsProfile(mockfromJsonArgs);
     expect(result).toEqual(mockfromJsonResult);
   });
 });

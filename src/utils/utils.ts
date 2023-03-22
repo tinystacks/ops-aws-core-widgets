@@ -61,8 +61,8 @@ export function getTimes (timeRange: TimeRange) {
   };
 }
 
-export function cleanTimeRange (timeRange: TimeRange, overrides: TimeRangeOverrides): TimeRange {
-  const clean = overrides && overrides.timeRange ? overrides.timeRange : timeRange;
+export function cleanTimeRange (timeRange: TimeRange, overrides?: TimeRangeOverrides): TimeRange {
+  const clean = combineTimeRangeWithOverrides(timeRange, overrides);
   if (!timeRange) {
     throw new Error('No timerange is defined');
   }
@@ -83,6 +83,10 @@ export function cleanTimeRange (timeRange: TimeRange, overrides: TimeRangeOverri
   }
 
   return clean;
+}
+
+export function combineTimeRangeWithOverrides (timeRange: TimeRange, overrides?: TimeRangeOverrides): TimeRange {
+  return overrides && overrides.timeRange ? overrides.timeRange : timeRange;
 }
 
 export type TimeRangeOverrides = { timeRange?: TimeRange };

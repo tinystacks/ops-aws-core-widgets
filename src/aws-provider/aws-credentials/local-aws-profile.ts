@@ -7,7 +7,6 @@ export type LocalAwsProfileType = {
   profileName: string;
 };
 
-
 class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileType {
   profileName: string;
 
@@ -18,11 +17,6 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileType 
 
   static isLocalAwsProfile (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType) {
     return 'profileName' in credentials;
-  }
-
-  static fromJson (object: LocalAwsProfileType): LocalAwsProfile {
-
-    return new LocalAwsProfile(object);
   }
 
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {

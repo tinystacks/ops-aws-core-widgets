@@ -36,25 +36,6 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType{
     return 'roleArn' in credentials;
   }
 
-  static fromJson (object: AwsAssumedRoleType): AwsAssumedRole {
-    return new AwsAssumedRole({
-      ...object,
-      region: object.region || DEFAULT_REGION,
-      primaryCredentials: this.buildPrimaryCreds(object.primaryCredentials),
-      duration: object.duration || ROLE_SESSION_DURATION_SECONDS
-    });
-  }
-
-  private static buildPrimaryCreds (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType): AwsAssumedRole | AwsKeys | LocalAwsProfile {
-    if (AwsKeys.isAwsKeys(credentials)) {
-      return AwsKeys.fromJson({ ...(credentials as AwsKeysType) });
-    } else if (LocalAwsProfile.isLocalAwsProfile(credentials)) {
-      return LocalAwsProfile.fromJson({ ...(credentials as LocalAwsProfileType) });
-    } else {
-      return this.fromJson({ ...(credentials as AwsAssumedRoleType) });
-    }
-  }
-
   private credsWillExpireInSession () {
     const credsExist = !!this.stsCreds;
     if (!credsExist) {

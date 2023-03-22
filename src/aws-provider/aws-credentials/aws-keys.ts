@@ -24,10 +24,6 @@ class AwsKeys extends AwsCredentialsType implements AwsKeysType{
     return 'AwsAccessKeyId' in credentials;
   }
 
-  static fromJson (object: AwsKeysType): AwsKeys {
-    return new AwsKeys(object);
-  }
-
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     return this.getVersionedCredentials(
       awsSdkVersion, 
