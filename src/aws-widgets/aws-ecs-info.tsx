@@ -225,7 +225,7 @@ export class AwsEcsInfo extends BaseWidget {
           }
         </SimpleGrid>
         <Stack pt='10px'>
-          <Text fontSize='xl'>Containers</Text>
+          <Text fontSize='md'>Containers</Text>
           <TableContainer border='1px' borderRadius='6px' borderColor='gray.100'>
             <Table variant="simple">
               <Thead bgColor='gray.50'>
