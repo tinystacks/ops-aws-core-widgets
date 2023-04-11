@@ -131,7 +131,8 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
       throw new Error('An AwsCredentialsProvider was expected, but was not given');
     }
 
-    this.timeRange = cleanTimeRange(this.timeRange, overrides);    
+    this.timeRange = cleanTimeRange(this.timeRange, overrides);
+
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const cwClient = new CloudWatch({
       credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
