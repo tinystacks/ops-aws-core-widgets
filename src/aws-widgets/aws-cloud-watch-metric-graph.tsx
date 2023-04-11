@@ -135,7 +135,8 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
 
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const cwClient = new CloudWatch({
-      credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3)
+      credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
+      region: this.region
     });
     
     const { 
