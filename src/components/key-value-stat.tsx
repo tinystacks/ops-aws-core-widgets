@@ -9,11 +9,14 @@ export default function KeyValueStat (props: { label: string, value: string, hre
   ) : props.value;
   return (
     <Stack>
-      <Text fontSize='sm'>{props.label}</Text>
+      <Text fontSize='12px' lineHeight='16px' casing='uppercase' color='#94A3B8' fontWeight='600'>{props.label}</Text>
       <Text
-        fontSize='md'
+        fontSize='14px'
+        lineHeight='24px'
         whiteSpace='nowrap'
         overflow='hidden'
+        fontWeight='500'
+        color='#475569'
         textOverflow='ellipsis'
       >
         {renderedValue}
