@@ -35,15 +35,6 @@ export class AwsCredentialsProvider extends BaseProvider implements CliEnvironme
     return new AwsCredentialsProvider(object);
   }
 
-  toJson () {
-    return {
-      ...super.toJson(),
-      credentials: this.credentials,
-      accountId: this.accountId,
-      region: this.region
-    };
-  }
-
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     const { credentials } = this;
     let creds: AwsAssumedRole | AwsKeys | LocalAwsProfile;
