@@ -1,29 +1,30 @@
-import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
-import { AwsKeys, AwsKeysType } from './aws-keys.js';
-import { LocalAwsProfile, LocalAwsProfileType } from './local-aws-profile.js';
 import { STS, Credentials } from '@aws-sdk/client-sts';
+import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
+import { AwsKeys, AwsKeysConfig } from './aws-keys.js';
+import { LocalAwsProfile, LocalAwsProfileConfig } from './local-aws-profile.js';
+import { AwsCredentialsClass, AwsCredentialsConfig } from '../../types/types.js';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 const DEFAULT_REGION = 'us-east-1';
 
-export type AwsAssumedRoleType = { 
+export type AwsAssumedRoleConfig = { 
   roleArn: string;
   sessionName: string;
   region: string;
-  primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
+  primaryCredentials: AwsCredentialsClass;
   duration?: number;
 }
 
-class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType{
+class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleConfig {
   roleArn: string;
   sessionName: string;
   region: string;
-  primaryCredentials: AwsAssumedRole | AwsKeys | LocalAwsProfile;
+  primaryCredentials: AwsCredentialsClass;
   duration?: number;
   private stsClient: STS;
   private stsCreds: Credentials;
 
-  constructor (props: AwsAssumedRoleType) {
+  constructor (props: AwsAssumedRoleConfig) {
     super();
     this.roleArn = props.roleArn;
     this.sessionName = props.sessionName;
@@ -32,11 +33,11 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType{
     this.duration = props.duration || ROLE_SESSION_DURATION_SECONDS;
   }
 
-  static isAwsAssumedRole (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType) {
+  static isAwsAssumedRole (credentials: AwsCredentialsConfig) {
     return 'roleArn' in credentials;
   }
 
-  static fromJson (object: AwsAssumedRoleType): AwsAssumedRole {
+  static fromJson (object: AwsAssumedRoleConfig): AwsAssumedRole {
     return new AwsAssumedRole({
       ...object,
       region: object.region || DEFAULT_REGION,
@@ -45,13 +46,13 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleType{
     });
   }
 
-  private static buildPrimaryCreds (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType): AwsAssumedRole | AwsKeys | LocalAwsProfile {
+  private static buildPrimaryCreds (credentials: AwsCredentialsConfig): AwsCredentialsClass {
     if (AwsKeys.isAwsKeys(credentials)) {
-      return AwsKeys.fromJson({ ...(credentials as AwsKeysType) });
+      return AwsKeys.fromJson({ ...(credentials as AwsKeysConfig) });
     } else if (LocalAwsProfile.isLocalAwsProfile(credentials)) {
-      return LocalAwsProfile.fromJson({ ...(credentials as LocalAwsProfileType) });
+      return LocalAwsProfile.fromJson({ ...(credentials as LocalAwsProfileConfig) });
     } else {
-      return this.fromJson({ ...(credentials as AwsAssumedRoleType) });
+      return this.fromJson({ ...(credentials as AwsAssumedRoleConfig) });
     }
   }
 

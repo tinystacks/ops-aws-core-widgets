@@ -2,6 +2,7 @@ import AWS from 'aws-sdk';
 import { AwsCredentialIdentity } from '@aws-sdk/types';
 
 export type AwsCredentials = AWS.Credentials | AwsCredentialIdentity;
+
 export enum AwsSdkVersionEnum {
   V2 = 'V2',
   V3 = 'V3'
