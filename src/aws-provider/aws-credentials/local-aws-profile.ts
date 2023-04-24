@@ -1,22 +1,18 @@
 import { fromIni } from '@aws-sdk/credential-provider-ini';
 import { fromSSO } from '@aws-sdk/credential-provider-sso';
-import { AwsCredentialIdentity } from '@aws-sdk/types';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
 import { AwsCredentialsConfig } from '../../types/types.js';
 
 export type LocalAwsProfileConfig = { 
   profileName: string;
-  sso?: boolean;
 };
 
 class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileConfig {
   profileName: string;
-  sso?: boolean;
 
   constructor (props: LocalAwsProfileConfig) {
     super();
     this.profileName = props.profileName;
-    this.sso = props.sso || false;
   }
 
   static isLocalAwsProfile (credentials: AwsCredentialsConfig) {
@@ -29,16 +25,13 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileConfi
 
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     try {
-      let sharedCreds: AwsCredentialIdentity;
-      if (this.sso) {
-        sharedCreds = await fromSSO({
+      const sharedCreds = await fromSSO({
+        profile: this.profileName
+      })().catch(async () => {
+        return await fromIni({
           profile: this.profileName
         })();
-      } else { 
-        sharedCreds = await fromIni({
-          profile: this.profileName
-        })();
-      }
+      });
       return this.getVersionedCredentials(awsSdkVersion, sharedCreds);
     } catch (e) {
       console.log(e);
