@@ -1,13 +1,14 @@
 import { BaseProvider } from '@tinystacks/ops-core';
-import { AwsAssumedRole, AwsAssumedRoleType } from './aws-credentials/aws-assumed-role.js';
-import { AwsKeys, AwsKeysType } from './aws-credentials/aws-keys.js';
-import { LocalAwsProfile, LocalAwsProfileType } from './aws-credentials/local-aws-profile.js';
+import { AwsAssumedRole, AwsAssumedRoleConfig } from './aws-credentials/aws-assumed-role.js';
+import { AwsKeys, AwsKeysConfig } from './aws-credentials/aws-keys.js';
+import { LocalAwsProfile, LocalAwsProfileConfig } from './aws-credentials/local-aws-profile.js';
 import { AwsSdkVersionEnum } from './aws-credentials/aws-credentials-type.js';
 import { Provider } from '@tinystacks/ops-model';
 import { CliEnvironmentProvider } from '@tinystacks/ops-core-widgets';
+import { AwsCredentialsClass, AwsCredentialsConfig } from '../types/types.js';
 
 type AwsCredentialsProviderProps = Provider & {
-  credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType,
+  credentials: AwsCredentialsConfig,
   accountId?: string,
   region?: string,
   cliEnv?: { [key: string]: string }
@@ -15,7 +16,7 @@ type AwsCredentialsProviderProps = Provider & {
 
 export class AwsCredentialsProvider extends BaseProvider implements CliEnvironmentProvider {
   static type = 'AwsCredentialsProvider';
-  credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType;
+  credentials: AwsCredentialsConfig;
   accountId?: string;
   region?: string;
 
@@ -37,13 +38,13 @@ export class AwsCredentialsProvider extends BaseProvider implements CliEnvironme
 
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     const { credentials } = this;
-    let creds: AwsAssumedRole | AwsKeys | LocalAwsProfile;
+    let creds: AwsCredentialsClass;
     if (AwsAssumedRole.isAwsAssumedRole(credentials)) {
-      creds = AwsAssumedRole.fromJson({ ...(credentials as AwsAssumedRole) });
+      creds = AwsAssumedRole.fromJson({ ...(credentials as AwsAssumedRoleConfig) });
     } else if (AwsKeys.isAwsKeys(credentials)) {
-      creds = AwsKeys.fromJson({ ...(credentials as AwsKeysType) });
+      creds = AwsKeys.fromJson({ ...(credentials as AwsKeysConfig) });
     } else {
-      creds = LocalAwsProfile.fromJson({ ...(credentials as LocalAwsProfileType) });
+      creds = LocalAwsProfile.fromJson({ ...(credentials as LocalAwsProfileConfig) });
     }
     return await creds.getCredentials(awsSdkVersion);
   }
