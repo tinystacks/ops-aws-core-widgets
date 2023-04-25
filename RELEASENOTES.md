@@ -1,1 +1,1 @@
-- fit and finish for ECS widgets
+- Fix index import extension
