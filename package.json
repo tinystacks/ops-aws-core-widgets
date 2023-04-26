@@ -1,6 +1,6 @@
 {
   "name": "@tinystacks/ops-aws-core-widgets",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "main": "dist/index.js",
   "type": "module",
   "files": [
@@ -63,7 +63,7 @@
     "@aws-sdk/client-cloudwatch-logs": "^3.272.0",
     "@aws-sdk/client-ecs": "^3.278.0",
     "@aws-sdk/client-iam": "^3.276.0",
-    "@aws-sdk/client-sts": "^3.301.0",
+    "@aws-sdk/client-sts": "^3.319.0",
     "@aws-sdk/types": "^3.257.0",
     "@chakra-ui/icons": "^2.0.17",
     "aws-sdk": "^2.1307.0",
@@ -75,8 +75,8 @@
   "peerDependencies": {
     "@chakra-ui/react": "2.x",
     "@tinystacks/ops-core": "0.x",
-    "@tinystacks/ops-model": "0.x",
     "@tinystacks/ops-core-widgets": "0.x",
+    "@tinystacks/ops-model": "0.x",
     "lodash.get": "4.x",
     "lodash.isempty": "4.x",
     "lodash.isnil": "4.x",
