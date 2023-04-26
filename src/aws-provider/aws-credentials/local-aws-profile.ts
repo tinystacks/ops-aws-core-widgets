@@ -23,10 +23,6 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileConfi
 
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     try {
-      // const ini = '@aws-sdk/credential-provider-ini';
-      // const { fromIni } = await import(ini);
-      // const sso = '@aws-sdk/credential-provider-sso';
-      // const { fromSSO } = await import(sso);
       const { fromIni } = await import('@aws-sdk/credential-provider-ini');
       const { fromSSO } = await import('@aws-sdk/credential-provider-sso');
       const sharedCreds = await fromSSO({
