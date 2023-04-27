@@ -175,6 +175,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
   }
 
   render (_children?: any, overridesCallback?: (overrides: AwsCloudWatchMetricGraphOverrides) => void): JSX.Element {
+
     // this is a map of all the timestamps to each datapoint
     // Sort by timestamp before render.
     const datasets = this.metrics.map((m: Metric, index: number) => {

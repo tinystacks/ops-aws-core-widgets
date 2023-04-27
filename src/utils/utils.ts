@@ -96,7 +96,7 @@ export function getPeriodBasedOnTimeRange (startTime: Date, endTime: Date): numb
   } else if(duration <= (3 * 24 * 60000 * 60)){ 
     return 1800;
   } else { 
-    return Math.floor(duration/150);
+    return Math.floor(duration/15000);
   }
 }
 
