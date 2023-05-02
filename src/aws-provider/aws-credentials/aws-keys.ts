@@ -1,27 +1,30 @@
-import { AwsAssumedRoleType } from './aws-assumed-role.js';
+import { AwsCredentialsConfig } from '../../types/types.js';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
-import { LocalAwsProfileType } from './local-aws-profile.js';
 
-export type AwsKeysType = { 
+export type AwsKeysConfig = { 
   AwsAccessKeyId: string;
   AwsSecretAccessKey: string;
   AwsSessionToken?: string;
 }
 
-class AwsKeys extends AwsCredentialsType implements AwsKeysType{
+class AwsKeys extends AwsCredentialsType implements AwsKeysConfig {
   AwsAccessKeyId: string;
   AwsSecretAccessKey: string;
   AwsSessionToken?: string;
 
-  constructor (props: AwsKeysType) {
+  constructor (props: AwsKeysConfig) {
     super();
     this.AwsAccessKeyId = props.AwsAccessKeyId;
     this.AwsSecretAccessKey = props.AwsSecretAccessKey;
     this.AwsSessionToken = props.AwsSessionToken;
   }
 
-  static isAwsKeys (credentials: AwsAssumedRoleType | AwsKeysType | LocalAwsProfileType) {
+  static isAwsKeys (credentials: AwsCredentialsConfig) {
     return 'AwsAccessKeyId' in credentials;
+  }
+
+  static fromJson (object: AwsKeysConfig): AwsKeys {
+    return new AwsKeys(object);
   }
 
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {

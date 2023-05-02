@@ -5,7 +5,7 @@ import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
-import { getAwsCredentialsProvider, getTimes, TimeUnitEnum, TimeRange, TimeRangeOverrides, cleanTimeRange } from '../utils/utils.js';
+import { getAwsCredentialsProvider, getTimes, TimeUnitEnum, TimeRange, TimeRangeOverrides, cleanTimeRange, getPeriodBasedOnTimeRange } from '../utils/utils.js';
 import { Box, Stack } from '@chakra-ui/react';
 import { TimeRangeSelector } from '../components/time-range-selector.js';
 import { Line } from 'react-chartjs-2';
@@ -80,7 +80,6 @@ type AwsCloudWatchMetricGraphOverrides = TimeRangeOverrides;
 type AwsCloudWatchMetricGraphProps = Widget & AwsCloudWatchMetricGraphOverrides & {
   showTimeRangeSelector?: boolean;
   showPeriodSelector?: boolean;
-  period?: number;
   metrics: Metric[];
   region: string;
 };
@@ -92,12 +91,11 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
   metrics: Metric[];
   timeRange: TimeRange;
   region: string;
-  period: number;
 
   constructor (props: AwsCloudWatchMetricGraphProps) {
     super (props);
     const {
-      showTimeRangeSelector, showPeriodSelector, metrics, timeRange, region, period
+      showTimeRangeSelector, showPeriodSelector, metrics, timeRange, region
     } = props;
     this.showTimeRangeSelector = showTimeRangeSelector;
     this.showPeriodSelector = showPeriodSelector;
@@ -107,7 +105,6 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
       unit: TimeUnitEnum.m
     };
     this.region = region || 'us-east-1';
-    this.period = period || 60;
   }
   additionalProperties?: any;
 
@@ -135,13 +132,16 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
 
     const awsCredentialsProvider = getAwsCredentialsProvider(providers);
     const cwClient = new CloudWatch({
-      credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3)
+      credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
+      region: this.region
     });
     
     const { 
       startTime,
       endTime
     } = getTimes(this.timeRange);
+
+    const period = getPeriodBasedOnTimeRange(startTime, endTime);
 
     const hydratedMetrics = [];
     for (const metric of this.metrics) {
@@ -153,7 +153,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
           Value: dimension.value
         })),
         Statistics: [metric.statistic || 'Average'],
-        Period: this.period,
+        Period: period,
         StartTime: startTime,
         EndTime: endTime
       });
@@ -175,6 +175,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
   }
 
   render (_children?: any, overridesCallback?: (overrides: AwsCloudWatchMetricGraphOverrides) => void): JSX.Element {
+
     // this is a map of all the timestamps to each datapoint
     // Sort by timestamp before render.
     const datasets = this.metrics.map((m: Metric, index: number) => {

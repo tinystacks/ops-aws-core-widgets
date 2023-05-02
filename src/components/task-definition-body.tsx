@@ -25,7 +25,7 @@ export default function TaskDefinitionBody (props: {
   const { isOpen, onToggle } = useDisclosure();
   return (
     <Stack>
-      <Text fontSize='xl'>
+      <Text fontSize='md'>
         Task Definition
       </Text>
       <TableContainer border='1px' borderRadius='6px' borderColor='gray.100'>
