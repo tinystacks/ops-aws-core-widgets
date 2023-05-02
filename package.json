@@ -41,6 +41,7 @@
     "@babel/core": "^7.20.12",
     "@babel/preset-react": "^7.18.6",
     "@babel/preset-typescript": "^7.21.0",
+    "@tinystacks/ops-core": "file:../ops-core/tinystacks-ops-core-0.0.5.tgz",
     "@types/jest": "^29.4.0",
     "@types/lodash.get": "^4.4.7",
     "@types/lodash.isempty": "^4.4.7",

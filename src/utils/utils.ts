@@ -1,17 +1,23 @@
 import isEmpty from 'lodash.isempty';
 import get from 'lodash.get';
-import { BaseProvider } from '@tinystacks/ops-core';
+import { BaseProvider, TinyStacksError } from '@tinystacks/ops-core';
 import dayjs, { ManipulateType } from 'dayjs';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
 
 export function getAwsCredentialsProvider (providers?: BaseProvider[]): AwsCredentialsProvider {
   if (!providers || isEmpty(providers)) {
-    throw new Error('No AwsCredentialsProvider provided');
+    throw TinyStacksError.fromJson({
+      message: 'No AwsCredentialsProvider provided',
+      status: 400
+    });
   }
 
   const provider = providers[0];
   if (providers[0].type !== AwsCredentialsProvider.type) {
-    throw new Error(`The passed in provider ${provider.id} is not an AwsCredentialsProvider`);
+    throw TinyStacksError.fromJson({
+      message: `The passed in provider ${provider.id} is not an AwsCredentialsProvider`,
+      status: 400
+    });
   }
 
   return provider as AwsCredentialsProvider;
@@ -64,7 +70,10 @@ export function getTimes (timeRange: TimeRange) {
 export function cleanTimeRange (timeRange: TimeRange, overrides: TimeRangeOverrides): TimeRange {
   const clean = overrides && overrides.timeRange ? overrides.timeRange : timeRange;
   if (!timeRange) {
-    throw new Error('No timerange is defined');
+    throw TinyStacksError.fromJson({
+      message: 'No timerange is defined',
+      status: 400
+    });
   }
 
   const rTime = get(clean, 'time');

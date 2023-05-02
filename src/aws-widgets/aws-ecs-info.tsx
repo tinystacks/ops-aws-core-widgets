@@ -8,7 +8,7 @@ import {
 } from '@aws-sdk/client-ecs';
 import { STS } from '@aws-sdk/client-sts';
 import _ from 'lodash';
-import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
+import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { getCoreEcsData, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
 import EcsPortsModal from '../components/ecs-ports-modal.js';
@@ -108,61 +108,69 @@ export class AwsEcsInfo extends BaseWidget {
   }
 
   async getData (providers?: BaseProvider[]): Promise<void> {
-    const awsCredentialsProvider = getAwsCredentialsProvider(providers);
-    const credentials = await awsCredentialsProvider.getCredentials();
-    const stsClient = new STS({
-      credentials: credentials,
-      region: this.region
-    });
-    const accountId = await stsClient.getCallerIdentity({}).then(res => res.Account).catch(e => console.error(e)) || '';
-    const ecsClient = new ECS({
-      credentials,
-      region: this.region
-    });
-    const {
-      service,
-      cluster
-    } = await getCoreEcsData(ecsClient, this.clusterName, this.serviceName);
-   
-    const primaryDeployment = service?.deployments?.find((deployment) => {
-      return deployment.status === 'PRIMARY';
-    });
-    this.taskDefinitionArn = primaryDeployment?.taskDefinition;
-    this.serviceArn = service?.serviceArn;
-    this.clusterArn = service?.clusterArn;
-    this.runningCount = service?.runningCount;
-    this.desiredCount = service?.desiredCount;
-    this.status = service?.status;
-    this.roleArn = service?.roleArn;
+    try {
+      const awsCredentialsProvider = getAwsCredentialsProvider(providers);
+      const credentials = await awsCredentialsProvider.getCredentials();
+      const stsClient = new STS({
+        credentials: credentials,
+        region: this.region
+      });
+      const accountId = await stsClient.getCallerIdentity({}).then(res => res.Account).catch(e => console.error(e)) || '';
+      const ecsClient = new ECS({
+        credentials,
+        region: this.region
+      });
+      const {
+        service,
+        cluster
+      } = await getCoreEcsData(ecsClient, this.clusterName, this.serviceName);
+    
+      const primaryDeployment = service?.deployments?.find((deployment) => {
+        return deployment.status === 'PRIMARY';
+      });
+      this.taskDefinitionArn = primaryDeployment?.taskDefinition;
+      this.serviceArn = service?.serviceArn;
+      this.clusterArn = service?.clusterArn;
+      this.runningCount = service?.runningCount;
+      this.desiredCount = service?.desiredCount;
+      this.status = service?.status;
+      this.roleArn = service?.roleArn;
 
-    const promises = [];
-    promises.push(ecsClient.describeTaskDefinition({
-      taskDefinition: service?.taskDefinition
-    }));
-    promises.push(ecsClient.describeCapacityProviders({
-      capacityProviders: [_.get(cluster, 'defaultCapacityProviderStrategy[0].capacityProvider')]
-    }));
-    const secondarySettledPromises = (await Promise.allSettled(promises)).map((promise) => {
-      if (promise.status === 'fulfilled') {
-        return promise.value;
-      }
-      console.error(promise.reason);
-      return undefined;
-    });
-    const describeTaskDefinitionRes = secondarySettledPromises[0] as DescribeTaskDefinitionCommandOutput;
-    const describeCapacityProvidersRes = secondarySettledPromises[1] as DescribeCapacityProvidersCommandOutput;
+      const promises = [];
+      promises.push(ecsClient.describeTaskDefinition({
+        taskDefinition: service?.taskDefinition
+      }));
+      promises.push(ecsClient.describeCapacityProviders({
+        capacityProviders: [_.get(cluster, 'defaultCapacityProviderStrategy[0].capacityProvider')]
+      }));
+      const secondarySettledPromises = (await Promise.allSettled(promises)).map((promise) => {
+        if (promise.status === 'fulfilled') {
+          return promise.value;
+        }
+        console.error(promise.reason);
+        return undefined;
+      });
+      const describeTaskDefinitionRes = secondarySettledPromises[0] as DescribeTaskDefinitionCommandOutput;
+      const describeCapacityProvidersRes = secondarySettledPromises[1] as DescribeCapacityProvidersCommandOutput;
 
-    const taskDefinition = describeTaskDefinitionRes?.taskDefinition;
-    this.memory = taskDefinition?.memory;
-    this.cpu = taskDefinition?.cpu;
-    this.execRoleArn = taskDefinition?.executionRoleArn;
+      const taskDefinition = describeTaskDefinitionRes?.taskDefinition;
+      this.memory = taskDefinition?.memory;
+      this.cpu = taskDefinition?.cpu;
+      this.execRoleArn = taskDefinition?.executionRoleArn;
 
-    const capacityProvider = _.get(describeCapacityProvidersRes, 'capacityProviders[0]');
-    this.asgArn = capacityProvider?.autoScalingGroupProvider?.autoScalingGroupArn;
-    this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity | this.desiredCount;
-    this.capacityType = capacityProvider?.autoScalingGroupProvider ? 'EC2' : 'Fargate';
+      const capacityProvider = _.get(describeCapacityProvidersRes, 'capacityProviders[0]');
+      this.asgArn = capacityProvider?.autoScalingGroupProvider?.autoScalingGroupArn;
+      this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity | this.desiredCount;
+      this.capacityType = capacityProvider?.autoScalingGroupProvider ? 'EC2' : 'Fargate';
 
-    this.images = hydrateImages(taskDefinition, accountId);
+      this.images = hydrateImages(taskDefinition, accountId);
+    } catch (e: any) {
+      throw TinyStacksError.fromJson({
+        message: 'Failed to get ECS info data!',
+        status: e.status || e.$metadata?.status || 500,
+        stack: e.stack
+      });
+    }
   }
 
   render (): JSX.Element {
