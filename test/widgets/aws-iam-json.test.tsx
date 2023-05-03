@@ -29,7 +29,6 @@ describe('AwsIamJson', () => {
 
 });
 
-
 describe('AwsIamJson getData function', () => {
   let mockProviders;
   let mockOverrides;
