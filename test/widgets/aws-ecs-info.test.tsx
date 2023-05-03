@@ -1,5 +1,6 @@
-import { cleanup } from '@testing-library/react';
 import { AwsEcsInfo } from '../../src/aws-widgets/aws-ecs-info.js'
+import { render, screen, cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
 
 describe('AwsEcsInfo', () => {
   afterEach(cleanup);
@@ -87,3 +88,75 @@ describe('AwsEcsInfo getData function', () => {
   });
 
 });
+
+
+describe('AwsEcsInfo render', () => {
+  const props = {
+    id: 'MockWidget',
+    type: 'AwsEcsInfo',
+    displayName: 'mock cw widget', 
+    region: 'us-east-1', 
+    clusterName: 'cluster-name',
+    serviceName: 'service-name',
+    clusterArn: 'clusterArn',
+    serviceArn:'serviceArn',
+    runningCount: 2,
+    desiredCount: 3,
+    taskDefinitionArn: 'taskDefinitionArn',
+    status: 'status',
+    roleArn: 'roleArn', 
+    execRoleArn: 'execRoleArn',
+    asgArn: 'asgArn',
+    cpu: 'cpu',
+    memory:'memory',
+    capacity: 5,
+    capacityType: undefined,
+    images:  [{
+      containerId: 'containerId1',
+      volumes: [{ name: 'volume1' }, { name: 'volume2' }],
+      cwLogsGroupArn: 'cwLogsGroupArn1',
+      portMappings: [],
+      envVars: [],
+      secrets: [], 
+      memory: 1024, 
+      cpu: 1024
+    },
+    {
+      containerId: 'containerId2',
+      volumes: [{ name: 'volume3' }],
+      cwLogsGroupArn: 'cwLogsGroupArn2', 
+      portMappings: [],
+      envVars: [],
+      secrets: [], 
+      memory: 1024, 
+      cpu: 1024
+    }
+  ]};
+
+
+  beforeEach(() => {
+    const ecsWidget = AwsEcsInfo.fromJson(props);
+    const renderedWidget = ecsWidget.render();
+    render(renderedWidget);
+  });
+
+  test('renders container ids', () => {
+    const containerIds = screen.getAllByText(/containerid/i);
+    expect(containerIds).toHaveLength(props.images.length);
+    expect(containerIds[0]).toHaveTextContent(props.images[0].containerId);
+    expect(containerIds[1]).toHaveTextContent(props.images[1].containerId);
+  });
+
+  test('renders volumes', () => {
+    const volumes = screen.getAllByText(/volume/i);
+    expect(volumes).toHaveLength(3);
+  });
+
+  test('renders view logs links', () => {
+    const viewLogsLinks = screen.getAllByText(/view logs/i);
+    expect(viewLogsLinks).toHaveLength(3); //cell plus the two anchor elements
+  });
+});
+
+
+
