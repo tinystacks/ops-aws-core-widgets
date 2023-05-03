@@ -1,23 +1,24 @@
 import { cleanup } from '@testing-library/react';
-import { AwsIamJson } from '../../src/aws-widgets/aws-iam-json.js'
+import { AwsJsonTree } from '../../src/aws-widgets/aws-json-tree.js'
 
-describe('AwsIamJson', () => {
+describe('AwsJsonTree', () => {
   afterEach(cleanup);
   
-  describe('AwsIamJson intialization', () => {
-    it('AwsIamJson is initialized successfully', () => {
+  describe('AwsJsonTree intialization', () => {
+    it('AwsJsonTree is initialized successfully', () => {
       const props = {
         id: 'MockWidget',
-        type: 'AwsIamJson',
+        type: 'AwsJsonTree',
         displayName: 'mock widget', 
         region: 'us-east-1', 
-        policyArn: 'policy-arn'
+        cloudControlType: 'cloud-control-type'
       };
       
-      const iamJson = AwsIamJson.fromJson(props);
+      const iamJson = AwsJsonTree.fromJson(props);
       expect(iamJson.toJson()).toStrictEqual({
         ...props,
-        roleArn: undefined,
+        resourceModel: undefined,
+        paths: undefined,
         childrenIds: undefined,
         description: undefined,
         displayOptions: undefined,
@@ -29,7 +30,7 @@ describe('AwsIamJson', () => {
 
 });
 
-describe('AwsIamJson getData function', () => {
+describe('AwsJsonTree getData function', () => {
   let mockProviders;
   let mockOverrides;
   let widget;
@@ -47,12 +48,12 @@ describe('AwsIamJson getData function', () => {
       }
     ];
     mockOverrides = {};
-    widget = new AwsIamJson({
+    widget = new AwsJsonTree({
       id: 'MockWidget',
-      type: 'AwsIamJson',
+      type: 'AwsJsonTree',
       displayName: 'mock cw widget', 
       region: 'us-east-1', 
-      policyArn: 'policy-arn'
+      cloudControlType: 'cloud-control-type'
     });
   });
 
