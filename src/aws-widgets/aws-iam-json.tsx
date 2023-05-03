@@ -32,7 +32,7 @@ export class AwsIamJson extends BaseWidget {
 
   }
 
-  fromJson (object: AwsIamJsonProps): AwsIamJson {
+  static fromJson (object: AwsIamJsonProps): AwsIamJson {
     if(isNil(object.roleArn) && isNil(object.policyArn)){ 
       throw new Error('Either role arn or policy arn must be defined for IAM Json Widget');
     }
@@ -45,7 +45,8 @@ export class AwsIamJson extends BaseWidget {
       ...super.toJson(),  
       region: this.region,
       roleArn: this.roleArn,
-      policyArn: this.policyArn };
+      policyArn: this.policyArn 
+    };
   }
 
 
