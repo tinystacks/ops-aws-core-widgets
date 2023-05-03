@@ -1,9 +1,6 @@
 import { AwsCloudWatchMetricGraph } from '../../src/aws-widgets/aws-cloud-watch-metric-graph.js'
 import { TimeUnitEnum } from '../../src/utils/utils.js';
-import * as utils from '../../src/utils/utils.js';
-import { Provider } from '@tinystacks/ops-model';
-import { AwsCredentialsProvider } from '../../src/aws-provider/aws-credentials-provider';
-import { render, cleanup, screen } from '@testing-library/react';
+import { cleanup } from '@testing-library/react';
 
 
 describe('AwsCloudWatchMetricGraph', () => {

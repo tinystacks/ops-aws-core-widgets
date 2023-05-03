@@ -1,28 +1,41 @@
 import { cleanup } from '@testing-library/react';
-import { AwsEcsDeployments } from '../../src/aws-widgets/aws-ecs-deployments.js'
+import { AwsEcsInfo } from '../../src/aws-widgets/aws-ecs-info.js'
 
-describe('AwsEcsDeployments', () => {
+describe('AwsEcsInfo', () => {
   afterEach(cleanup);
   
-  describe('AwsEcsDeployments intialization', () => {
-    it('AwsEcsDeployments is initialized successfully', () => {
+  describe('AwsEcsInfo intialization', () => {
+    it('AwsEcsInfo is initialized successfully', () => {
       const props = {
         id: 'MockWidget',
-        type: 'AwsEcsDeployments',
-        displayName: 'mock widget', 
+        type: 'AwsEcsInfo',
+        displayName: 'mock cw widget', 
         region: 'us-east-1', 
         clusterName: 'cluster-name',
         serviceName: 'service-name'
       };
       
-      const awsEcs = AwsEcsDeployments.fromJson(props);
-      expect(awsEcs.toJson()).toStrictEqual({
+      const awsEcsInfo = new AwsEcsInfo(props);
+      expect(awsEcsInfo.toJson()).toStrictEqual({
         ...props,
-        deployments: [],
         childrenIds: undefined,
         description: undefined,
         displayOptions: undefined,
         providerIds: undefined, 
+        serviceArn: undefined,
+        clusterArn: undefined,
+        runningCount: undefined,
+        desiredCount: undefined,
+        capacity: undefined,
+        asgArn: undefined,
+        memory: undefined,
+        cpu: undefined,
+        taskDefinitionArn: undefined,
+        status: undefined,
+        roleArn: undefined,
+        execRoleArn: undefined,
+        images: undefined, 
+        capacityType: undefined
       });
     });
 
@@ -31,7 +44,7 @@ describe('AwsEcsDeployments', () => {
 });
 
 
-describe('AwsEcsDeployments getData function', () => {
+describe('AwsEcsInfo getData function', () => {
   let mockProviders;
   let mockOverrides;
   let widget;
@@ -49,13 +62,13 @@ describe('AwsEcsDeployments getData function', () => {
       }
     ];
     mockOverrides = {};
-    widget = new AwsEcsDeployments({
+    widget = new AwsEcsInfo({
       id: 'MockWidget',
-      type: 'AwsEcsDeployments',
-      displayName: 'mock cw widget', 
+      type: 'AwsEcsInfo',
+      displayName: 'mock widget', 
       region: 'us-east-1', 
       clusterName: 'cluster-name',
-      serviceName: 'service-name'
+      serviceName: 'service-name', 
     });
   });
 

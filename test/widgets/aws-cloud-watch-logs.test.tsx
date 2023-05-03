@@ -1,4 +1,4 @@
-import { render, cleanup, screen } from '@testing-library/react';
+import { cleanup } from '@testing-library/react';
 import { AwsCloudWatchLogs } from '../../src/aws-widgets/aws-cloud-watch-logs.js'
 import { TimeUnitEnum } from '../../src/utils/utils';
 
@@ -8,7 +8,7 @@ describe('AwsCloudWatchLogs', () => {
   describe('Cloud watch logs intialization', () => {
     it('cw logs is initialized successfully', () => {
       const props = {
-        id: 'CW MockWidget',
+        id: 'MockWidget',
         type: 'AwsCloudWatchLogs',
         displayName: 'mock cw widget', 
         region: 'us-east-1', 
@@ -19,8 +19,8 @@ describe('AwsCloudWatchLogs', () => {
         logGroupName: 'groupName', 
       };
       
-      const cli = AwsCloudWatchLogs.fromJson(props);
-      expect(cli.toJson()).toStrictEqual({
+      const cwLogs = AwsCloudWatchLogs.fromJson(props);
+      expect(cwLogs.toJson()).toStrictEqual({
         ...props,
         logStreamName: undefined,
         events: [],
@@ -54,9 +54,9 @@ describe('AwsCloudWatchLogs getData function', () => {
     ];
     mockOverrides = {};
     widget = new AwsCloudWatchLogs({
-      id: 'CW MockWidget',
+      id: 'MockWidget',
       type: 'AwsCloudWatchLogs',
-      displayName: 'mock cw widget', 
+      displayName: 'mock widget', 
       region: 'us-east-1', 
       showTimeRangeSelector: true,
       timeRange: {
