@@ -1,1 +1,1 @@
-- Fix index import extension
+- Update @tinystacks/ops-core
