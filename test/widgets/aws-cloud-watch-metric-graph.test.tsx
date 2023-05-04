@@ -45,9 +45,7 @@ describe('AwsCloudWatchMetricGraph', () => {
     });
 
   });
-
 });
-
 
 describe('AwsCloudWatchMetricGraph getData function', () => {
   let mockProviders;
@@ -102,46 +100,4 @@ describe('AwsCloudWatchMetricGraph getData function', () => {
     mockProviders[0].type = 'NotAwsCredentialsProvider';
     await expect(widget.getData(mockProviders, mockOverrides)).rejects.toThrow('An AwsCredentialsProvider was expected, but was not given');
   });
-
-  /*it('should call getAwsCredentialsProvider and getMetricStatistics with the correct parameters', async () => {
-    const mockGetAwsCredentialsProvider = jest.spyOn(utils, 'getAwsCredentialsProvider');
-
-    const mockGetMetricStatistics = jest.spyOn(CloudWatch.prototype, 'getMetricStatistics');
-
-    await widget.getData(mockProviders, mockOverrides);
-
-    expect(mockGetAwsCredentialsProvider).toHaveBeenCalledWith(mockProviders);
-    expect(mockGetMetricStatistics).toHaveBeenCalledWith({
-      Namespace: 'namespace',
-      MetricName: 'name',
-      Dimensions: [{ Name: 'key', Value: 'value' }],
-      Statistics: ['Average'],
-      Period: 60,
-      StartTime: expect.any(Date),
-      EndTime: expect.any(Date),
-    });
-  });*/
-
- /* it('should update the widget with the fetched data', async () => {
-    const mockData = [
-      {
-        Timestamp: new Date(),
-        Average: 123,
-        Unit: 'Count'
-      }
-    ];
-    const mockGetMetricStatistics = jest.spyOn(CloudWatch.prototype, 'getMetricStatistics').mockResolvedValue({ Datapoints: mockData });
-    const mockCleanTimeRange = jest.spyOn(utils, 'cleanTimeRange').mockReturnValue(widget.timeRange);
-
-    await widget.getData(mockProviders, mockOverrides);
-
-    expect(mockCleanTimeRange).toHaveBeenCalledWith(widget.timeRange, mockOverrides);
-    expect(widget.metrics[0].data).toEqual([
-      {
-        value: 123,
-        unit: 'Count',
-        timestamp: mockData[0].Timestamp.getTime()
-      }
-    ]);
-  });*/
 });
