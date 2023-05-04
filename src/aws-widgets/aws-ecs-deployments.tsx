@@ -10,7 +10,7 @@ import {
   Thead,
   Tr
 } from '@chakra-ui/react';
-import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
+import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { Widget } from '@tinystacks/ops-model';
 import {
   ECS,
@@ -152,63 +152,71 @@ export class AwsEcsDeployments extends BaseWidget {
     providers?: BaseProvider[],
     overrides?: AwsEcsDeploymentsOverrides
   ): Promise<void> {
-    const awsCredentialsProvider = getAwsCredentialsProvider(providers);
-    const credentials = await awsCredentialsProvider.getCredentials();
-    const stsClient = new STS({
-      credentials: credentials,
-      region: this.region
-    });
-    const accountId =
-      (await stsClient
-        .getCallerIdentity({})
-        .then(res => res.Account)
-        .catch(e => console.error(e))) || '';
-    const ecsClient = new ECS({
-      credentials,
-      region: this.region
-    });
-
-    if (overrides?.stoppedTaskId) {
-      console.log(`KILLING ${overrides.stoppedTaskId}`);
-      await ecsClient.stopTask({
-        task: overrides.stoppedTaskId,
-        cluster: this.clusterName
+    try {
+      const awsCredentialsProvider = getAwsCredentialsProvider(providers);
+      const credentials = await awsCredentialsProvider.getCredentials();
+      const stsClient = new STS({
+        credentials: credentials,
+        region: this.region
       });
-    }
-
-    const { service, taskArns } = await getCoreEcsData(
-      ecsClient,
-      this.clusterName,
-      this.serviceName
-    );
-
-    let tasks: AwsTask[] = [];
-    if (!_.isEmpty(taskArns)) {
-      const describeTasksRes = await ecsClient.describeTasks({
-        cluster: this.clusterName,
-        tasks: taskArns
+      const accountId =
+        (await stsClient
+          .getCallerIdentity({})
+          .then(res => res.Account)
+          .catch(e => console.error(e))) || '';
+      const ecsClient = new ECS({
+        credentials,
+        region: this.region
       });
-      tasks = describeTasksRes.tasks;
-    }
 
-    const deploymentPromises: Promise<Deployment>[] = [];
-    service.deployments.forEach((deployment) => {
-      deploymentPromises.push(
-        this.hydrateDeployment(ecsClient, deployment, tasks, accountId)
-      );
-    });
-    const settledPromises = (
-      await Promise.allSettled(deploymentPromises)
-    ).reduce((filtered, promise) => {
-      if (promise.status === 'fulfilled') {
-        filtered.push(promise.value);
-      } else {
-        console.error(promise.reason);
+      if (overrides?.stoppedTaskId) {
+        console.log(`KILLING ${overrides.stoppedTaskId}`);
+        await ecsClient.stopTask({
+          task: overrides.stoppedTaskId,
+          cluster: this.clusterName
+        });
       }
-      return filtered;
-    }, []);
 
-    this.deployments = settledPromises;
+      const { service, taskArns } = await getCoreEcsData(
+        ecsClient,
+        this.clusterName,
+        this.serviceName
+      );
+
+      let tasks: AwsTask[] = [];
+      if (!_.isEmpty(taskArns)) {
+        const describeTasksRes = await ecsClient.describeTasks({
+          cluster: this.clusterName,
+          tasks: taskArns
+        });
+        tasks = describeTasksRes.tasks;
+      }
+
+      const deploymentPromises: Promise<Deployment>[] = [];
+      service.deployments.forEach((deployment) => {
+        deploymentPromises.push(
+          this.hydrateDeployment(ecsClient, deployment, tasks, accountId)
+        );
+      });
+      const settledPromises = (
+        await Promise.allSettled(deploymentPromises)
+      ).reduce((filtered, promise) => {
+        if (promise.status === 'fulfilled') {
+          filtered.push(promise.value);
+        } else {
+          console.error(promise.reason);
+        }
+        return filtered;
+      }, []);
+
+      this.deployments = settledPromises;
+    } catch (e: any) {
+      throw TinyStacksError.fromJson({
+        message: 'Failed to get ECS deployments data!',
+        status: e.status || e.$metadata?.status || 500,
+        stack: e.stack
+      });
+    }
   }
 
   render (

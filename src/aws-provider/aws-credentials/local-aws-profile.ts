@@ -1,5 +1,6 @@
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
 import { AwsCredentialsConfig } from '../../types/types.js';
+import { TinyStacksError } from '@tinystacks/ops-core';
 
 export type LocalAwsProfileConfig = { 
   profileName: string;
@@ -33,9 +34,12 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileConfi
         })();
       });
       return this.getVersionedCredentials(awsSdkVersion, sharedCreds);
-    } catch (e) {
-      console.log(e);
-      throw new Error(`Failed to read credentials from profile: ${this.profileName}!. Ensure ${this.profileName} exists in ~/.aws/credentials`);
+    } catch (e: any) {
+      throw TinyStacksError.fromJson({
+        message: `Failed to read credentials from profile: ${this.profileName}!. Ensure ${this.profileName} exists in ~/.aws/credentials`,
+        status: e.status || e.$metadata?.status || 500,
+        stack: e.stack
+      });
     }
   }
 }
