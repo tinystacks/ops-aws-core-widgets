@@ -1,6 +1,7 @@
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
 import { AwsCredentialsConfig } from '../../types/types.js';
 import { TinyStacksError } from '@tinystacks/ops-core';
+import AWS from 'aws-sdk';
 
 export type LocalAwsProfileConfig = { 
   profileName: string;
@@ -24,15 +25,12 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileConfi
 
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
     try {
-      const { fromIni } = await import('@aws-sdk/credential-provider-ini');
-      const { fromSSO } = await import('@aws-sdk/credential-provider-sso');
-      const sharedCreds = await fromSSO({
+      const sharedCreds = new AWS.SharedIniFileCredentials({
         profile: this.profileName
-      })().catch(async () => {
-        return await fromIni({
-          profile: this.profileName
-        })();
       });
+      if (!sharedCreds.accessKeyId) {
+        throw new Error('Shared ini file failure!');
+      }
       return this.getVersionedCredentials(awsSdkVersion, sharedCreds);
     } catch (e: any) {
       throw TinyStacksError.fromJson({
