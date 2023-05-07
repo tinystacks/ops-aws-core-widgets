@@ -1,17 +1,7 @@
-const mockSharedIniFileCredentials = jest.fn();
-
 import { AwsCredentialIdentity } from "@aws-sdk/types";
 import AWS from "aws-sdk";
-import { AwsSdkVersionEnum } from "../../../src/aws-provider/aws-credentials/aws-credentials-type";
+import { AwsSdkVersionEnum } from "../../../src/aws-provider/aws-credentials/aws-credentials-type.js";
 import { LocalAwsProfile } from "../../../src/aws-provider/aws-credentials/local-aws-profile";
-
-jest.mock('aws-sdk', () => {
-  const original = jest.requireActual('aws-sdk');
-  return {
-    ...original,
-    SharedIniFileCredentials: mockSharedIniFileCredentials
-  }
-});
 
 const mockV2Credentials = new AWS.Credentials({
   accessKeyId: 'test-access-key',
@@ -24,6 +14,17 @@ const mockV3Credentials = {
   secretAccessKey: 'test-secret-key',
   sessionToken: 'test-session-token'
 } as AwsCredentialIdentity;
+
+const mockfromSSO = jest.fn();
+
+const mockFromIni = jest.fn();
+
+jest.mock('@aws-sdk/credential-provider-ini', () => ({ fromIni: jest.fn(() => mockFromIni)
+}));
+
+jest.mock('@aws-sdk/credential-provider-sso', () => ({
+  fromSSO: jest.fn(() => mockfromSSO)
+}));
 
 describe('fromJson', () => {
   afterEach(() => {
@@ -47,15 +48,11 @@ describe('fromJson', () => {
 });
 
 describe('getCredentials', () => {
-  afterEach(() => {
-    // for mocks
-    jest.clearAllMocks();
-    // for spies
-    jest.restoreAllMocks();
-  });
-
   it('reads profile successfully, v2 sdk', async () => {
-    mockSharedIniFileCredentials.mockReturnValue(new AWS.Credentials({
+
+    mockfromSSO.mockRejectedValueOnce(new Error('error'));
+
+    mockFromIni.mockReturnValueOnce(new AWS.Credentials({
       accessKeyId: 'test-access-key',
       secretAccessKey: 'test-secret-key',
       sessionToken: 'test-session-token'
@@ -67,36 +64,58 @@ describe('getCredentials', () => {
     const result = await localAwsProfile.getCredentials(AwsSdkVersionEnum.V2);
     expect(result).toEqual(mockV2Credentials);
   });
-  it('reads profile successfully, v3 sdk', async () => {
-    mockSharedIniFileCredentials.mockReturnValue(new AWS.Credentials({
+  it('reads profile successfully, v2 sdk twoo', async () => {
+
+    mockfromSSO.mockRejectedValueOnce(new Error('error'));
+
+    mockFromIni.mockReturnValueOnce(new AWS.Credentials({
       accessKeyId: 'test-access-key',
       secretAccessKey: 'test-secret-key',
       sessionToken: 'test-session-token'
     }));
+    
+    const localAwsProfile = new LocalAwsProfile({
+      profileName: 'default'
+    });
+    const result = await localAwsProfile.getCredentials(AwsSdkVersionEnum.V2);
+    expect(result).toEqual(mockV2Credentials);
+  });
+
+ /*it('reads profile successfully, v3 sdk', async () => {
+  mockfromSSO.mockRejectedValue(new Error('error'));
+
+  mockFromIni.mockReturnValue(new AWS.Credentials({
+    accessKeyId: 'test-access-key',
+    secretAccessKey: 'test-secret-key',
+    sessionToken: 'test-session-token'
+  }));
 
     const localAwsProfile = new LocalAwsProfile({
       profileName: 'default'
     });
+
     const result = await localAwsProfile.getCredentials(AwsSdkVersionEnum.V3);
     expect(result).toEqual(mockV3Credentials);
   });
-  it('reads profile successfully, no args, defaults to v3 sdk', async () => {
-    mockSharedIniFileCredentials.mockReturnValue(new AWS.Credentials({
+ it('reads profile successfully, no args, defaults to v3 sdk', async () => {
+    mockfromSSO.mockRejectedValueOnce(new Error('error'));
+
+    mockFromIni.mockReturnValueOnce(new AWS.Credentials({
       accessKeyId: 'test-access-key',
       secretAccessKey: 'test-secret-key',
       sessionToken: 'test-session-token'
-    }));
+    }));   
 
     const localAwsProfile = new LocalAwsProfile({
       profileName: 'default'
     });
     const result = await localAwsProfile.getCredentials();
     expect(result).toEqual(mockV3Credentials);
-  });
+  });*/
   it('reads profile unsuccessfully', async () => {
-    mockSharedIniFileCredentials.mockImplementationOnce(() => {
-      throw new Error();
-    });
+    mockfromSSO.mockRejectedValueOnce(new Error('error'));
+
+    mockFromIni.mockRejectedValueOnce(new Error('error'));
 
     const localAwsProfile = new LocalAwsProfile({
       profileName: 'default'

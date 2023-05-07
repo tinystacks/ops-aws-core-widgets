@@ -87,6 +87,22 @@ export function cleanTimeRange (timeRange: TimeRange, overrides?: TimeRangeOverr
 
 export function combineTimeRangeWithOverrides (timeRange: TimeRange, overrides?: TimeRangeOverrides): TimeRange {
   return overrides && overrides.timeRange ? overrides.timeRange : timeRange;
+
+}
+
+export function getPeriodBasedOnTimeRange (startTime: Date, endTime: Date): number { 
+  const duration = Math.abs(endTime.valueOf() - startTime.valueOf());
+  if(duration <= (60000 * 30)){ 
+    return 60;
+  } else if(duration <= (60000 * 60)){ 
+    return 300;
+  } else if(duration <= (24 * 60000 * 60)){ 
+    return 900;
+  } else if(duration <= (3 * 24 * 60000 * 60)){ 
+    return 1800;
+  } else { 
+    return Math.floor(duration/15000);
+  }
 }
 
 export type TimeRangeOverrides = { timeRange?: TimeRange };

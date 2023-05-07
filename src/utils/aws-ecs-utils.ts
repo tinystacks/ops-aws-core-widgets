@@ -10,7 +10,7 @@ import {
   DescribeClustersCommandOutput,
   ListTasksCommandOutput
 } from '@aws-sdk/client-ecs';
-import _ from 'lodash';
+import get from 'lodash.get';
 
 export type Image = {
   containerId: string;
@@ -43,9 +43,9 @@ export async function getCoreEcsData (ecsClient: ECS, clusterName: string, servi
     console.error(promise.reason);
     return undefined;
   });
-  const service = _.get((settledPromises[0] as DescribeServicesCommandOutput), 'services[0]');
-  const cluster = _.get((settledPromises[1] as DescribeClustersCommandOutput), 'clusters[0]');
-  const taskArns = _.get((settledPromises[2] as ListTasksCommandOutput), 'taskArns', [] as string[]);
+  const service = get((settledPromises[0] as DescribeServicesCommandOutput), 'services[0]');
+  const cluster = get((settledPromises[1] as DescribeClustersCommandOutput), 'clusters[0]');
+  const taskArns = get((settledPromises[2] as ListTasksCommandOutput), 'taskArns', [] as string[]);
  
   return {
     service,

@@ -1,0 +1,1 @@
+- Fix index import extension
