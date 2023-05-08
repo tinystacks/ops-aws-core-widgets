@@ -31,9 +31,22 @@ describe('AwsJsonTree', () => {
 });
 
 describe('AwsJsonTree getData function', () => {
+const mockfromSSO = jest.fn();
+
+const mockFromIni = jest.fn();
+
+jest.mock('@aws-sdk/credential-provider-ini', () => ({ fromIni: jest.fn(() => mockFromIni)
+}));
+
+jest.mock('@aws-sdk/credential-provider-sso', () => ({
+  fromSSO: jest.fn(() => mockfromSSO)
+}));
   let mockProviders;
   let mockOverrides;
   let widget;
+  let mockCloudControlClient;
+  let mockListResources;
+  let mockAwsCredentialsProvider;
 
   beforeEach(() => {
     mockProviders = [
@@ -55,6 +68,21 @@ describe('AwsJsonTree getData function', () => {
       region: 'us-east-1', 
       cloudControlType: 'cloud-control-type'
     });
+
+    mockCloudControlClient = {
+      listResources: jest.fn(),
+    };
+
+    mockListResources = {
+      promise: jest.fn(),
+    };
+
+    mockCloudControlClient.listResources.mockReturnValue(mockListResources);
+    
+    mockAwsCredentialsProvider = {
+      getCredentials: jest.fn().mockResolvedValue('mocked credentials'),
+    };
+
   });
 
   afterEach(() => {

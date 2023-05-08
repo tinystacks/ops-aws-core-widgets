@@ -1,5 +1,6 @@
-import { cleanTimeRange, combineTimeRangeWithOverrides, getAwsCredentialsProvider, getTimes, TimeUnitEnum } from '../../src/utils/utils.js'; 
+import { cleanTimeRange, combineTimeRangeWithOverrides, getAwsCredentialsProvider, getPeriodBasedOnTimeRange, getTimes, TimeUnitEnum } from '../../src/utils/utils.js'; 
 import { AwsCredentialsProvider } from '../../src/aws-provider/aws-credentials-provider.js';
+import dayjs from 'dayjs';
 
 describe('utils', () => {
   describe('getAwsCredentialsProvider', () => {
@@ -38,6 +39,17 @@ describe('utils', () => {
       expect(getTimes(timeRange)).toStrictEqual({
         startTime: new Date(timeRange.startTime),
         endTime: new Date(timeRange.endTime)
+      });
+    });
+    it ('relativeTimeRange', () => {
+      const timeRange = {
+        time: 1, 
+        unit: TimeUnitEnum.hr
+      };
+      const now = dayjs();
+      expect(getTimes(timeRange)).toStrictEqual({
+        startTime: now.subtract(1, 'hour').toDate(),
+        endTime: now.toDate()
       });
     });
   });
@@ -102,4 +114,35 @@ describe('utils', () => {
       })).toStrictEqual(timeRange);
     });
   });
+
+  describe('getPeriodBasedOnTimeRange', () => {
+    it('returns 60 when duration is less than or equal to 30 minutes', () => {
+      const startTime = new Date('2023-05-01T12:00:00Z');
+      const endTime = new Date('2023-05-01T12:29:59Z');
+      const period = getPeriodBasedOnTimeRange(startTime, endTime);
+      expect(period).toBe(60);
+    });
+  
+    it('returns 300 when duration is less than or equal to 1 hour', () => {
+      const startTime = new Date('2023-05-01T12:00:00Z');
+      const endTime = new Date('2023-05-01T12:59:59Z');
+      const period = getPeriodBasedOnTimeRange(startTime, endTime);
+      expect(period).toBe(300);
+    });
+  
+    it('returns 900 when duration is less than or equal to 24 hours', () => {
+      const startTime = new Date('2023-05-01T12:00:00Z');
+      const endTime = new Date('2023-05-02T11:59:59Z');
+      const period = getPeriodBasedOnTimeRange(startTime, endTime);
+      expect(period).toBe(900);
+    });
+  
+    it('returns 1800 when duration is less than or equal to 3 days', () => {
+      const startTime = new Date('2023-05-01T12:00:00Z');
+      const endTime = new Date('2023-05-04T11:59:59Z');
+      const period = getPeriodBasedOnTimeRange(startTime, endTime);
+      expect(period).toBe(1800);
+    });
+  });
+  
 });
