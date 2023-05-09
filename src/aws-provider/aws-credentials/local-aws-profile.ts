@@ -13,6 +13,7 @@ class LocalAwsProfile extends AwsCredentialsType implements LocalAwsProfileConfi
   constructor (props: LocalAwsProfileConfig) {
     super();
     this.profileName = props.profileName;
+    console.log(`Looking for ${this.profileName} in ~/.aws/credentials...`);
   }
 
   static isLocalAwsProfile (credentials: AwsCredentialsConfig) {
