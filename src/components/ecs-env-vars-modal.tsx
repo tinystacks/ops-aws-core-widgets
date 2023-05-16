@@ -7,7 +7,7 @@ import { Image } from '../utils/aws-ecs-utils.js';
 export default function EcsEnvVarsModal (props: { image: Image }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { image } = props;
-  const totalRecords = image.envVars.length + image.secrets.length;
+  const totalRecords = (image.envVars?.length || 0) + (image.secrets?.length || 0);
   return (
     <span>
       {totalRecords} {totalRecords === 1 ? 'record' : 'records'}&nbsp;
