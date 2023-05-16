@@ -1,1 +1,1 @@
-- Reverted local aws profile to v2 sdk for stability
+fixed npes
