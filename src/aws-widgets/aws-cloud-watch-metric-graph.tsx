@@ -3,7 +3,7 @@ import isEmpty from 'lodash.isempty';
 import React from 'react';
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import { Widget } from '@tinystacks/ops-model';
-import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
+import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 import { getAwsCredentialsProvider, getTimes, TimeUnitEnum, TimeRange, TimeRangeOverrides, cleanTimeRange, getPeriodBasedOnTimeRange } from '../utils/utils.js';
 import { Box, Stack } from '@chakra-ui/react';
@@ -124,54 +124,65 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
   }
 
   async getData (providers?: BaseProvider[], overrides?: AwsCloudWatchMetricGraphOverrides): Promise<void> {
-    if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
-      throw new Error('An AwsCredentialsProvider was expected, but was not given');
-    }
+    try {
+      if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
+        throw TinyStacksError.fromJson({
+          message: 'An AwsCredentialsProvider was expected, but was not given',
+          status: 400
+        });
+      }
 
-    this.timeRange = cleanTimeRange(this.timeRange, overrides);
+      this.timeRange = cleanTimeRange(this.timeRange, overrides);
 
-    const awsCredentialsProvider = getAwsCredentialsProvider(providers);
-    const cwClient = new CloudWatch({
-      credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
-      region: this.region
-    });
-    
-    const { 
-      startTime,
-      endTime
-    } = getTimes(this.timeRange);
-
-    const period = getPeriodBasedOnTimeRange(startTime, endTime);
-
-    const hydratedMetrics = [];
-    for (const metric of this.metrics) {
-      const metricStatsResponse = await cwClient.getMetricStatistics({
-        Namespace: metric.metricNamespace,
-        MetricName: metric.metricName,
-        Dimensions: metric.dimensions.map(dimension => ({
-          Name: dimension.key,
-          Value: dimension.value
-        })),
-        Statistics: [metric.statistic || 'Average'],
-        Period: period,
-        StartTime: startTime,
-        EndTime: endTime
+      const awsCredentialsProvider = getAwsCredentialsProvider(providers);
+      const cwClient = new CloudWatch({
+        credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
+        region: this.region
       });
-      const {
-        Datapoints = []
-      } = metricStatsResponse;
-      metric.data = Datapoints
-        .map(datapoint  => ({
-          value: Number((datapoint as any)[metric.statistic || 'Average']),
-          unit: datapoint.Unit || '',
-          timestamp: (datapoint.Timestamp || new Date()).getTime()
-        }))
-        .sort((dp1, dp2) => dp1.timestamp - dp2.timestamp);
+      
+      const { 
+        startTime,
+        endTime
+      } = getTimes(this.timeRange);
 
-      hydratedMetrics.push(metric);
+      const period = getPeriodBasedOnTimeRange(startTime, endTime);
+
+      const hydratedMetrics = [];
+      for (const metric of this.metrics) {
+        const metricStatsResponse = await cwClient.getMetricStatistics({
+          Namespace: metric.metricNamespace,
+          MetricName: metric.metricName,
+          Dimensions: metric.dimensions.map(dimension => ({
+            Name: dimension.key,
+            Value: dimension.value
+          })),
+          Statistics: [metric.statistic || 'Average'],
+          Period: period,
+          StartTime: startTime,
+          EndTime: endTime
+        });
+        const {
+          Datapoints = []
+        } = metricStatsResponse;
+        metric.data = Datapoints
+          .map(datapoint  => ({
+            value: Number((datapoint as any)[metric.statistic || 'Average']),
+            unit: datapoint.Unit || '',
+            timestamp: (datapoint.Timestamp || new Date()).getTime()
+          }))
+          .sort((dp1, dp2) => dp1.timestamp - dp2.timestamp);
+
+        hydratedMetrics.push(metric);
+      }
+
+      this.metrics = hydratedMetrics;
+    } catch (e: any) {
+      throw TinyStacksError.fromJson({
+        message: 'Failed to get CloudWatch metrics!',
+        status: e.status || e.$metadata?.status || 500,
+        stack: e.stack
+      });
     }
-
-    this.metrics = hydratedMetrics;
   }
 
   render (_children?: any, overridesCallback?: (overrides: AwsCloudWatchMetricGraphOverrides) => void): JSX.Element {

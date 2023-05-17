@@ -1,5 +1,5 @@
 import { Widget } from '@tinystacks/ops-model';
-import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
+import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { IAM } from '@aws-sdk/client-iam';
 import { Policy } from 'aws-sdk/clients/iam';
 import isNil from 'lodash.isnil';
@@ -34,7 +34,10 @@ export class AwsIamJson extends BaseWidget {
 
   static fromJson (object: AwsIamJsonProps): AwsIamJson {
     if(isNil(object.roleArn) && isNil(object.policyArn)){ 
-      throw new Error('Either role arn or policy arn must be defined for IAM Json Widget');
+      throw TinyStacksError.fromJson({
+        message: 'Either role arn or policy arn must be defined for IAM Json Widget',
+        status: 400
+      });
     }
 
     return new AwsIamJson(object);
@@ -52,7 +55,10 @@ export class AwsIamJson extends BaseWidget {
 
   async getData (providers?: BaseProvider[]): Promise<void> {
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
-      throw new Error('An AwsCredentialsProvider was expected, but was not given');
+      throw TinyStacksError.fromJson({
+        message: 'An AwsCredentialsProvider was expected, but was not given',
+        status: 400
+      });
     }
 
     try {
@@ -79,8 +85,12 @@ export class AwsIamJson extends BaseWidget {
         }
       }
     }
-    catch (e) {
-      throw new Error('Failed to get IAM Policy');
+    catch (e: any) {
+      throw TinyStacksError.fromJson({
+        message: 'Failed to get IAM Policy',
+        status: e.status || e.$metadata?.status || 500,
+        stack: e.stack
+      });
     }
   }
 

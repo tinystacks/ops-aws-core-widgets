@@ -1,5 +1,5 @@
 import { Widget } from '@tinystacks/ops-model';
-import { BaseProvider, BaseWidget } from '@tinystacks/ops-core';
+import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import CloudControl, { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 import isEmpty from 'lodash.isempty';
@@ -54,7 +54,10 @@ export class AwsJsonTree extends BaseWidget {
   
   async getData (providers?: BaseProvider[]): Promise<void> {
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
-      throw new Error('An AwsCredentialsProvider was expected, but was not given');
+      throw TinyStacksError.fromJson({
+        message: 'An AwsCredentialsProvider was expected, but was not given',
+        status: 400
+      });
     }
 
     try{ 
@@ -76,8 +79,12 @@ export class AwsJsonTree extends BaseWidget {
         }).promise();
         this._resourceDescriptions = [...this._resourceDescriptions, ...res.ResourceDescriptions]; 
       }
-    } catch(e){ 
-      throw new Error(`Failed to list resources for resoruce type ${this.cloudControlType}`);
+    } catch (e: any) {
+      throw TinyStacksError.fromJson({
+        message: `Failed to list resources for resoruce type ${this.cloudControlType}`,
+        status: e.status || e.$metadata?.status || 500,
+        stack: e.stack
+      });
     }
     
   }

@@ -1,6 +1,6 @@
 {
   "name": "@tinystacks/ops-aws-core-widgets",
-  "version": "0.0.11",
+  "version": "0.0.15",
   "main": "dist/index.js",
   "type": "module",
   "files": [
@@ -46,6 +46,7 @@
     "@babel/preset-typescript": "^7.21.5",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
+    "@tinystacks/ops-core": "^0.1.0",
     "@types/jest": "^29.4.0",
     "@types/lodash.get": "^4.4.7",
     "@types/lodash.isempty": "^4.4.7",

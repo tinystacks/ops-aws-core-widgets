@@ -1,4 +1,5 @@
 import { STS, Credentials } from '@aws-sdk/client-sts';
+import { TinyStacksError } from '@tinystacks/ops-core';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
 import { AwsKeys, AwsKeysConfig } from './aws-keys.js';
 import { LocalAwsProfile, LocalAwsProfileConfig } from './local-aws-profile.js';
@@ -79,24 +80,32 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleConfig 
   }
 
   async getCredentials (awsSdkVersion = AwsSdkVersionEnum.V3) {
-    // if sts creds exist and have not expired, return them as generic creds
-    if (!this.credsWillExpireInSession()) {
+    try {
+      // if sts creds exist and have not expired, return them as generic creds
+      if (!this.credsWillExpireInSession()) {
+        const genericCreds = this.mapStsCredsToGenericCreds();
+        return this.getVersionedCredentials(awsSdkVersion, genericCreds);
+      }
+      const creds = await this.primaryCredentials.getCredentials(awsSdkVersion);
+      this.stsClient = new STS({
+        credentials: creds,
+        region: this.region
+      });
+      const res = await this.stsClient.assumeRole({
+        RoleArn: this.roleArn,
+        RoleSessionName: this.sessionName,
+        DurationSeconds: this.duration
+      });
+      this.stsCreds = res.Credentials;
       const genericCreds = this.mapStsCredsToGenericCreds();
       return this.getVersionedCredentials(awsSdkVersion, genericCreds);
+    } catch (e: any) {
+      throw TinyStacksError.fromJson({
+        message: `Failed to get credentials for assumed role ${this.roleArn}`,
+        status: e.status || e.$metadata?.status || 500,
+        stack: e.stack
+      });
     }
-    const creds = await this.primaryCredentials.getCredentials(awsSdkVersion);
-    this.stsClient = new STS({
-      credentials: creds,
-      region: this.region
-    });
-    const res = await this.stsClient.assumeRole({
-      RoleArn: this.roleArn,
-      RoleSessionName: this.sessionName,
-      DurationSeconds: this.duration
-    });
-    this.stsCreds = res.Credentials;
-    const genericCreds = this.mapStsCredsToGenericCreds();
-    return this.getVersionedCredentials(awsSdkVersion, genericCreds);
   }
 }
 
