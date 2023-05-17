@@ -81,37 +81,6 @@ describe('getCredentials', () => {
     expect(result).toEqual(mockV2Credentials);
   });
 
- /*it('reads profile successfully, v3 sdk', async () => {
-  mockfromSSO.mockRejectedValue(new Error('error'));
-
-  mockFromIni.mockReturnValue(new AWS.Credentials({
-    accessKeyId: 'test-access-key',
-    secretAccessKey: 'test-secret-key',
-    sessionToken: 'test-session-token'
-  }));
-
-    const localAwsProfile = new LocalAwsProfile({
-      profileName: 'default'
-    });
-
-    const result = await localAwsProfile.getCredentials(AwsSdkVersionEnum.V3);
-    expect(result).toEqual(mockV3Credentials);
-  });
- it('reads profile successfully, no args, defaults to v3 sdk', async () => {
-    mockfromSSO.mockRejectedValueOnce(new Error('error'));
-
-    mockFromIni.mockReturnValueOnce(new AWS.Credentials({
-      accessKeyId: 'test-access-key',
-      secretAccessKey: 'test-secret-key',
-      sessionToken: 'test-session-token'
-    }));   
-
-    const localAwsProfile = new LocalAwsProfile({
-      profileName: 'default'
-    });
-    const result = await localAwsProfile.getCredentials();
-    expect(result).toEqual(mockV3Credentials);
-  });*/
   it('reads profile unsuccessfully', async () => {
     mockfromSSO.mockRejectedValueOnce(new Error('error'));
 

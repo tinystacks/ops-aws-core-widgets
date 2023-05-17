@@ -36,6 +36,28 @@ describe('AwsAssumedRole', () => {
   });
 
   describe('primary credentials modality', () => {  
+      it('AwsAssumedRoleType is initialized successfully', () => {
+        const props =  {
+          roleArn: 'test-role-arn',
+          sessionName: 'test-session-name',
+          region: 'test-region',
+          primaryCredentials: new AwsAssumedRole({
+            roleArn: 'test-primary-role-arn',
+            sessionName: 'test-primary-session-name',
+            region: 'test-primary-region',
+            primaryCredentials: new LocalAwsProfile({
+              profileName: 'default'
+            })
+          })
+        };
+        
+        const awsAssumeRole = AwsAssumedRole.fromJson(props);
+        expect(awsAssumeRole).toEqual({
+          ...props,
+          duration: 3600,
+        });
+      });
+
     it('has AwsAssumedRoleType primary credentials', () => {
       const mockfromJsonArgs = {
         roleArn: 'test-role-arn',

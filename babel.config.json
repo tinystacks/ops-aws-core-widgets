@@ -13,7 +13,8 @@
             "modules": "auto"
           },
           "jest"
-        ]
+        ], 
+        "@babel/preset-typescript"
       ],
       "plugins": ["@babel/plugin-transform-modules-commonjs", "@babel/plugin-transform-reserved-words"]
     }
