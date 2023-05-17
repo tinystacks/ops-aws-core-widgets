@@ -29,6 +29,10 @@ export function cloudwatchLogsGroupArnToUrl (arn: string) {
   return `https://${splitArn.region}.console.aws.amazon.com/cloudwatch/home?region=${splitArn.region}#logsV2:log-groups/log-group/${splitArn.resourceName}/log-events`;
 }
 
+export function cloudwatchLogsGroupToUrl (logGroupName: string, region: string) {
+  return `https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#logsV2:log-groups/log-group/${logGroupName}/log-events`;
+}
+
 export function ecsClusterArnToUrl (arn: string) {
   const splitArn = arnSplitter(arn);
   if (!splitArn) return '';
@@ -90,4 +94,26 @@ export function asgArnToUrl (arn: string) {
     baseUrl += splitArn.extra.replace('autoScalingGroupName/', 'id=');
   }
   return baseUrl;
+}
+
+export function ec2InstanceToUrl (instanceId: string, region: string) { 
+  return `https://${region}.console.aws.amazon.com/ec2/home?region=${region}#InstanceDetails:instanceId=${instanceId}`;
+}
+
+export function natGatewayArnToUrl (arn: string) { 
+  const splitArn = arnSplitter(arn);
+  if (!splitArn) return '';
+  return `https://${splitArn.region}.console.aws.amazon.com/vpc/home?region=${splitArn.region}#NatGatewayDetails:natGatewayId=${splitArn.resourceName}`;  
+}
+
+export function s3BucketToUrl (bucketName: string, region: string) { 
+  return `https://s3.console.aws.amazon.com/s3/buckets/${bucketName}?region=${region}&tab=objects`; 
+}
+
+export function ebsVolumeIdToUrl (volumeId: string, region: string) { 
+  return `https://${region}.console.aws.amazon.com/ec2/home?region=${region}#VolumeDetails:volumeId=${volumeId}`;
+}
+
+export function rdsInstanceArnToUrl (dbInstanceIdentifier: string, region: string) { 
+  return `https://${region}.console.aws.amazon.com/rds/home?region=${region}#database:id=${dbInstanceIdentifier}`;
 }
