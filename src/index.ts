@@ -5,3 +5,4 @@ export * from './aws-widgets/aws-cloud-watch-logs.js';
 export * from './aws-widgets/aws-ecs-deployments.js';
 export * from './aws-widgets/aws-ecs-info.js';
 export * from './utils/utils.js';
+export * from './utils/arn-utils.js';
