@@ -1,1 +1,1 @@
-fixed npes
+- added log statement to aws provider specifying where creds are being located
