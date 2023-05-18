@@ -23,6 +23,7 @@ jobs:
           token: ${{ secrets.TS_GH_BOT }}
       - run: |
           npm ci;
+          npm run build;
           npm run qa;
           node .github/workflows/dependency-check.js;
           changeType=$(<.version-change-type)
