@@ -67,7 +67,7 @@ type MetricData = {
   timestamp: number;
 }
 
-type Metric = {
+export type Metric = {
   metricNamespace: string;
   metricName: string;
   metricDisplayName: string;
