@@ -37,3 +37,4 @@ jobs:
           if [ -z "$diff" ]; then echo "Missing release notes! exiting..."; exit 1; fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TS_GH_BOT }}
+          NODE_OPTIONS: "--max-old-space-size=8192"
