@@ -46,6 +46,7 @@
     "@types/lodash.get": "^4.4.7",
     "@types/lodash.isempty": "^4.4.7",
     "@types/lodash.isnil": "^4.0.7",
+    "@types/lodash.sortby": "^4.7.7",
     "@types/react": "^18.0.31",
     "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.52.0",
@@ -62,6 +63,7 @@
   "dependencies": {
     "@aws-sdk/client-cloudwatch": "^3.267.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.272.0",
+    "@aws-sdk/client-codepipeline": "^3.338.0",
     "@aws-sdk/client-ecs": "^3.278.0",
     "@aws-sdk/client-iam": "^3.276.0",
     "@aws-sdk/client-sts": "^3.319.0",
@@ -81,6 +83,7 @@
     "lodash.get": "4.x",
     "lodash.isempty": "4.x",
     "lodash.isnil": "4.x",
+    "lodash.sortby": "4.x",
     "react": "18.x"
   }
 }
