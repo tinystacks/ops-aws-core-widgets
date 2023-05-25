@@ -11,7 +11,7 @@
     "url": "git+https://github.com/tinystacks/ops-aws-core-widgets.git"
   },
   "scripts": {
-    "build": "npm run build:types; npm run build:js; pushd dist; rm **/*.jsx; popd",
+    "build": "npm run build:types; npm run build:js; cd dist; rm **/*.jsx; cd ..",
     "build:types": "tsc",
     "build:js": "babel dist --out-dir dist --extensions \".js,.jsx\" --source-maps inline",
     "clean": "rm -rf ./dist || true; rm *.tgz || true; rm -rf ./build;",
