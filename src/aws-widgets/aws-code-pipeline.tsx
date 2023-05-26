@@ -29,6 +29,9 @@ import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider
 import KeyValueStat from '../components/key-value-stat.js';
 import { findProvider } from '../utils/utils.js';
 import { IconButton } from 'rsuite';
+import { StatusIcon } from '../components/status-icon.js';
+import { Pill } from '../components/pill.js';
+import dayjs from 'dayjs';
 
 type AwsCodePipelineType = Widget & {
   pipelineName: string;
@@ -250,9 +253,8 @@ class AwsCodePipeline extends BaseWidget implements AwsCodePipelineType {
                 <WrapItem key={actionId}>
                   {
                     index !== 0 ?
-                      <Center h="240px" mr={2.5}>
+                      <Center h="200px" mr={2.5}>
                         <Stack align="center" spacing="3">
-                          <Box h="4" />
                           <ChevronRightIcon w={10} h={10} />
                         </Stack>
                       </Center> :
@@ -271,58 +273,71 @@ class AwsCodePipeline extends BaseWidget implements AwsCodePipelineType {
                         mx="auto"
                         shadow="base"
                         overflow="hidden"
-                        h="300px"
+                        h="200px"
                         w="320px"
                       >
                         <Stack justify="space-between" height="100%">
                           <Box px="6" pt="4" flex="1">
                             <Stack spacing="5px" h="full">
-                              <KeyValueStat
-                                label='Stage Name'
-                                value={a.stageName}
-                              />
-                              <KeyValueStat
-                                label='Action Name'
-                                value={a.name}
-                              />
-                              <KeyValueStat
-                                label='Action Type'
-                                value={`${a.provider} ${a.category}`}
-                              />
-                              <KeyValueStat
-                                label='Status'
-                                value={a.status || 'N/A'}
-                              />
-                              {
-                                a.lastStatusChange ?
-                                  <KeyValueStat
-                                    label='Last Status Change'
-                                    value={new Date(a.lastStatusChange).toLocaleString()}
-                                  /> :
-                                  <></>
-                              }
-                              {
-                                (
-                                  a.category === 'Approval' &&
-                                  a.provider === 'Manual' &&
-                                  a.status === 'InProgress'
-                                ) ?
-                                  <ButtonGroup variant='outline' spacing='6'>
-                                    <Button
-                                      colorScheme='blue'
-                                      onClick={() => submitApproval(a, 'Approved')}
-                                    >
-                                      Approve
-                                    </Button>
-                                    <Button
-                                      colorScheme='red'
-                                      onClick={() => submitApproval(a, 'Rejected')}
-                                    >
-                                      Reject
-                                    </Button>
-                                  </ButtonGroup> :
-                                  <></>
-                              }
+                              <HStack justify="space-between" align="center">
+                                <HStack justify="space-between" align="center"> 
+                                  <Text
+                                    as="h4"
+                                    fontWeight="bold"
+                                    fontSize="sm"
+                                    textTransform="uppercase"
+                                  >
+                                    {a.stageName}
+                                  </Text>
+                                  <Pill 
+                                    text={`${a.provider} ${a.category}`}
+                                    tooltip={a.name}
+                                  />
+                                </HStack>
+                                <StatusIcon
+                                  awaitingApproval={(
+                                    a.category === 'Approval' &&
+                                    a.provider === 'Manual' &&
+                                    a.status === 'InProgress'
+                                  )}
+                                  status={a.status}
+                                />
+                              </HStack>
+                              <Stack justify="start" align='baseline' height='100%'>
+                                <KeyValueStat
+                                  label='Status'
+                                  value={
+                                    !a.status ?
+                                      'N/A' :
+                                      `${a.status}${a.lastStatusChange ? ` ${dayjs(new Date(a.lastStatusChange)).format('M/D/YYYY h:mA')}` : ''}`
+                                  }
+                                />
+                                {
+                                  (
+                                    a.category === 'Approval' &&
+                                    a.provider === 'Manual'
+                                  ) ?
+                                    <HStack justify="end" align='center' height='100%' width='100%'> 
+                                      <Button
+                                        colorScheme='blue'
+                                        variant='outline'
+                                        isDisabled={a.status !== 'InProgress'}
+                                        onClick={() => submitApproval(a, 'Approved')}
+                                      >
+                                        Approve
+                                      </Button>
+                                      <Button
+                                        colorScheme='red'
+                                        variant='outline'
+                                        isDisabled={a.status !== 'InProgress'}
+                                        onClick={() => submitApproval(a, 'Rejected')}
+                                      >
+                                        Reject
+                                      </Button>
+                                    </HStack> :
+                                    <></>
+                                }
+                              </Stack>
                             </Stack>
                           </Box>
                         </Stack>
