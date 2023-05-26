@@ -23,6 +23,25 @@ export function getAwsCredentialsProvider (providers?: BaseProvider[]): AwsCrede
   return provider as AwsCredentialsProvider;
 }
 
+export function findProvider<T extends BaseProvider> (providers: BaseProvider[] = [], providerType: string): T {
+  if (!providers || isEmpty(providers)) {
+    throw TinyStacksError.fromJson({
+      message: 'No providers are available!',
+      status: 400
+    });
+  }
+
+  const provider = providers.find(p => p.type === providerType);
+  if (!provider) {
+    throw TinyStacksError.fromJson({
+      message: `No ${providerType}s are available!`,
+      status: 400
+    });
+  }
+
+  return provider as T;
+}
+
 // eslint-disable-next-line no-shadow
 export enum TimeUnitEnum {
   ns = 'ns',
