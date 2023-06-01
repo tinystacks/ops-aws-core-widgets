@@ -25,13 +25,13 @@ export default function EcsEnvVarsModal (props: { image: Image }) {
                   <Th>Host Port</Th>
                 </Thead>
                 <Tbody>
-                  {image.envVars.map(ev => (
+                  {(image.envVars || []).map(ev => (
                     <Tr key={`envVar${ev.name}`}>
                       <Td>{ev.name}</Td>
                       <Td>{ev.value}</Td>
                     </Tr>
                   ))}
-                  {image.secrets.map(secret => (
+                  {(image.secrets || []).map(secret => (
                     <Tr key={`secret${secret.name}`}>
                       <Td>{secret.name}</Td>
                       <Td>{secret.valueFrom}</Td>
