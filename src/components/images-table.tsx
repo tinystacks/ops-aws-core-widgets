@@ -1,7 +1,7 @@
-import { TableContainer, Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';
-import _ from 'lodash';
 import React from 'react';
-import { Image } from '../ops-types.js';
+import get from 'lodash.get';
+import { TableContainer, Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';
+import { Image } from '../utils/aws-ecs-utils.js';
 
 export default function ImagesTable (props: {
   images: Image[]
@@ -26,7 +26,7 @@ export default function ImagesTable (props: {
         <Td>{portMappingsString}</Td>
         <Td>{envVarsString}</Td>
         <Td>{secretsString}</Td>
-        <Td>{_.get(image, 'volumes[0].name')}</Td>
+        <Td>{get(image, 'volumes[0].name')}</Td>
       </Tr>
     );
   });

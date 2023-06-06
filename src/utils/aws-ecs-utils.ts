@@ -5,9 +5,23 @@ import {
   TaskDefinition,
   DescribeServicesCommandOutput,
   DescribeClustersCommandOutput,
-  ListTasksCommandOutput
+  ListTasksCommandOutput,
+  PortMapping,
+  KeyValuePair,
+  Secret,
+  Volume
 } from '@aws-sdk/client-ecs';
-import { Image } from '../ops-types';
+
+export type Image = {
+  containerId: string;
+  portMappings: PortMapping[];
+  envVars: KeyValuePair[];
+  secrets: Secret[],
+  volumes: Volume[],
+  cwLogsGroupArn: string,
+  memory: number,
+  cpu: number
+}
 
 export async function getCoreEcsData (ecsClient: ECS, clusterName: string, serviceName: string) {
   const promises = [];

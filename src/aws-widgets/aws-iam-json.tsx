@@ -1,3 +1,4 @@
+import React from 'react';
 import isEmpty from 'lodash.isempty';
 import isNil from 'lodash.isnil';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';

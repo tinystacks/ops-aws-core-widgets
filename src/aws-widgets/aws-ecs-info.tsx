@@ -14,10 +14,25 @@ import EcsPortsModal from '../components/ecs-ports-modal.js';
 import EcsEnvVarsModal from '../components/ecs-env-vars-modal.js';
 import { asgArnToUrl, cloudwatchLogsGroupArnToUrl, ecsClusterArnToUrl, ecsServiceArnToUrl, ecsTaskDefinitionArnToUrl } from '../utils/arn-utils.js';
 import KeyValueStat from '../components/key-value-stat.js';
-import {
-  AwsEcsInfo as AwsEcsInfoType,
-  Image
-} from '../ops-types.js';
+import { AwsEcsInfo as AwsEcsInfoProps } from '../ops-types.js';
+import { Image } from '../utils/aws-ecs-utils.js';
+
+type AwsEcsInfoType = AwsEcsInfoProps & {
+  serviceArn: string;
+  clusterArn: string;
+  runningCount: number;
+  desiredCount: number;
+  capacity: number;
+  asgArn: string;
+  memory: string;
+  cpu: string;
+  taskDefinitionArn: string,
+  status: string;
+  roleArn: string;
+  execRoleArn: string;
+  images: Image[];
+  capacityType: 'EC2' | 'Fargate';
+}
 
 export class AwsEcsInfo extends BaseWidget {
   static type = 'AwsEcsInfo';

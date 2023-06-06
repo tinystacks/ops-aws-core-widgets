@@ -1,11 +1,5 @@
 import { Provider, Widget } from '@tinystacks/ops-model';
 import { OutputLogEvent } from '@aws-sdk/client-cloudwatch-logs';
-import { 
-  PortMapping,
-  KeyValuePair,
-  Secret,
-  Volume
-} from '@aws-sdk/client-ecs';
 
 // Start Aws Credential Provider Types
 export type AwsKeys = { 
@@ -105,74 +99,16 @@ export type AwsCodePipeline = Widget & {
 };
 // End CodePipeline Types
 
-// Start Aws ECS Deployments Types
-export type Task = {
-  taskId?: string;
-  startTime?: Date;
-  stopTime?: Date;
-  status?: string;
-  group?: string;
-  version?: number;
-  cwLogsArn?: string;
-};
-
-export type Image = {
-  containerId: string;
-  portMappings: PortMapping[];
-  envVars: KeyValuePair[];
-  secrets: Secret[];
-  volumes: Volume[];
-  cwLogsGroupArn: string;
-  memory: number;
-  cpu: number;
-}
-
-export type TaskDefinition = {
-  taskDefinitionArn?: string;
-  cpu?: string;
-  memory?: string;
-  roleArn?: string;
-  execRoleArn?: string;
-  containers?: Image[];
-  tasks?: Task[];
-};
-
-export type Deployment = {
-  deploymentId?: string;
-  status?: string;
-  startTime?: Date;
-  runningCount?: number;
-  pendingCount?: number;
-  desiredCount?: number;
-  taskDefinition?: TaskDefinition;
-};
-
 export type AwsEcsDeployments = Widget & {
   region: string;
   clusterName: string;
   serviceName: string;
-  deployments?: Deployment[];
 };
-// End Aws ECS Deployments Types
 
 export type AwsEcsInfo = Widget & {
   region: string;
   clusterName: string;
   serviceName: string;
-  serviceArn?: string;
-  clusterArn?: string;
-  runningCount?: number;
-  desiredCount?: number;
-  capacity?: number;
-  asgArn?: string;
-  memory?: string;
-  cpu?: string;
-  taskDefinitionArn?: string,
-  status?: string;
-  roleArn?: string;
-  execRoleArn?: string;
-  images?: Image[];
-  capacityType?: 'EC2' | 'Fargate';
 }
 
 export type AwsIamJson = Widget & {

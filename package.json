@@ -11,9 +11,7 @@
     "url": "git+https://github.com/tinystacks/ops-aws-core-widgets.git"
   },
   "scripts": {
-    "build": "npm run build:types && npm run build:js && cd dist && rm **/*.jsx && cd .. && npm run types",
-    "build:types": "tsc",
-    "build:js": "babel dist --out-dir dist --extensions \".js,.jsx\" --source-maps inline",
+    "build": "tsc",
     "clean": "rm -rf ./dist || true; rm *.tgz || true; rm -rf ./build;",
     "clean-build": "npm run clean; npm run build",
     "prepack": "npm run clean-build",
@@ -38,11 +36,8 @@
     "types": "npx typescript-json-schema './src/ops-types.ts' '*' --out ./dist/ops-types.json --required --esModuleInterop"
   },
   "devDependencies": {
-    "@babel/cli": "^7.21.5",
-    "@babel/core": "^7.22.1",
-    "@babel/preset-react": "^7.22.3",
-    "@babel/preset-typescript": "^7.21.5",
     "@tinystacks/ops-core": "^0.1.0",
+    "@types/babel__traverse": "7.20.1",
     "@types/jest": "^29.4.0",
     "@types/lodash.get": "^4.4.7",
     "@types/lodash.isempty": "^4.4.7",

@@ -4,8 +4,6 @@ import {
 } from '../../ops-types.js';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
 
-
-
 class AwsKeys extends AwsCredentialsType implements AwsKeysConfig {
   AwsAccessKeyId: string;
   AwsSecretAccessKey: string;
