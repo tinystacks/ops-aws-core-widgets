@@ -6,7 +6,7 @@ import {
   useDisclosure
 } from '@chakra-ui/react';
 import React from 'react';
-import { Deployment } from '../aws-widgets/aws-ecs-deployments.js';
+import { Deployment } from '../ops-types.js';
 
 export default function DeploymentRow (props: {
   deployment: Deployment;

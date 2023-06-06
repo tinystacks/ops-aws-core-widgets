@@ -1,20 +1,18 @@
 import { STS, Credentials } from '@aws-sdk/client-sts';
 import { TinyStacksError } from '@tinystacks/ops-core';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
-import { AwsKeys, AwsKeysConfig } from './aws-keys.js';
-import { LocalAwsProfile, LocalAwsProfileConfig } from './local-aws-profile.js';
-import { AwsCredentialsClass, AwsCredentialsConfig } from '../../types/types.js';
+import { AwsKeys } from './aws-keys.js';
+import { LocalAwsProfile } from './local-aws-profile.js';
+import {
+  AwsAssumedRole as AwsAssumedRoleConfig,
+  AwsCredentials as AwsCredentialsConfig,
+  AwsKeys as AwsKeysConfig,
+  LocalAwsProfile as LocalAwsProfileConfig
+} from '../../ops-types.js';
+import { AwsCredentialsClass } from '../../types/types.js';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 const DEFAULT_REGION = 'us-east-1';
-
-export type AwsAssumedRoleConfig = { 
-  roleArn: string;
-  sessionName: string;
-  region: string;
-  primaryCredentials: AwsCredentialsClass;
-  duration?: number;
-}
 
 class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleConfig {
   roleArn: string;
@@ -30,7 +28,7 @@ class AwsAssumedRole extends AwsCredentialsType implements AwsAssumedRoleConfig 
     this.roleArn = props.roleArn;
     this.sessionName = props.sessionName;
     this.region = props.region || DEFAULT_REGION;
-    this.primaryCredentials = props.primaryCredentials;
+    this.primaryCredentials = AwsAssumedRole.buildPrimaryCreds(props.primaryCredentials);
     this.duration = props.duration || ROLE_SESSION_DURATION_SECONDS;
   }
 

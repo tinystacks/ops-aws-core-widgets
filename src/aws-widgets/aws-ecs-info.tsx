@@ -1,43 +1,23 @@
 import React from 'react';
+import get from 'lodash.get';
 import { Link, SimpleGrid, Stack, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react';
-import { Widget } from '@tinystacks/ops-model';
 import {
   ECS,
   DescribeTaskDefinitionCommandOutput,
   DescribeCapacityProvidersCommandOutput
 } from '@aws-sdk/client-ecs';
 import { STS } from '@aws-sdk/client-sts';
-import _ from 'lodash';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
-import { getCoreEcsData, hydrateImages, Image } from '../utils/aws-ecs-utils.js';
+import { getCoreEcsData, hydrateImages } from '../utils/aws-ecs-utils.js';
 import EcsPortsModal from '../components/ecs-ports-modal.js';
 import EcsEnvVarsModal from '../components/ecs-env-vars-modal.js';
 import { asgArnToUrl, cloudwatchLogsGroupArnToUrl, ecsClusterArnToUrl, ecsServiceArnToUrl, ecsTaskDefinitionArnToUrl } from '../utils/arn-utils.js';
 import KeyValueStat from '../components/key-value-stat.js';
-
-type AwsEcsInfoProps = Widget & {
-  region: string,
-  clusterName: string,
-  serviceName: string
-}
-
-type AwsEcsInfoType = AwsEcsInfoProps & {
-  serviceArn: string;
-  clusterArn: string;
-  runningCount: number;
-  desiredCount: number;
-  capacity: number;
-  asgArn: string;
-  memory: string;
-  cpu: string;
-  taskDefinitionArn: string,
-  status: string;
-  roleArn: string;
-  execRoleArn: string;
-  images: Image[];
-  capacityType: 'EC2' | 'Fargate';
-}
+import {
+  AwsEcsInfo as AwsEcsInfoType,
+  Image
+} from '../ops-types.js';
 
 export class AwsEcsInfo extends BaseWidget {
   static type = 'AwsEcsInfo';
@@ -59,7 +39,7 @@ export class AwsEcsInfo extends BaseWidget {
   images: Image[];
   capacityType: 'EC2' | 'Fargate';
 
-  constructor (props: AwsEcsInfoProps) {
+  constructor (props: AwsEcsInfoType) {
     super(props);
     this.region = props.region;
     this.clusterName = props.clusterName;
@@ -141,7 +121,7 @@ export class AwsEcsInfo extends BaseWidget {
         taskDefinition: service?.taskDefinition
       }));
       promises.push(ecsClient.describeCapacityProviders({
-        capacityProviders: [_.get(cluster, 'defaultCapacityProviderStrategy[0].capacityProvider')]
+        capacityProviders: [get(cluster, 'defaultCapacityProviderStrategy[0].capacityProvider')]
       }));
       const secondarySettledPromises = (await Promise.allSettled(promises)).map((promise) => {
         if (promise.status === 'fulfilled') {
@@ -158,7 +138,7 @@ export class AwsEcsInfo extends BaseWidget {
       this.cpu = taskDefinition?.cpu;
       this.execRoleArn = taskDefinition?.executionRoleArn;
 
-      const capacityProvider = _.get(describeCapacityProvidersRes, 'capacityProviders[0]');
+      const capacityProvider = get(describeCapacityProvidersRes, 'capacityProviders[0]');
       this.asgArn = capacityProvider?.autoScalingGroupProvider?.autoScalingGroupArn;
       this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity | this.desiredCount;
       this.capacityType = capacityProvider?.autoScalingGroupProvider ? 'EC2' : 'Fargate';

@@ -1,7 +1,7 @@
 import { TableContainer, Table, Thead, Tr, Th, Tbody, Td } from '@chakra-ui/react';
 import _ from 'lodash';
 import React from 'react';
-import { Image } from '../utils/aws-ecs-utils.js';
+import { Image } from '../ops-types.js';
 
 export default function ImagesTable (props: {
   images: Image[]

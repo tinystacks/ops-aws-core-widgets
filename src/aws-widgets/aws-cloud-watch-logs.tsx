@@ -1,25 +1,19 @@
 import React from 'react';
 import isEmpty from 'lodash.isempty';
-
-import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { CloudWatchLogs, OutputLogEvent } from '@aws-sdk/client-cloudwatch-logs';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
 import {
-  getAwsCredentialsProvider, getTimes, TimeUnitEnum, TimeRange, cleanTimeRange, TimeRangeOverrides
+  getAwsCredentialsProvider, getTimes, cleanTimeRange, TimeRangeOverrides
 } from '../utils/utils.js';
 import { Box, Code, Stack } from '@chakra-ui/react';
 import { TimeRangeSelector } from '../components/time-range-selector.js';
 import { arnSplitter, isArn } from '../utils/arn-utils.js';
-
-type AwsCloudWatchLogsProps = Widget & {
-  region: string,
-  logGroupName: string,
-  logStreamName?: string,
-  timeRange: TimeRange,
-  showTimeRangeSelector?: boolean;
-  events?: OutputLogEvent[];
-}
+import {
+  AwsCloudWatchLogs as AwsCloudWatchLogsProps,
+  TimeRange,
+  TimeUnit
+} from '../ops-types.js';
 
 type AwsCloudWatchLogsOverrides = TimeRangeOverrides;
 
@@ -39,7 +33,7 @@ export class AwsCloudWatchLogs extends BaseWidget {
     this.logGroupName = props.logGroupName;
     this.timeRange = props.timeRange || {
       time: 5,
-      unit: TimeUnitEnum.m
+      unit: TimeUnit.m
     };
     this.showTimeRangeSelector = props.showTimeRangeSelector || false;
     this.events = props.events || [];

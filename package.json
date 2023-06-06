@@ -11,7 +11,7 @@
     "url": "git+https://github.com/tinystacks/ops-aws-core-widgets.git"
   },
   "scripts": {
-    "build": "npm run build:types; npm run build:js; cd dist; rm **/*.jsx; cd ..",
+    "build": "npm run build:types && npm run build:js && cd dist && rm **/*.jsx && cd .. && npm run types",
     "build:types": "tsc",
     "build:js": "babel dist --out-dir dist --extensions \".js,.jsx\" --source-maps inline",
     "clean": "rm -rf ./dist || true; rm *.tgz || true; rm -rf ./build;",
@@ -34,13 +34,14 @@
     "test-file": "jest ./test/index.test.ts",
     "test-file-cov": "jest ./testindex.test.ts --coverage",
     "view-test-cov": "jest --coverage || true && open coverage/lcov-report/index.html",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "types": "npx typescript-json-schema './src/ops-types.ts' '*' --out ./dist/ops-types.json --required --esModuleInterop"
   },
   "devDependencies": {
-    "@babel/cli": "^7.20.7",
-    "@babel/core": "^7.20.12",
-    "@babel/preset-react": "^7.18.6",
-    "@babel/preset-typescript": "^7.21.0",
+    "@babel/cli": "^7.21.5",
+    "@babel/core": "^7.22.1",
+    "@babel/preset-react": "^7.22.3",
+    "@babel/preset-typescript": "^7.21.5",
     "@tinystacks/ops-core": "^0.1.0",
     "@types/jest": "^29.4.0",
     "@types/lodash.get": "^4.4.7",

@@ -2,7 +2,7 @@ import {
   Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Table, Tbody, Td, Th, Thead, Tr, useDisclosure
 } from '@chakra-ui/react';
 import React from 'react';
-import { Image } from '../utils/aws-ecs-utils.js';
+import { Image } from '../ops-types.js';
 
 export default function EcsEnvVarsModal (props: { image: Image }) {
   const { isOpen, onOpen, onClose } = useDisclosure();

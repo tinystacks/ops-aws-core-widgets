@@ -1,27 +1,13 @@
+import get from 'lodash.get';
 import { 
   ECS,
   Task,
   TaskDefinition,
-  PortMapping,
-  KeyValuePair,
-  Secret,
-  Volume,
   DescribeServicesCommandOutput,
   DescribeClustersCommandOutput,
   ListTasksCommandOutput
 } from '@aws-sdk/client-ecs';
-import get from 'lodash.get';
-
-export type Image = {
-  containerId: string;
-  portMappings: PortMapping[];
-  envVars: KeyValuePair[];
-  secrets: Secret[],
-  volumes: Volume[],
-  cwLogsGroupArn: string,
-  memory: number,
-  cpu: number
-}
+import { Image } from '../ops-types';
 
 export async function getCoreEcsData (ecsClient: ECS, clusterName: string, serviceName: string) {
   const promises = [];

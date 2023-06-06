@@ -11,7 +11,6 @@ import {
   Tr
 } from '@chakra-ui/react';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
-import { Widget } from '@tinystacks/ops-model';
 import {
   ECS,
   Deployment as AwsDeployment,
@@ -22,52 +21,16 @@ import _ from 'lodash';
 import {
   getCoreEcsData,
   getTasksForTaskDefinition,
-  hydrateImages,
-  Image
+  hydrateImages
 } from '../utils/aws-ecs-utils.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import TaskDefinitionBody from '../components/task-definition-body.js';
 import DeploymentRow from '../components/deployment-row.js';
-
-type Task = {
-  taskId?: string;
-  startTime?: Date;
-  stopTime?: Date;
-  status?: string;
-  group?: string;
-  version?: number;
-  cwLogsArn?: string;
-};
-
-export type TaskDefinition = {
-  taskDefinitionArn?: string;
-  cpu?: string;
-  memory?: string;
-  roleArn?: string;
-  execRoleArn?: string;
-  containers?: Image[];
-  tasks?: Task[];
-};
-
-export type Deployment = {
-  deploymentId?: string;
-  status?: string;
-  startTime?: Date;
-  runningCount?: number;
-  pendingCount?: number;
-  desiredCount?: number;
-  taskDefinition?: TaskDefinition;
-};
-
-type AwsEcsDeploymentsProps = Widget & {
-  region: string;
-  clusterName: string;
-  serviceName: string;
-};
-
-type AwsEcsDeploymentsType = AwsEcsDeploymentsProps & {
-  deployments?: Deployment[];
-};
+import {
+  AwsEcsDeployments as AwsEcsDeploymentsType,
+  Deployment,
+  Task
+} from '../ops-types.js';
 
 type AwsEcsDeploymentsOverrides = {
   stoppedTaskId?: string;

@@ -14,7 +14,7 @@ import {
   Stack
 } from '@chakra-ui/react';
 import React from 'react';
-import { TaskDefinition } from '../aws-widgets/aws-ecs-deployments.js';
+import { TaskDefinition } from '../ops-types.js';
 import { ecsTaskDefinitionArnToUrl, roleArnToUrl } from '../utils/arn-utils.js';
 
 export default function TaskDefinitionBody (props: {

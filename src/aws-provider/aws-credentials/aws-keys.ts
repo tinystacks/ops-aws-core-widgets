@@ -1,11 +1,10 @@
-import { AwsCredentialsConfig } from '../../types/types.js';
+import {
+  AwsCredentials as AwsCredentialsConfig,
+  AwsKeys as AwsKeysConfig
+} from '../../ops-types.js';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
 
-export type AwsKeysConfig = { 
-  AwsAccessKeyId: string;
-  AwsSecretAccessKey: string;
-  AwsSessionToken?: string;
-}
+
 
 class AwsKeys extends AwsCredentialsType implements AwsKeysConfig {
   AwsAccessKeyId: string;
