@@ -1,6 +1,7 @@
 import React from 'react';
 import sortBy from 'lodash.sortby';
-import { Widget } from '@tinystacks/ops-model';
+import dayjs from 'dayjs';
+
 import { ChevronRightIcon, RepeatIcon } from '@chakra-ui/icons';
 import {
   BaseProvider,
@@ -30,13 +31,9 @@ import { findProvider } from '../utils/utils.js';
 import { IconButton } from 'rsuite';
 import { StatusIcon } from '../components/status-icon.js';
 import { Pill } from '../components/pill.js';
-import dayjs from 'dayjs';
-
-type AwsCodePipelineType = Widget & {
-  pipelineName: string;
-  region: string;
-  pipeline?: Pipeline;
-};
+import {
+  AwsCodePipeline as AwsCodePipelineType, Pipeline, StageAction
+} from '../ops-types.js';
 
 type AwsCodePipelineOverrides = {
   pipelineName?: string;
@@ -49,32 +46,6 @@ type AwsCodePipelineOverrides = {
   };
   startPipeline?: boolean;
 };
-
-type PipelineAction = {
-  name: string;
-  status: string;
-  lastStatusChange?: Date;
-  token?: string;
-  category: string;
-  provider: string;
-  runOrder: number;
-};
-
-type StageAction = PipelineAction & {
-  stageName: string;
-}
-
-type PipelineStage = {
-  name: string;
-  status: string;
-  actions: PipelineAction[]
-};
-
-type Pipeline = {
-  name: string;
-  arn: string;
-  stages: PipelineStage[]
-}
 
 class AwsCodePipeline extends BaseWidget implements AwsCodePipelineType {
   static type = 'AwsCloudWatchLogs';
@@ -355,7 +326,6 @@ class AwsCodePipeline extends BaseWidget implements AwsCodePipelineType {
 
 export {
   AwsCodePipeline,
-  AwsCodePipelineType,
   AwsCodePipelineOverrides
 };
 export default AwsCodePipeline;

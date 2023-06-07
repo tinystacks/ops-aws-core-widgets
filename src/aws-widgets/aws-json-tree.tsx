@@ -1,16 +1,10 @@
-import { Widget } from '@tinystacks/ops-model';
+import React from 'react';
+import isEmpty from 'lodash.isempty';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import CloudControl, { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
-import isEmpty from 'lodash.isempty';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
-
-type AwsJsonTreeProps = Widget & {
-  region: string,
-  cloudControlType: string,
-  resourceModel?: string,
-  paths?: string[]
-}
+import { AwsJsonTree as AwsJsonTreeProps } from '../ops-types.js';
 
 export class AwsJsonTree extends BaseWidget {
   static type = 'AwsJsonTree';

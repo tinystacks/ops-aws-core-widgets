@@ -1,16 +1,16 @@
+import get from 'lodash.get';
 import { 
   ECS,
   Task,
   TaskDefinition,
+  DescribeServicesCommandOutput,
+  DescribeClustersCommandOutput,
+  ListTasksCommandOutput,
   PortMapping,
   KeyValuePair,
   Secret,
-  Volume,
-  DescribeServicesCommandOutput,
-  DescribeClustersCommandOutput,
-  ListTasksCommandOutput
+  Volume
 } from '@aws-sdk/client-ecs';
-import get from 'lodash.get';
 
 export type Image = {
   containerId: string;

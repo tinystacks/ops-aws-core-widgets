@@ -1,17 +1,12 @@
-import { Widget } from '@tinystacks/ops-model';
+import React from 'react';
+import isEmpty from 'lodash.isempty';
+import isNil from 'lodash.isnil';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { IAM } from '@aws-sdk/client-iam';
 import { Policy } from 'aws-sdk/clients/iam';
-import isNil from 'lodash.isnil';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
-import isEmpty from 'lodash.isempty';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
-
-type AwsIamJsonProps = Widget & {
-  region: string,
-  roleArn?: string,
-  policyArn?: string,
-}
+import { AwsIamJson as AwsIamJsonProps } from '../ops-types.js';
 
 export class AwsIamJson extends BaseWidget {
   static type = 'AwsIamJson';
@@ -21,7 +16,6 @@ export class AwsIamJson extends BaseWidget {
   private _policy: Policy;
   private _rolePolicies: string[];
 
-
   constructor (props: AwsIamJsonProps) {
     super(props);
     this.region = props.region;
@@ -29,7 +23,6 @@ export class AwsIamJson extends BaseWidget {
     this.policyArn = props.policyArn;
     this.policy = {};
     this.rolePolicies = [];
-
   }
 
   fromJson (object: AwsIamJsonProps): AwsIamJson {
@@ -50,7 +43,6 @@ export class AwsIamJson extends BaseWidget {
       roleArn: this.roleArn,
       policyArn: this.policyArn };
   }
-
 
   async getData (providers?: BaseProvider[]): Promise<void> {
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {

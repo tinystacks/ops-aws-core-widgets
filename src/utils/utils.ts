@@ -3,6 +3,7 @@ import get from 'lodash.get';
 import { BaseProvider, TinyStacksError } from '@tinystacks/ops-core';
 import dayjs, { ManipulateType } from 'dayjs';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
+import { AbsoluteTimeRange, RelativeTime, TimeRange } from '../ops-types.js';
 
 export function getAwsCredentialsProvider (providers?: BaseProvider[]): AwsCredentialsProvider {
   if (!providers || isEmpty(providers)) {
@@ -40,30 +41,6 @@ export function findProvider<T extends BaseProvider> (providers: BaseProvider[] 
   }
 
   return provider as T;
-}
-
-// eslint-disable-next-line no-shadow
-export enum TimeUnitEnum {
-  ns = 'ns',
-  ms = 'ms',
-  s = 's',
-  m = 'm',
-  hr = 'h',
-  d = 'd',
-  w = 'w',
-  mo = 'mo',
-  yr = 'yr'
-}
-
-export type TimeRange = AbsoluteTimeRange | RelativeTime;
-export type AbsoluteTimeRange = {
-  startTime: number;
-  endTime: number;
-}
-
-export type RelativeTime = {
-  time: number;
-  unit: TimeUnitEnum;
 }
 
 export function getTimes (timeRange: TimeRange) {

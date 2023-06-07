@@ -1,3 +1,4 @@
+import React from 'react';
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import {
   Tr,
@@ -5,8 +6,7 @@ import {
   Button,
   useDisclosure
 } from '@chakra-ui/react';
-import React from 'react';
-import { Deployment } from '../aws-widgets/aws-ecs-deployments.js';
+import { Deployment } from '../aws-widgets/aws-ecs-deployments';
 
 export default function DeploymentRow (props: {
   deployment: Deployment;
