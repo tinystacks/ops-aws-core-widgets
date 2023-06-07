@@ -3,6 +3,7 @@ import get from 'lodash.get';
 import { BaseProvider, TinyStacksError } from '@tinystacks/ops-core';
 import dayjs, { ManipulateType } from 'dayjs';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
+import { AbsoluteTimeRange, RelativeTime, TimeRange } from '../ops-types.js';
 
 export function getAwsCredentialsProvider (providers?: BaseProvider[]): AwsCredentialsProvider {
   if (!providers || isEmpty(providers)) {
@@ -23,28 +24,23 @@ export function getAwsCredentialsProvider (providers?: BaseProvider[]): AwsCrede
   return provider as AwsCredentialsProvider;
 }
 
-// eslint-disable-next-line no-shadow
-export enum TimeUnitEnum {
-  ns = 'ns',
-  ms = 'ms',
-  s = 's',
-  m = 'm',
-  hr = 'h',
-  d = 'd',
-  w = 'w',
-  mo = 'mo',
-  yr = 'yr'
-}
+export function findProvider<T extends BaseProvider> (providers: BaseProvider[] = [], providerType: string): T {
+  if (!providers || isEmpty(providers)) {
+    throw TinyStacksError.fromJson({
+      message: 'No providers are available!',
+      status: 400
+    });
+  }
 
-export type TimeRange = AbsoluteTimeRange | RelativeTime;
-export type AbsoluteTimeRange = {
-  startTime: number;
-  endTime: number;
-}
+  const provider = providers.find(p => p.type === providerType);
+  if (!provider) {
+    throw TinyStacksError.fromJson({
+      message: `No ${providerType}s are available!`,
+      status: 400
+    });
+  }
 
-export type RelativeTime = {
-  time: number;
-  unit: TimeUnitEnum;
+  return provider as T;
 }
 
 export function getTimes (timeRange: TimeRange) {

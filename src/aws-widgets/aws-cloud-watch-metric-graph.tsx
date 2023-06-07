@@ -5,13 +5,14 @@ import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
-import { getAwsCredentialsProvider, getTimes, TimeUnitEnum, TimeRange, TimeRangeOverrides, cleanTimeRange, getPeriodBasedOnTimeRange } from '../utils/utils.js';
+import { getAwsCredentialsProvider, getTimes, TimeRangeOverrides, cleanTimeRange, getPeriodBasedOnTimeRange } from '../utils/utils.js';
 import { Box, Stack } from '@chakra-ui/react';
 import { TimeRangeSelector } from '../components/time-range-selector.js';
 import { Line } from 'react-chartjs-2';
 import {
   CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, Chart, LineElement, TooltipItem, TooltipModel
 } from 'chart.js';
+import { TimeRange, TimeUnit } from '../ops-types.js';
 
 Chart.register(
   CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, LineElement
@@ -102,7 +103,7 @@ export class AwsCloudWatchMetricGraph extends BaseWidget {
     this.metrics = metrics;
     this.timeRange = timeRange || {
       time: 5,
-      unit: TimeUnitEnum.m
+      unit: TimeUnit.m
     };
     this.region = region || 'us-east-1';
   }

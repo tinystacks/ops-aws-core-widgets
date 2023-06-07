@@ -11,7 +11,6 @@ import {
   Tr
 } from '@chakra-ui/react';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
-import { Widget } from '@tinystacks/ops-model';
 import {
   ECS,
   Deployment as AwsDeployment,
@@ -22,12 +21,13 @@ import _ from 'lodash';
 import {
   getCoreEcsData,
   getTasksForTaskDefinition,
-  hydrateImages,
-  Image
+  hydrateImages
 } from '../utils/aws-ecs-utils.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import TaskDefinitionBody from '../components/task-definition-body.js';
 import DeploymentRow from '../components/deployment-row.js';
+import { AwsEcsDeployments as AwsEcsDeploymentsProps } from '../ops-types.js';
+import { Image } from '../utils/aws-ecs-utils.js';
 
 type Task = {
   taskId?: string;
@@ -57,12 +57,6 @@ export type Deployment = {
   pendingCount?: number;
   desiredCount?: number;
   taskDefinition?: TaskDefinition;
-};
-
-type AwsEcsDeploymentsProps = Widget & {
-  region: string;
-  clusterName: string;
-  serviceName: string;
 };
 
 type AwsEcsDeploymentsType = AwsEcsDeploymentsProps & {

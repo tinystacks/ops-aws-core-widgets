@@ -2,17 +2,17 @@ import React from 'react';
 import { useState } from 'react';
 import { Stack } from '@chakra-ui/react';
 import { DateRange } from 'rsuite/esm/DateRangePicker';
-import { RelativeTime, TimeRange, TimeUnitEnum } from '../utils/utils.js';
+import { RelativeTime, TimeRange, TimeUnit } from '../ops-types.js';
 import { RadioButtonGroup, RadioButton } from './radio-button-group.js';
 import { DateTimeSelectPopover } from './date-time-select-popover.js';
 
 const timeRangesToRadioValue: { [key: string]: RelativeTime } = {
-  '5m': { time: 5, unit: TimeUnitEnum.m },
-  '30m': { time: 30, unit: TimeUnitEnum.m },
-  '1hr': { time: 1, unit: TimeUnitEnum.hr },
-  '12hr': { time: 12, unit: TimeUnitEnum.hr },
-  '3d': { time: 3, unit: TimeUnitEnum.d },
-  '1w': { time: 1, unit: TimeUnitEnum.w }
+  '5m': { time: 5, unit: TimeUnit.m },
+  '30m': { time: 30, unit: TimeUnit.m },
+  '1hr': { time: 1, unit: TimeUnit.hr },
+  '12hr': { time: 12, unit: TimeUnit.hr },
+  '3d': { time: 3, unit: TimeUnit.d },
+  '1w': { time: 1, unit: TimeUnit.w }
 };
 
 export type TimeRangeSelectorProps = {
