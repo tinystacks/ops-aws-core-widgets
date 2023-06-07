@@ -123,3 +123,29 @@ export type AwsJsonTree = Widget & {
   resourceModel?: string,
   paths?: string[]
 }
+
+export type KeyValuePair = {
+  key: string;
+  value: string;
+}
+
+export type MetricData = {
+  value: number;
+  unit: string;
+  timestamp: number;
+}
+
+export type Metric = {
+  metricNamespace: string;
+  metricName: string;
+  metricDisplayName: string;
+  statistic?: string;
+  dimensions: KeyValuePair[];
+  data?: MetricData[];
+}
+
+export type AwsCloudWatchMetricGraph = Widget & {
+  region?: string;
+  timeRange?: TimeRange;
+  metrics: Metric[]
+}
