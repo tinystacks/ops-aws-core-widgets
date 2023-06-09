@@ -2,17 +2,17 @@ import { Provider, Widget } from '@tinystacks/ops-model';
 import { OutputLogEvent } from '@aws-sdk/client-cloudwatch-logs';
 
 // Start Aws Credential Provider Types
-export type AwsKeys = { 
+export interface AwsKeys {
   AwsAccessKeyId: string;
   AwsSecretAccessKey: string;
   AwsSessionToken?: string;
 }
 
-export type LocalAwsProfile = { 
+export interface LocalAwsProfile {
   profileName: string;
-};
+}
 
-export type AwsAssumedRole = {
+export interface AwsAssumedRole {
   roleArn: string;
   sessionName: string;
   region: string;
@@ -22,12 +22,12 @@ export type AwsAssumedRole = {
 
 export type AwsCredentials = AwsAssumedRole | AwsKeys | LocalAwsProfile;
 
-export type AwsCredentialsProvider = Provider & {
+export interface AwsCredentialsProvider extends Provider {
   credentials: AwsCredentials,
   accountId?: string,
   region?: string,
   cliEnv?: { [key: string]: string }
-};
+}
 // End Aws Credential Provider Types
 
 // Start Aws CloudWatch Types
@@ -43,19 +43,19 @@ export enum TimeUnit {
   yr = 'yr'
 }
 
-export type AbsoluteTimeRange = {
+export interface AbsoluteTimeRange {
   startTime: number;
   endTime: number;
 }
 
-export type RelativeTime = {
+export interface RelativeTime {
   time: number;
   unit: TimeUnit;
 }
 
 export type TimeRange = AbsoluteTimeRange | RelativeTime;
 
-export type AwsCloudWatchLogs = Widget & {
+export interface AwsCloudWatchLogs extends Widget {
   region: string,
   logGroupName: string,
   logStreamName?: string,
@@ -66,7 +66,7 @@ export type AwsCloudWatchLogs = Widget & {
 // End Aws CloudWatch Types
 
 // Start CodePipeline Types
-export type PipelineAction = {
+export interface PipelineAction {
   name: string;
   status: string;
   lastStatusChange?: Date;
@@ -74,68 +74,68 @@ export type PipelineAction = {
   category: string;
   provider: string;
   runOrder: number;
-};
+}
 
-export type StageAction = PipelineAction & {
+export interface StageAction extends PipelineAction {
   stageName: string;
 }
 
-export type PipelineStage = {
+export interface PipelineStage {
   name: string;
   status: string;
   actions: PipelineAction[]
-};
+}
 
-export type Pipeline = {
+export interface Pipeline {
   name: string;
   arn: string;
   stages: PipelineStage[]
 }
 
-export type AwsCodePipeline = Widget & {
+export interface AwsCodePipeline extends Widget {
   pipelineName: string;
   region: string;
   pipeline?: Pipeline;
-};
+}
 // End CodePipeline Types
 
-export type AwsEcsDeployments = Widget & {
-  region: string;
-  clusterName: string;
-  serviceName: string;
-};
-
-export type AwsEcsInfo = Widget & {
+export interface AwsEcsDeployments extends Widget {
   region: string;
   clusterName: string;
   serviceName: string;
 }
 
-export type AwsIamJson = Widget & {
+export interface AwsEcsInfo extends Widget {
+  region: string;
+  clusterName: string;
+  serviceName: string;
+}
+
+export interface AwsIamJson extends Widget {
   region: string,
   roleArn?: string,
   policyArn?: string,
 }
 
-export type AwsJsonTree = Widget & {
+export interface AwsJsonTree extends Widget {
   region: string,
   cloudControlType: string,
   resourceModel?: string,
   paths?: string[]
 }
 
-export type KeyValuePair = {
+export interface KeyValuePair {
   key: string;
   value: string;
 }
 
-export type MetricData = {
+export interface MetricData {
   value: number;
   unit: string;
   timestamp: number;
 }
 
-export type Metric = {
+export interface Metric {
   metricNamespace: string;
   metricName: string;
   metricDisplayName: string;
@@ -144,7 +144,7 @@ export type Metric = {
   data?: MetricData[];
 }
 
-export type AwsCloudWatchMetricGraph = Widget & {
+export interface AwsCloudWatchMetricGraph extends Widget {
   region?: string;
   timeRange?: TimeRange;
   metrics: Metric[]
