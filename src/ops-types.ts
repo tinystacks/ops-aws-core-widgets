@@ -22,6 +22,19 @@ export interface AwsAssumedRole {
 
 export type AwsCredentials = AwsAssumedRole | AwsKeys | LocalAwsProfile;
 
+/**
+ * @example
+ * ```yaml
+ * AwsProvider:
+    type: AwsCredentialsProvider
+    credentials:
+      roleArn: arn:aws:iam::123456789012:role/OrganizationAccountAccessRole
+      sessionName: ops-console
+      region: us-east-1
+      primaryCredentials:
+        profileName: default
+ * ```
+ */
 export interface AwsCredentialsProvider extends Provider {
   credentials: AwsCredentials,
   accountId?: string,
@@ -55,6 +68,23 @@ export interface RelativeTime {
 
 export type TimeRange = AbsoluteTimeRange | RelativeTime;
 
+/**
+ * @example
+ * ```yaml
+ * Logs:
+    type: AwsCloudWatchLogs
+    displayName: Service Logs
+    region: us-east-1
+    providers:
+      - $ref: '#/Console/providers/AwsProvider'
+    logGroupName: 
+      $ref: '#/Console/widgets/EcsInfo'
+      path: images[0].cwLogsGroupArn
+    timeRange:
+      time: 12
+      unit: h
+ * ```
+ */
 export interface AwsCloudWatchLogs extends Widget {
   region: string,
   logGroupName: string,
@@ -92,6 +122,18 @@ export interface Pipeline {
   stages: PipelineStage[]
 }
 
+/**
+ * @example
+ * ```yaml
+ * CodePipeline:
+    type: AwsCodePipeline
+    displayName: Code Pipeline
+    pipelineName: my-code-pipeline-name
+    region: $const.region
+    providers:
+      - $ref: '#/Console/providers/AwsProvider'
+ * ```
+ */
 export interface AwsCodePipeline extends Widget {
   pipelineName: string;
   region: string;
@@ -99,12 +141,44 @@ export interface AwsCodePipeline extends Widget {
 }
 // End CodePipeline Types
 
+/**
+ * @example
+ * ```yaml
+ * EcsDeployments:
+    type: AwsEcsDeployments
+    displayName: Service Deployments
+    providers:
+      - $ref: '#/Console/providers/AwsProvider'
+    region:
+      $ref: '#/Console/widgets/EcsInfo'
+      path: region
+    clusterName:
+      $ref: '#/Console/widgets/EcsInfo'
+      path: clusterName
+    serviceName:
+      $ref: '#/Console/widgets/EcsInfo'
+      path: serviceName
+ * ```
+ */
 export interface AwsEcsDeployments extends Widget {
   region: string;
   clusterName: string;
   serviceName: string;
 }
 
+/**
+ * @example
+ * ```yaml
+ * EcsInfo:
+    type: AwsEcsInfo
+    displayName: Service Information
+    providers:
+      - $ref: '#/Console/providers/AwsLocalProvider'
+    region: $param.region
+    clusterName: $param.clusterName
+    serviceName: $param.serviceName
+ * ```
+ */
 export interface AwsEcsInfo extends Widget {
   region: string;
   clusterName: string;
@@ -144,6 +218,51 @@ export interface Metric {
   data?: MetricData[];
 }
 
+/**
+ * @example
+ * ```yaml
+ * CPUMetrics:
+    type: AwsCloudWatchMetricGraph
+    displayName: CPU Utilization Details
+    region:
+      $ref: '#/Console/widgets/EcsInfo'
+      path: region
+    period: 300
+    providers:
+      - $ref: '#/Console/providers/AwsProvider'
+    timeRange:
+      time: 1
+      unit: h
+    metrics:
+      - metricNamespace: AWS/ECS
+        metricName: CPUUtilization
+        metricDisplayName: 'Average'
+        statistic: Average
+        dimensions:
+          - key: ClusterName
+            value: $param.clusterName
+          - key: ServiceName
+            value: $param.serviceName
+      - metricNamespace: AWS/ECS
+        metricName: CPUUtilization
+        metricDisplayName: 'Max'
+        statistic: Maximum
+        dimensions:
+          - key: ClusterName
+            value: $param.clusterName
+          - key: ServiceName
+            value: $param.serviceName
+      - metricNamespace: AWS/ECS
+        metricName: CPUUtilization
+        metricDisplayName: 'Min'
+        statistic: Minimum
+        dimensions:
+          - key: ClusterName
+            value: $param.clusterName
+          - key: ServiceName
+            value: $param.serviceName
+ * ```
+ */
 export interface AwsCloudWatchMetricGraph extends Widget {
   region?: string;
   timeRange?: TimeRange;
