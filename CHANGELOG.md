@@ -1,3 +1,7 @@
+v0.0.24
+---
+- Change ops-types from type to interface for docs generation
+ 
 v0.0.23
 ---
 
