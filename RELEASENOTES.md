@@ -1,1 +1,1 @@
-
+- Added copy arn buttons in ecs info widget

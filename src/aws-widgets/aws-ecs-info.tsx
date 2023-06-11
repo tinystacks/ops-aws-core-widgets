@@ -12,7 +12,7 @@ import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { getCoreEcsData, hydrateImages } from '../utils/aws-ecs-utils.js';
 import EcsPortsModal from '../components/ecs-ports-modal.js';
 import EcsEnvVarsModal from '../components/ecs-env-vars-modal.js';
-import { asgArnToUrl, cloudwatchLogsGroupArnToUrl, ecsClusterArnToUrl, ecsServiceArnToUrl, ecsTaskDefinitionArnToUrl } from '../utils/arn-utils.js';
+import { asgArnToUrl, cloudwatchLogsGroupArnToUrl, ecsClusterArnToUrl, ecsServiceArnToUrl, ecsTaskDefinitionArnToUrl, getAsgNameFromArn, getTaskDefIdFromArn } from '../utils/arn-utils.js';
 import KeyValueStat from '../components/key-value-stat.js';
 import { AwsEcsInfo as AwsEcsInfoProps } from '../ops-types.js';
 import { Image } from '../utils/aws-ecs-utils.js';
@@ -188,14 +188,16 @@ export class AwsEcsInfo extends BaseWidget {
       <Stack p='20px'>
         <SimpleGrid columns={4} spacing={10}>
           <KeyValueStat
-            label='Cluster Arn'
-            value={this.clusterArn}
+            label='Cluster'
+            value={this.clusterName}
             href={ecsClusterArnToUrl(this.clusterArn)}
+            copy={this.clusterArn}
           />
           <KeyValueStat
-            label='Service Arn'
-            value={this.serviceArn}
+            label='Service'
+            value={this.serviceName}
             href={ecsServiceArnToUrl(this.serviceArn)}
+            copy={this.serviceArn}
           />
           <KeyValueStat
             label='Tasks Running/Desired'
@@ -203,8 +205,9 @@ export class AwsEcsInfo extends BaseWidget {
           />
           <KeyValueStat
             label='Active Task Def Id'
-            value={this.taskDefinitionArn}
+            value={getTaskDefIdFromArn(this.taskDefinitionArn)}
             href={ecsTaskDefinitionArnToUrl(this.taskDefinitionArn)}
+            copy={this.taskDefinitionArn}
           />
           <KeyValueStat
             label='Provisioned CPU'
@@ -222,8 +225,9 @@ export class AwsEcsInfo extends BaseWidget {
             this.asgArn && 
               <KeyValueStat
                 label='ASG'
-                value={this.asgArn}
+                value={getAsgNameFromArn(this.asgArn)}
                 href={asgArnToUrl(this.asgArn)}
+                copy={this.asgArn}
               />
           }
         </SimpleGrid>
