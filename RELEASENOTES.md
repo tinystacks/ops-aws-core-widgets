@@ -1,1 +1,1 @@
-
+- Add yaml config examples to types in tsdoc comments
