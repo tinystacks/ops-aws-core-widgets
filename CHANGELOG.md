@@ -1,3 +1,7 @@
+v0.0.25
+---
+- Add yaml config examples to types in tsdoc comments
+ 
 v0.0.24
 ---
 - Change ops-types from type to interface for docs generation
