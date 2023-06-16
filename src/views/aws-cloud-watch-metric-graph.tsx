@@ -1,17 +1,17 @@
-import get from 'lodash.get';
-import isEmpty from 'lodash.isempty';
 import React from 'react';
-import { CloudWatch } from '@aws-sdk/client-cloudwatch';
-import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
-import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
-import { getAwsCredentialsProvider, getTimes, TimeRangeOverrides, cleanTimeRange, getPeriodBasedOnTimeRange } from '../utils/utils.js';
+import get from 'lodash.get';
+import { Views } from '@tinystacks/ops-core';
 import { Box, Stack } from '@chakra-ui/react';
-import { TimeRangeSelector } from '../components/time-range-selector.js';
 import { Line } from 'react-chartjs-2';
 import {
   CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, Chart, LineElement, TooltipItem, TooltipModel
 } from 'chart.js';
-import { TimeRange, TimeUnit, AwsCloudWatchMetricGraph as AwsCloudWatchMetricGraphType, Metric, MetricData } from '../ops-types.js';
+import { TimeRangeOverrides } from '../utils/utils.js';
+import { TimeRangeSelector } from './components/time-range-selector.js';
+import { AwsCloudWatchMetricGraph as AwsCloudWatchMetricGraphType, Metric, MetricData } from '../ops-types.js';
+import { AwsCloudWatchMetricGraph as AwsCloudWatchMetricGraphModel } from '../models/aws-cloud-watch-metric-graph.js';
+
+import Widget = Views.Widget;
 
 Chart.register(
   CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, LineElement
@@ -63,105 +63,9 @@ type AwsCloudWatchMetricGraphProps = AwsCloudWatchMetricGraphType & {
   showPeriodSelector?: boolean;
 };
 
-export class AwsCloudWatchMetricGraph extends BaseWidget {
-  static type = 'AwsCloudWatchMetricGraph';
-  showTimeRangeSelector: boolean;
-  showPeriodSelector: boolean;
-  metrics: Metric[];
-  timeRange: TimeRange;
-  region: string;
-
-  constructor (props: AwsCloudWatchMetricGraphProps) {
-    super (props);
-    const {
-      showTimeRangeSelector, showPeriodSelector, metrics, timeRange, region
-    } = props;
-    this.showTimeRangeSelector = showTimeRangeSelector;
-    this.showPeriodSelector = showPeriodSelector;
-    this.metrics = metrics;
-    this.timeRange = timeRange || {
-      time: 5,
-      unit: TimeUnit.m
-    };
-    this.region = region || 'us-east-1';
-  }
-  additionalProperties?: any;
-
+export class AwsCloudWatchMetricGraph extends AwsCloudWatchMetricGraphModel implements Widget {
   static fromJson (object: AwsCloudWatchMetricGraphProps): AwsCloudWatchMetricGraph {
     return new AwsCloudWatchMetricGraph(object);
-  }
-
-  toJson (): AwsCloudWatchMetricGraphProps {
-    return {
-      ...super.toJson(),
-      showTimeRangeSelector: this.showTimeRangeSelector,
-      showPeriodSelector: this.showPeriodSelector,
-      metrics: this.metrics,
-      timeRange: this.timeRange,
-      region: this.region
-    };
-  }
-
-  async getData (providers?: BaseProvider[], overrides?: AwsCloudWatchMetricGraphOverrides): Promise<void> {
-    try {
-      if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
-        throw TinyStacksError.fromJson({
-          message: 'An AwsCredentialsProvider was expected, but was not given',
-          status: 400
-        });
-      }
-
-      this.timeRange = cleanTimeRange(this.timeRange, overrides);
-
-      const awsCredentialsProvider = getAwsCredentialsProvider(providers);
-      const cwClient = new CloudWatch({
-        credentials: await awsCredentialsProvider.getCredentials(AwsSdkVersionEnum.V3),
-        region: this.region
-      });
-      
-      const { 
-        startTime,
-        endTime
-      } = getTimes(this.timeRange);
-
-      const period = getPeriodBasedOnTimeRange(startTime, endTime);
-
-      const hydratedMetrics = [];
-      for (const metric of this.metrics) {
-        const metricStatsResponse = await cwClient.getMetricStatistics({
-          Namespace: metric.metricNamespace,
-          MetricName: metric.metricName,
-          Dimensions: metric.dimensions.map(dimension => ({
-            Name: dimension.key,
-            Value: dimension.value
-          })),
-          Statistics: [metric.statistic || 'Average'],
-          Period: period,
-          StartTime: startTime,
-          EndTime: endTime
-        });
-        const {
-          Datapoints = []
-        } = metricStatsResponse;
-        metric.data = Datapoints
-          .map(datapoint  => ({
-            value: Number((datapoint as any)[metric.statistic || 'Average']),
-            unit: datapoint.Unit || '',
-            timestamp: (datapoint.Timestamp || new Date()).getTime()
-          }))
-          .sort((dp1, dp2) => dp1.timestamp - dp2.timestamp);
-
-        hydratedMetrics.push(metric);
-      }
-
-      this.metrics = hydratedMetrics;
-    } catch (e: any) {
-      throw TinyStacksError.fromJson({
-        message: 'Failed to get CloudWatch metrics!',
-        status: e.status || e.$metadata?.status || 500,
-        stack: e.stack
-      });
-    }
   }
 
   render (_children?: any, overridesCallback?: (overrides: AwsCloudWatchMetricGraphOverrides) => void): JSX.Element {

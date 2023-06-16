@@ -2,6 +2,15 @@
   "name": "@tinystacks/ops-aws-core-widgets",
   "version": "0.0.25",
   "main": "dist/index.js",
+  "exports": {
+    "./dist/ops-types.json": "./dist/ops-types.json",
+    "./package.json": "./package.json",
+    ".": {
+      "node": "./dist/node.js",
+      "browser": "./dist/browser.js",
+      "default": "./dist/index.js"
+    }
+  },
   "type": "module",
   "files": [
     "dist"
@@ -36,7 +45,7 @@
     "types": "npx typescript-json-schema './src/ops-types.ts' '*' --out ./dist/ops-types.json --required --esModuleInterop"
   },
   "devDependencies": {
-    "@tinystacks/ops-core": "^0.1.0",
+    "@tinystacks/ops-core": "file:../ops-core/tinystacks-ops-core-0.3.2.tgz",
     "@types/babel__traverse": "7.20.1",
     "@types/jest": "^29.4.0",
     "@types/lodash.get": "^4.4.7",
@@ -73,9 +82,9 @@
   },
   "peerDependencies": {
     "@chakra-ui/react": "2.x",
-    "@tinystacks/ops-core": "0.x",
-    "@tinystacks/ops-core-widgets": "0.x",
-    "@tinystacks/ops-model": "0.x",
+    "@tinystacks/ops-core": "file:../ops-core/tinystacks-ops-core-0.3.2.tgz",
+    "@tinystacks/ops-core-widgets": "file:../ops-core-widgets/tinystacks-ops-core-widgets-0.0.15.tgz",
+    "@tinystacks/ops-model": "file:../ops-model/tinystacks-ops-model-0.4.1.tgz",
     "lodash.get": "4.x",
     "lodash.isempty": "4.x",
     "lodash.isnil": "4.x",

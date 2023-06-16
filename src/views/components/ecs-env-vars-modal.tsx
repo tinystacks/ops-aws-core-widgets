@@ -2,20 +2,20 @@ import React from 'react';
 import {
   Button, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Table, Tbody, Td, Th, Thead, Tr, useDisclosure
 } from '@chakra-ui/react';
-import { Image } from '../utils/aws-ecs-utils.js';
+import { Image } from '../../utils/aws-ecs-utils.js';
 
-export default function EcsPortsModal (props: { image: Image }) {
+export default function EcsEnvVarsModal (props: { image: Image }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { image } = props;
-
+  const totalRecords = (image.envVars?.length || 0) + (image.secrets?.length || 0);
   return (
     <span>
-      {image.portMappings.length} {image.portMappings.length === 1 ? 'record' : 'records'}&nbsp;
+      {totalRecords} {totalRecords === 1 ? 'record' : 'records'}&nbsp;
       <Button colorScheme='purple' variant='link' size='sm' onClick={onOpen}>view</Button>
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} size='4xl'>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Ports</ModalHeader>
+          <ModalHeader>Environment Variables and Secrets</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Stack>
@@ -25,10 +25,16 @@ export default function EcsPortsModal (props: { image: Image }) {
                   <Th>Host Port</Th>
                 </Thead>
                 <Tbody>
-                  {image.portMappings.map(pm => (
-                    <Tr key={`containerport${pm.containerPort || pm.containerPortRange}`}>
-                      <Td>{pm.containerPort || pm.containerPortRange}</Td>
-                      <Td>{pm.hostPort}</Td>
+                  {(image.envVars || []).map(ev => (
+                    <Tr key={`envVar${ev.name}`}>
+                      <Td>{ev.name}</Td>
+                      <Td>{ev.value}</Td>
+                    </Tr>
+                  ))}
+                  {(image.secrets || []).map(secret => (
+                    <Tr key={`secret${secret.name}`}>
+                      <Td>{secret.name}</Td>
+                      <Td>{secret.valueFrom}</Td>
                     </Tr>
                   ))}
                 </Tbody>

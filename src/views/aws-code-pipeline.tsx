@@ -1,19 +1,9 @@
 import React from 'react';
 import sortBy from 'lodash.sortby';
 import dayjs from 'dayjs';
-
 import { ChevronRightIcon, RepeatIcon } from '@chakra-ui/icons';
-import {
-  BaseProvider,
-  BaseWidget,
-  TinyStacksError
-} from '@tinystacks/ops-core';
-import {
-  ApprovalStatus,
-  CodePipeline,
-  GetPipelineStateOutput,
-  PipelineDeclaration
-} from '@aws-sdk/client-codepipeline';
+import { Views } from '@tinystacks/ops-core';
+import { ApprovalStatus } from '@aws-sdk/client-codepipeline';
 import {
   Box,
   Button,
@@ -25,133 +15,24 @@ import {
   WrapItem,
   useColorModeValue
 } from '@chakra-ui/react';
-import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
-import KeyValueStat from '../components/key-value-stat.js';
-import { findProvider } from '../utils/utils.js';
+import KeyValueStat from './components/key-value-stat.js';
 import { IconButton } from 'rsuite';
-import { StatusIcon } from '../components/status-icon.js';
-import { Pill } from '../components/pill.js';
+import { StatusIcon } from './components/status-icon.js';
+import { Pill } from './components/pill.js';
 import {
-  AwsCodePipeline as AwsCodePipelineType, Pipeline, StageAction
+  AwsCodePipeline as AwsCodePipelineType,
+  StageAction
 } from '../ops-types.js';
+import {
+  AwsCodePipeline as AwsCodePipelineModel,
+  AwsCodePipelineOverrides
+} from '../models/aws-code-pipeline.js';
 
-type AwsCodePipelineOverrides = {
-  pipelineName?: string;
-  region?: string;
-  approval?: {
-    stageName: string;
-    actionName: string;
-    status: ApprovalStatus;
-    token: string;
-  };
-  startPipeline?: boolean;
-};
+import Widget = Views.Widget;
 
-class AwsCodePipeline extends BaseWidget implements AwsCodePipelineType {
-  static type = 'AwsCloudWatchLogs';
-  pipelineName: string;
-  region: string;
-  pipeline?: Pipeline;
-
-  constructor (props: AwsCodePipelineType) {
-    super(props);
-    this.pipelineName = props?.pipelineName;
-    this.region = props?.region;
-    this.pipeline = props?.pipeline;
-  }
-
+class AwsCodePipeline extends AwsCodePipelineModel implements Widget {
   static fromJson (object: AwsCodePipelineType): AwsCodePipeline {
     return new AwsCodePipeline(object);
-  }
-
-  toJson (): AwsCodePipelineType {
-    return {
-      ...super.toJson(),
-      region: this.region,
-      pipelineName: this.pipelineName,
-      pipeline: this.pipeline
-    };
-  }
-
-  async getData (providers?: BaseProvider[], overrides: AwsCodePipelineOverrides = {}): Promise<void> {
-    try {
-      const {
-        pipelineName = this.pipelineName,
-        region = this.region,
-        approval,
-        startPipeline
-      } = overrides;
-      const awsCredentialsProvider = findProvider<AwsCredentialsProvider>(providers, AwsCredentialsProvider.type);
-      const codePipelineClient = new CodePipeline({
-        credentials: await awsCredentialsProvider.getCredentials(),
-        region: region
-      });
-
-      if (approval) {
-        const {
-          actionName,
-          stageName,
-          status,
-          token
-        } = approval;
-        await codePipelineClient.putApprovalResult({
-          pipelineName,
-          actionName,
-          stageName,
-          result: {
-            status,
-            summary: `${status} through Ops Console`
-          },
-          token
-        });
-      }
-      if (startPipeline) {
-        await codePipelineClient.startPipelineExecution({
-          name: pipelineName
-        });
-      }
-      const pipelineResponse = await codePipelineClient.getPipeline({
-        name: this.pipelineName
-      });
-      const { pipeline = {}, metadata = {} } = pipelineResponse || {};
-      const {
-        name = this.pipelineName,
-        stages = []
-      } = pipeline as PipelineDeclaration;
-      const pipelineState: GetPipelineStateOutput = await codePipelineClient.getPipelineState({
-        name: this.pipelineName
-      });
-      this.pipeline = {
-        name: name,
-        arn: metadata.pipelineArn,
-        stages: stages.map((stage) => {
-          const stageState = pipelineState?.stageStates?.find(state => state.stageName === stage.name);
-          return {
-            name: stage.name,
-            status: stageState?.latestExecution?.status,
-            actions: stage.actions?.map((action) => {
-              const actionState = stageState?.actionStates?.find(aState => aState.actionName === action.name);
-              return {
-                name: action.name,
-                status: actionState?.latestExecution?.status,
-                lastStatusChange: actionState?.latestExecution?.lastStatusChange,
-                token: actionState?.latestExecution?.token,
-                category: action.actionTypeId.category,
-                provider: action.actionTypeId.provider,
-                runOrder: action.runOrder
-              };
-            })
-          };
-        })
-      };
-    } catch (e: any) {
-      console.error(e);
-      throw TinyStacksError.fromJson({
-        message: 'Failed to get Code Pipeline details!',
-        status: e.status || e.$metadata?.status || 500,
-        stack: e.stack
-      });
-    }
   }
 
   render (
@@ -325,7 +206,6 @@ class AwsCodePipeline extends BaseWidget implements AwsCodePipelineType {
 }
 
 export {
-  AwsCodePipeline,
-  AwsCodePipelineOverrides
+  AwsCodePipeline
 };
 export default AwsCodePipeline;

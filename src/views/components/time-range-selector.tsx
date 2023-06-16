@@ -2,7 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { Stack } from '@chakra-ui/react';
 import { DateRange } from 'rsuite/esm/DateRangePicker';
-import { RelativeTime, TimeRange, TimeUnit } from '../ops-types.js';
+import { RelativeTime, TimeRange, TimeUnit } from '../../ops-types.js';
 import { RadioButtonGroup, RadioButton } from './radio-button-group.js';
 import { DateTimeSelectPopover } from './date-time-select-popover.js';
 
