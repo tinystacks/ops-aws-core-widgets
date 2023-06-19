@@ -1,7 +1,7 @@
 export function arnSplitter (arn: string) {
   if (!arn) return undefined;
   const splitArn = arn.split(':');
-  if (arn.length < 6) return undefined;
+  if (splitArn.length < 6) return undefined;
   const arnMap: any = {
     partition: splitArn[1],
     service: splitArn[2],
