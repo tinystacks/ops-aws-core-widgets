@@ -56,25 +56,6 @@ const metricColorPattern = [
   MetricColors.GREEN
 ];
 
-type KeyValuePair = {
-  key: string;
-  value: string;
-}
-
-type MetricData = {
-  value: number;
-  unit: string;
-  timestamp: number;
-}
-
-export type Metric = {
-  metricNamespace: string;
-  metricName: string;
-  metricDisplayName: string;
-  statistic?: string;
-  dimensions: KeyValuePair[];
-  data?: MetricData[];
-}
 type AwsCloudWatchMetricGraphOverrides = TimeRangeOverrides;
 
 type AwsCloudWatchMetricGraphProps = AwsCloudWatchMetricGraphType & {
