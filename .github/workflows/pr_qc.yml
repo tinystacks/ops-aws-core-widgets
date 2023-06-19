@@ -25,7 +25,7 @@ jobs:
           npm ci;
           npm run build;
           npm run qa;
-          node .github/workflows/dependency-check.js;
+          node .github/workflows/dependency-check.cjs;
           changeType=$(<.version-change-type)
           if [ -z "$changeType" ];
             then
