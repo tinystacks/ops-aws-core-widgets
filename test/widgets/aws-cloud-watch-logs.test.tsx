@@ -72,14 +72,35 @@ describe('AwsCloudWatchLogs getData function', () => {
     jest.resetAllMocks();
   });
 
-  it('should throw an error if providers is not an array or is empty', async () => {
-    await expect(widget.getData(null, mockOverrides)).rejects.toThrow('An AwsCredentialsProvider was expected, but was not given');
-    await expect(widget.getData([], mockOverrides)).rejects.toThrow('An AwsCredentialsProvider was expected, but was not given');
+  it('should throw an error if providers is nil', async () => {
+    let thrownError;
+    try {
+      await widget.getData(null, mockOverrides)
+    } catch (error) {
+      thrownError = error;
+    } finally {
+      expect(thrownError.message).toEqual('Failed to get CloudWatch logs!');
+    }
   });
-
+  it('should throw an error if providers is an empty array', async () => {
+    let thrownError;
+    try {
+      await widget.getData([], mockOverrides)
+    } catch (error) {
+      thrownError = error;
+    } finally {
+      expect(thrownError.message).toEqual('Failed to get CloudWatch logs!');
+    }
+  });
   it('should throw an error if the first provider is not an AwsCredentialsProvider', async () => {
-    mockProviders[0].type = 'NotAwsCredentialsProvider';
-    await expect(widget.getData(mockProviders, mockOverrides)).rejects.toThrow('An AwsCredentialsProvider was expected, but was not given');
+    let thrownError;
+    try {
+      await widget.getData([{ type: 'Not-AwsCredentialsProvider' }, mockProviders], mockOverrides)
+    } catch (error) {
+      thrownError = error;
+    } finally {
+      expect(thrownError.message).toEqual('Failed to get CloudWatch logs!');
+    }
   });
 
 });

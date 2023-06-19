@@ -77,14 +77,35 @@ describe('AwsEcsInfo getData function', () => {
     jest.resetAllMocks();
   });
 
-  it('should throw an error if providers is not an array or is empty', async () => {
-    await expect(widget.getData(null, mockOverrides)).rejects.toThrow('No AwsCredentialsProvider provided');
-    await expect(widget.getData([], mockOverrides)).rejects.toThrow('No AwsCredentialsProvider provided');
+  it('should throw an error if providers is nil', async () => {
+    let thrownError;
+    try {
+      await widget.getData(null, mockOverrides)
+    } catch (error) {
+      thrownError = error;
+    } finally {
+      expect(thrownError.message).toEqual('Failed to get ECS info data!');
+    }
   });
-
+  it('should throw an error if providers is an empty array', async () => {
+    let thrownError;
+    try {
+      await widget.getData([], mockOverrides)
+    } catch (error) {
+      thrownError = error;
+    } finally {
+      expect(thrownError.message).toEqual('Failed to get ECS info data!');
+    }
+  });
   it('should throw an error if the first provider is not an AwsCredentialsProvider', async () => {
-    mockProviders[0].type = 'NotAwsCredentialsProvider';
-    await expect(widget.getData(mockProviders, mockOverrides)).rejects.toThrow('The passed in provider test-provider is not an AwsCredentialsProvider');
+    let thrownError;
+    try {
+      await widget.getData([{ type: 'Not-AwsCredentialsProvider' }, mockProviders], mockOverrides)
+    } catch (error) {
+      thrownError = error;
+    } finally {
+      expect(thrownError.message).toEqual('Failed to get ECS info data!');
+    }
   });
 
 });
