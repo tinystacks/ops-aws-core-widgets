@@ -2,7 +2,6 @@ import get from 'lodash.get';
 import isEmpty from 'lodash.isempty';
 import React from 'react';
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
-import { Widget } from '@tinystacks/ops-model';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 import { getAwsCredentialsProvider, getTimes, TimeRangeOverrides, cleanTimeRange, getPeriodBasedOnTimeRange } from '../utils/utils.js';
@@ -12,7 +11,7 @@ import { Line } from 'react-chartjs-2';
 import {
   CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, Chart, LineElement, TooltipItem, TooltipModel
 } from 'chart.js';
-import { TimeRange, TimeUnit } from '../ops-types.js';
+import { TimeRange, TimeUnit, AwsCloudWatchMetricGraph as AwsCloudWatchMetricGraphType, Metric, MetricData } from '../ops-types.js';
 
 Chart.register(
   CategoryScale, LinearScale, Title, Tooltip, Legend, PointElement, LineElement
@@ -78,11 +77,9 @@ export type Metric = {
 }
 type AwsCloudWatchMetricGraphOverrides = TimeRangeOverrides;
 
-type AwsCloudWatchMetricGraphProps = Widget & AwsCloudWatchMetricGraphOverrides & {
+type AwsCloudWatchMetricGraphProps = AwsCloudWatchMetricGraphType & {
   showTimeRangeSelector?: boolean;
   showPeriodSelector?: boolean;
-  metrics: Metric[];
-  region: string;
 };
 
 export class AwsCloudWatchMetricGraph extends BaseWidget {
