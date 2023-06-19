@@ -1,12 +1,6 @@
-
-import AWS from 'aws-sdk';
-import { AwsAssumedRole } from '../../../src/aws-provider/aws-credentials/aws-assumed-role.js';
-import { AwsKeys } from '../../../src/aws-provider/aws-credentials/aws-keys.js';
-import { LocalAwsProfile } from '../../../src/aws-provider/aws-credentials/local-aws-profile.js';
-import { AwsSdkVersionEnum } from '../../../src/aws-provider/aws-credentials/aws-credentials-type.js';
-import { AwsCredentialIdentity } from '@aws-sdk/types';
-
 const mockAssumeRole = jest.fn();
+const mockSharedIniFileCredentials = jest.fn();
+const mockCredentials = jest.fn();
 
 jest.mock('@aws-sdk/client-sts', () => ({
     STS: jest.fn().mockImplementation(() => ({
@@ -14,15 +8,25 @@ jest.mock('@aws-sdk/client-sts', () => ({
     }))
 }));
 
+jest.mock('aws-sdk', () => ({
+  SharedIniFileCredentials: mockSharedIniFileCredentials,
+  Credentials: mockCredentials
+}));
+
 jest.useFakeTimers().setSystemTime(new Date('2023-02-02 00:00:00').getTime());
+
+import { AwsAssumedRole } from '../../../src/aws-provider/aws-credentials/aws-assumed-role.js';
+import { AwsKeys } from '../../../src/aws-provider/aws-credentials/aws-keys.js';
+import { LocalAwsProfile } from '../../../src/aws-provider/aws-credentials/local-aws-profile.js';
+import { AwsSdkVersionEnum } from '../../../src/aws-provider/aws-credentials/aws-credentials-type.js';
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 
-const mockV2Credentials = new AWS.Credentials({
+const mockV2Credentials = {
   accessKeyId: 'test-access-key',
   secretAccessKey: 'test-secret-key',
   sessionToken: 'test-session-token'
-});
+};
 
 const mockV3Credentials = {
   accessKeyId: 'test-access-key',
@@ -115,6 +119,10 @@ describe('AwsAssumedRole', () => {
   });
   
   describe('getCredentials', () => {
+    beforeEach(() => {
+      mockSharedIniFileCredentials.mockReturnValue(mockV2Credentials);
+      mockCredentials.mockImplementation(creds => creds);
+    });
     it('sts creds have expired, v2 sdk', async () => {
       mockAssumeRole.mockResolvedValueOnce({
         Credentials: {

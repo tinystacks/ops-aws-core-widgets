@@ -29,7 +29,7 @@
     "setup-test-lint": "node ./scripts/setup-test-lint.js",
     "test": "jest --detectOpenHandles",
     "test-cov": "jest --coverage --detectOpenHandles",
-    "test-file": "jest ./test/aws-provider/aws-credentials/local-aws-profile.test.ts --detectOpenHandles",
+    "test-file": "jest ./test/aws-provider/aws-credentials/aws-assumed-role.test.ts --detectOpenHandles",
     "test-file-cov": "jest ./testindex.test.ts --coverage --detectOpenHandles",
     "view-test-cov": "jest --coverage --detectOpenHandles || true && open coverage/lcov-report/index.html",
     "prepare": "husky install",
