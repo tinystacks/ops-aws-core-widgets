@@ -17,7 +17,7 @@ import {
   Task as AwsTask
 } from '@aws-sdk/client-ecs';
 import { STS } from '@aws-sdk/client-sts';
-import _ from 'lodash';
+import isEmpty from 'lodash.isempty';
 import {
   getCoreEcsData,
   getTasksForTaskDefinition,
@@ -178,7 +178,7 @@ export class AwsEcsDeployments extends BaseWidget {
       );
 
       let tasks: AwsTask[] = [];
-      if (!_.isEmpty(taskArns)) {
+      if (!isEmpty(taskArns)) {
         const describeTasksRes = await ecsClient.describeTasks({
           cluster: this.clusterName,
           tasks: taskArns
@@ -239,7 +239,7 @@ export class AwsEcsDeployments extends BaseWidget {
           </Tr>
         );
       });
-      const taskTable = _.isEmpty(deployment.taskDefinition.tasks) ? (
+      const taskTable = isEmpty(deployment.taskDefinition.tasks) ? (
         <Stack/>
       ) : (
         <Stack>
