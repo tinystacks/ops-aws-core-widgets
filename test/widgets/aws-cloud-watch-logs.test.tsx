@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { AwsCloudWatchLogs } from '../../src/aws-widgets/aws-cloud-watch-logs.js'
-import { TimeUnitEnum } from '../../src/utils/utils';
+import { TimeUnit } from '../../src/ops-types.js';
 import '@testing-library/jest-dom/extend-expect';
 
 describe('AwsCloudWatchLogs', () => {
@@ -62,7 +62,7 @@ describe('AwsCloudWatchLogs getData function', () => {
       showTimeRangeSelector: true,
       timeRange: {
         time: 5,
-        unit: TimeUnitEnum.m
+        unit: TimeUnit.m
       },
       logGroupName: 'test-group-name'
     });

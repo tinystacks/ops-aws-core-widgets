@@ -1,6 +1,7 @@
-import { cleanTimeRange, combineTimeRangeWithOverrides, getAwsCredentialsProvider, getPeriodBasedOnTimeRange, getTimes, TimeUnitEnum } from '../../src/utils/utils.js'; 
-import { AwsCredentialsProvider } from '../../src/aws-provider/aws-credentials-provider.js';
 import dayjs from 'dayjs';
+import { cleanTimeRange, combineTimeRangeWithOverrides, getAwsCredentialsProvider, getPeriodBasedOnTimeRange, getTimes } from '../../src/utils/utils.js'; 
+import { AwsCredentialsProvider } from '../../src/aws-provider/aws-credentials-provider.js';
+import { TimeUnit } from '../../src/ops-types.js';
 
 describe('utils', () => {
   describe('getAwsCredentialsProvider', () => {
@@ -44,7 +45,7 @@ describe('utils', () => {
     it ('relativeTimeRange', () => {
       const timeRange = {
         time: 1, 
-        unit: TimeUnitEnum.hr
+        unit: TimeUnit.hr
       };
       const now = dayjs();
       expect(getTimes(timeRange)).toStrictEqual({
@@ -79,7 +80,7 @@ describe('utils', () => {
     it ('relativeTime', () => {
       const timeRange = {
         time: 100,
-        unit: TimeUnitEnum.s
+        unit: TimeUnit.s
       };
 
       expect(cleanTimeRange(timeRange)).toBe(timeRange);

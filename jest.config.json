@@ -1,5 +1,6 @@
 {
   "preset": "ts-jest",
+  "resolver": "ts-jest-resolver",
 	"testPathIgnorePatterns": [".d.ts", ".js"],
 	"verbose": true,
 	"roots": ["<rootDir>/test", "<rootDir>/src"],
@@ -14,7 +15,7 @@
 			"statements": 90
 		}
 	},
-  "extensionsToTreatAsEsm": [".ts", ".tsx"],
+  "extensionsToTreatAsEsm": [".ts", ".tsx", ".jsx"],
   "globals": {
     "NODE_ENV": "test"
   },

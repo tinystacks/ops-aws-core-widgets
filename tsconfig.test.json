@@ -18,7 +18,6 @@
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "presets":["@babel/preset-react", "@babel/preset-env"],
     "typeRoots": ["./node_modules/@types"],
     "outDir": "./test-dist"
   },

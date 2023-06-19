@@ -1,5 +1,5 @@
 import { AwsCloudWatchMetricGraph, Metric } from '../../src/aws-widgets/aws-cloud-watch-metric-graph.js'
-import { TimeUnitEnum } from '../../src/utils/utils.js';
+import { TimeUnit } from '../../src/ops-types.js';
 import { cleanup, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
@@ -82,7 +82,7 @@ describe('AwsCloudWatchMetricGraph getData function', () => {
       ],
       timeRange: {
         time: 5,
-        unit: TimeUnitEnum.m
+        unit: TimeUnit.m
       }
     });
   });
