@@ -1,0 +1,33 @@
+{
+  "preset": "ts-jest",
+  "resolver": "ts-jest-resolver",
+	"testPathIgnorePatterns": [".d.ts", ".js"],
+	"verbose": true,
+	"roots": ["<rootDir>/test", "<rootDir>/src"],
+	"collectCoverageFrom": ["src/**/*.ts", "src/**/*.tsx"],
+	"coveragePathIgnorePatterns": ["src/index.ts"],
+  "coverageProvider": "v8",
+	"coverageThreshold": {
+		"global": {
+			"branches": 63,			
+			"functions": 72,
+			"lines": 69,
+			"statements": 69
+		}
+	},
+  "extensionsToTreatAsEsm": [".ts", ".tsx", ".jsx"],
+  "globals": {
+    "NODE_ENV": "test"
+  },
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1"
+  },
+  "testEnvironment": "jest-environment-jsdom",
+  "transform": {
+    "^.+\\.[jt]s$": "ts-jest",
+    "^.+\\.[jt]sx$": "babel-jest"
+  },
+  "transformIgnorePatterns": [
+    "\\/node_modules\\/(?!((@tinystacks|@aws-sdk|uuid)\\/))"
+  ]
+}
