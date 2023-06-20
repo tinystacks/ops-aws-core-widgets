@@ -117,3 +117,11 @@ export function ebsVolumeIdToUrl (volumeId: string, region: string) {
 export function rdsInstanceArnToUrl (dbInstanceIdentifier: string, region: string) { 
   return `https://${region}.console.aws.amazon.com/rds/home?region=${region}#database:id=${dbInstanceIdentifier}`;
 }
+
+export function getTaskDefIdFromArn (taskDefinitionArn: string) {
+  return taskDefinitionArn.split(':task-definition/').at(-1);
+}
+
+export function getAsgNameFromArn (asgArn: string) {
+  return asgArn.split(':autoScalingGroupName/').at(-1);
+}

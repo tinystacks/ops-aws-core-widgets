@@ -7,12 +7,13 @@ import {
   DescribeCapacityProvidersCommandOutput
 } from '@aws-sdk/client-ecs';
 import { STS } from '@aws-sdk/client-sts';
+import { AutoScaling } from '@aws-sdk/client-auto-scaling';
 import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { getCoreEcsData, hydrateImages } from '../utils/aws-ecs-utils.js';
 import EcsPortsModal from '../components/ecs-ports-modal.js';
 import EcsEnvVarsModal from '../components/ecs-env-vars-modal.js';
-import { asgArnToUrl, cloudwatchLogsGroupArnToUrl, ecsClusterArnToUrl, ecsServiceArnToUrl, ecsTaskDefinitionArnToUrl } from '../utils/arn-utils.js';
+import { asgArnToUrl, cloudwatchLogsGroupArnToUrl, ecsClusterArnToUrl, ecsServiceArnToUrl, ecsTaskDefinitionArnToUrl, getAsgNameFromArn, getTaskDefIdFromArn } from '../utils/arn-utils.js';
 import KeyValueStat from '../components/key-value-stat.js';
 import { AwsEcsInfo as AwsEcsInfoProps } from '../ops-types.js';
 import { Image } from '../utils/aws-ecs-utils.js';
@@ -24,9 +25,11 @@ type AwsEcsInfoType = AwsEcsInfoProps & {
   desiredCount: number;
   capacity: number;
   asgArn: string;
+  asgName: string;
   memory: string;
   cpu: string;
   taskDefinitionArn: string,
+  taskDefinitionVersion: number,
   status: string;
   roleArn: string;
   execRoleArn: string;
@@ -45,9 +48,11 @@ export class AwsEcsInfo extends BaseWidget {
   desiredCount: number;
   capacity: number;
   asgArn: string;
+  asgName: string;
   memory: string;
   cpu: string;
   taskDefinitionArn: string;
+  taskDefinitionVersion: number;
   status: string;
   roleArn: string;
   execRoleArn: string;
@@ -69,13 +74,16 @@ export class AwsEcsInfo extends BaseWidget {
     awsEcsInfo.desiredCount = object.desiredCount;
     awsEcsInfo.capacity = object.capacity;
     awsEcsInfo.asgArn = object.asgArn;
+    awsEcsInfo.asgName = object.asgName;
     awsEcsInfo.memory = object.memory;
     awsEcsInfo.cpu = object.cpu;
     awsEcsInfo.taskDefinitionArn = object.taskDefinitionArn;
+    awsEcsInfo.taskDefinitionVersion = object.taskDefinitionVersion;
     awsEcsInfo.status = object.status;
     awsEcsInfo.roleArn = object.roleArn;
     awsEcsInfo.execRoleArn = object.execRoleArn;
     awsEcsInfo.images = object.images;
+    awsEcsInfo.capacityType = object.capacityType;
     return awsEcsInfo;
   }
 
@@ -91,9 +99,11 @@ export class AwsEcsInfo extends BaseWidget {
       desiredCount: this.desiredCount,
       capacity: this.capacity,
       asgArn: this.asgArn,
+      asgName: this.asgName,
       memory: this.memory,
       cpu: this.cpu,
       taskDefinitionArn: this.taskDefinitionArn,
+      taskDefinitionVersion: this.taskDefinitionVersion,
       status: this.status,
       roleArn: this.roleArn,
       execRoleArn: this.execRoleArn,
@@ -112,6 +122,10 @@ export class AwsEcsInfo extends BaseWidget {
       });
       const accountId = await stsClient.getCallerIdentity({}).then(res => res.Account).catch(e => console.error(e)) || '';
       const ecsClient = new ECS({
+        credentials,
+        region: this.region
+      });
+      const autoscalingClient = new AutoScaling({
         credentials,
         region: this.region
       });
@@ -149,14 +163,24 @@ export class AwsEcsInfo extends BaseWidget {
       const describeCapacityProvidersRes = secondarySettledPromises[1] as DescribeCapacityProvidersCommandOutput;
 
       const taskDefinition = describeTaskDefinitionRes?.taskDefinition;
+      this.taskDefinitionVersion = taskDefinition?.revision || 1;
       this.memory = taskDefinition?.memory;
       this.cpu = taskDefinition?.cpu;
       this.execRoleArn = taskDefinition?.executionRoleArn;
 
       const capacityProvider = get(describeCapacityProvidersRes, 'capacityProviders[0]');
       this.asgArn = capacityProvider?.autoScalingGroupProvider?.autoScalingGroupArn;
-      this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity | this.desiredCount;
-      this.capacityType = capacityProvider?.autoScalingGroupProvider ? 'EC2' : 'Fargate';
+      if (this.asgArn) {
+        this.asgName = getAsgNameFromArn(this.asgArn);
+        const describeAutoScalingGroupsRes = await autoscalingClient.describeAutoScalingGroups({
+          AutoScalingGroupNames: [this.asgName]
+        });
+        this.capacity = get(describeAutoScalingGroupsRes, 'AutoScalingGroups[0].DesiredCapacity', 0);
+        this.capacityType = 'EC2';
+      } else {
+        this.capacity = primaryDeployment?.desiredCount;
+        this.capacityType = 'Fargate';
+      }
 
       this.images = hydrateImages(taskDefinition, accountId);
     } catch (e: any) {
@@ -188,14 +212,16 @@ export class AwsEcsInfo extends BaseWidget {
       <Stack p='20px'>
         <SimpleGrid columns={4} spacing={10}>
           <KeyValueStat
-            label='Cluster Arn'
-            value={this.clusterArn}
+            label='Cluster'
+            value={this.clusterName}
             href={ecsClusterArnToUrl(this.clusterArn)}
+            copy={this.clusterArn}
           />
           <KeyValueStat
-            label='Service Arn'
-            value={this.serviceArn}
+            label='Service'
+            value={this.serviceName}
             href={ecsServiceArnToUrl(this.serviceArn)}
+            copy={this.serviceArn}
           />
           <KeyValueStat
             label='Tasks Running/Desired'
@@ -203,27 +229,39 @@ export class AwsEcsInfo extends BaseWidget {
           />
           <KeyValueStat
             label='Active Task Def Id'
-            value={this.taskDefinitionArn}
+            value={getTaskDefIdFromArn(this.taskDefinitionArn)}
             href={ecsTaskDefinitionArnToUrl(this.taskDefinitionArn)}
+            copy={this.taskDefinitionArn}
           />
           <KeyValueStat
-            label='Provisioned CPU'
-            value={this.cpu}
+            label='Active Task Def Version'
+            value={`${this.taskDefinitionVersion}`}
           />
-          <KeyValueStat
-            label='Provisioned Memory'
-            value={this.memory}
-          />
+          { 
+            this.cpu &&
+              <KeyValueStat
+                label='Provisioned CPU'
+                value={this.cpu}
+              />
+          }
+          { 
+            this.memory &&
+              <KeyValueStat
+                label='Provisioned Memory'
+                value={this.memory}
+              />
+          }
           <KeyValueStat
             label='Capacity'
-            value={`${this.capacity} (${this.capacityType || 'Fargate'})`}
+            value={`${this.capacity} (${this.capacityType})`}
           />
           {
             this.asgArn && 
               <KeyValueStat
                 label='ASG'
-                value={this.asgArn}
+                value={this.asgName}
                 href={asgArnToUrl(this.asgArn)}
+                copy={this.asgArn}
               />
           }
         </SimpleGrid>
