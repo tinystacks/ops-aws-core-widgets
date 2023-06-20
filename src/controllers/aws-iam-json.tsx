@@ -10,6 +10,15 @@ import { AwsIamJson as AwsIamJsonModel } from '../models/aws-iam-json.js';
 import Widget = Controllers.Widget;
 
 export class AwsIamJson extends AwsIamJsonModel implements Widget {
+  constructor (props: AwsIamJsonProps) {
+    super(props);
+    this.region = props.region;
+    this.roleArn = props.roleArn;
+    this.policyArn = props.policyArn;
+    this.policy = {};
+    this.rolePolicies = [];
+  }
+
   static fromJson (object: AwsIamJsonProps): AwsIamJson {
     if(isNil(object.roleArn) && isNil(object.policyArn)){ 
       throw TinyStacksError.fromJson({
@@ -19,6 +28,15 @@ export class AwsIamJson extends AwsIamJsonModel implements Widget {
     }
 
     return new AwsIamJson(object);
+  }
+
+  toJson (): AwsIamJsonProps {
+    return { 
+      ...super.toJson(),  
+      region: this.region,
+      roleArn: this.roleArn,
+      policyArn: this.policyArn 
+    };
   }
 
   async getData (providers?: Provider[]): Promise<void> {

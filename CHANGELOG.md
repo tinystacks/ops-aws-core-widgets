@@ -1,3 +1,7 @@
+v0.0.26
+---
+- Fix jest config, set test coverage
+ 
 v0.0.25
 ---
 - Add yaml config examples to types in tsdoc comments

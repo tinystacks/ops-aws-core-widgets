@@ -66,7 +66,7 @@ export function TimeRangeSelector (props: TimeRangeSelectorProps) {
           <RadioButton value={k}>{k}</RadioButton>
         ))}
         <RadioButton value={CUSTOM} onClick={() => setIsTimePopoverOpen(true)}>
-          <DateTimeSelectPopover 
+          <DateTimeSelectPopover
             isOpen={isTimePopoverOpen} 
             onClose={() => setIsTimePopoverOpen(false)} 
             onChange={onDateRangeChange}/>

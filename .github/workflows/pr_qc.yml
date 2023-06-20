@@ -23,9 +23,9 @@ jobs:
           token: ${{ secrets.TS_GH_BOT }}
       - run: |
           npm ci;
-          npm run qa;
           npm run build;
-          node .github/workflows/dependency-check.js;
+          npm run qa;
+          node .github/workflows/dependency-check.cjs;
           changeType=$(<.version-change-type)
           if [ -z "$changeType" ];
             then
@@ -38,3 +38,4 @@ jobs:
           if [ -z "$diff" ]; then echo "Missing release notes! exiting..."; exit 1; fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.TS_GH_BOT }}
+          NODE_OPTIONS: "--max-old-space-size=8192"
