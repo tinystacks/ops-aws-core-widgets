@@ -5,20 +5,18 @@ import { Image } from '../utils/aws-ecs-utils.js';
 import Widget = Models.Widget;
 
 type AwsEcsInfoType = AwsEcsInfoProps & {
-  serviceArn: string;
-  clusterArn: string;
-  runningCount: number;
-  desiredCount: number;
-  capacity: number;
-  asgArn: string;
-  memory: string;
-  cpu: string;
-  taskDefinitionArn: string,
-  status: string;
-  roleArn: string;
-  execRoleArn: string;
-  images: Image[];
-  capacityType: 'EC2' | 'Fargate';
+  runningCount?: number;
+  desiredCount?: number;
+  capacity?: number;
+  asgArn?: string;
+  memory?: string;
+  cpu?: string;
+  taskDefinitionArn?: string,
+  status?: string;
+  roleArn?: string;
+  execRoleArn?: string;
+  images?: Image[];
+  capacityType?: 'EC2' | 'Fargate';
 }
 
 class AwsEcsInfo extends Widget {

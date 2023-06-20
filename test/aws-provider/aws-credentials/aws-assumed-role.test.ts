@@ -1,24 +1,29 @@
-const mockAssumeRole = jest.fn();
+import { jest } from '@jest/globals';
+const mockSts: jest.Mock<any> = jest.fn();
+const mockAssumeRole: jest.Mock<any> = jest.fn();
 const mockSharedIniFileCredentials = jest.fn();
 const mockCredentials = jest.fn();
-
-jest.mock('@aws-sdk/client-sts', () => ({
-    STS: jest.fn().mockImplementation(() => ({
-      assumeRole: mockAssumeRole
-    }))
-}));
-
-jest.mock('aws-sdk', () => ({
+const mockAws = {
   SharedIniFileCredentials: mockSharedIniFileCredentials,
   Credentials: mockCredentials
+};
+
+jest.mock('aws-sdk', () => ({
+  __esModule: true,
+  ...mockAws
+}));
+
+jest.mock('@aws-sdk/client-sts', () => ({
+  __esModule: true,
+  STS: mockSts
 }));
 
 jest.useFakeTimers().setSystemTime(new Date('2023-02-02 00:00:00').getTime());
 
-import { AwsAssumedRole } from '../../../src/aws-provider/aws-credentials/aws-assumed-role.js';
-import { AwsKeys } from '../../../src/aws-provider/aws-credentials/aws-keys.js';
-import { LocalAwsProfile } from '../../../src/aws-provider/aws-credentials/local-aws-profile.js';
-import { AwsSdkVersionEnum } from '../../../src/aws-provider/aws-credentials/aws-credentials-type.js';
+const { AwsAssumedRole } = await import('../../../src/aws-provider/aws-credentials/aws-assumed-role.js');
+const { AwsKeys } = await import('../../../src/aws-provider/aws-credentials/aws-keys.js');
+const { LocalAwsProfile } = await import('../../../src/aws-provider/aws-credentials/local-aws-profile.js');
+const { AwsSdkVersionEnum } = await import('../../../src/aws-provider/aws-credentials/aws-credentials-type.js');
 
 const ROLE_SESSION_DURATION_SECONDS = 3600;
 
@@ -35,8 +40,18 @@ const mockV3Credentials = {
 };
 
 describe('AwsAssumedRole', () => {
+  beforeEach(() => {
+    mockSts.mockReturnValue({
+      assumeRole: mockAssumeRole
+    });
+    mockSharedIniFileCredentials.mockReturnValue(mockV2Credentials);
+    mockCredentials.mockImplementation(creds => creds);
+  });
   afterEach(() => {
-    mockAssumeRole.mockClear();
+    // for mocks
+    jest.clearAllMocks();
+    // for spies
+    jest.restoreAllMocks();
   });
 
   describe('primary credentials modality', () => {  
@@ -119,10 +134,6 @@ describe('AwsAssumedRole', () => {
   });
   
   describe('getCredentials', () => {
-    beforeEach(() => {
-      mockSharedIniFileCredentials.mockReturnValue(mockV2Credentials);
-      mockCredentials.mockImplementation(creds => creds);
-    });
     it('sts creds have expired, v2 sdk', async () => {
       mockAssumeRole.mockResolvedValueOnce({
         Credentials: {

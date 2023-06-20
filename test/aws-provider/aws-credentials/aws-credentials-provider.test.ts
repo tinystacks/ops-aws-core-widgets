@@ -1,6 +1,4 @@
 import { AwsCredentialsProvider } from "../../../src/aws-provider/aws-credentials-provider.js";
-import { AwsAssumedRole } from "../../../src/aws-provider/aws-credentials/aws-assumed-role.js";
-import { LocalAwsProfile } from "../../../src/aws-provider/aws-credentials/local-aws-profile.js";
 
 
 

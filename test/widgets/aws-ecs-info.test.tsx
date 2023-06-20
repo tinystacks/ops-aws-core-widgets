@@ -1,4 +1,5 @@
-import { AwsEcsInfo } from '../../src/aws-widgets/aws-ecs-info.js'
+import { AwsEcsInfo } from '../../src/controllers/aws-ecs-info.js'
+import { AwsEcsInfo as AwsEcsInfoView } from '../../src/views/aws-ecs-info.js'
 import { render, screen, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
@@ -156,7 +157,7 @@ describe('AwsEcsInfo render', () => {
 
 
   beforeEach(() => {
-    const ecsWidget = AwsEcsInfo.fromJson(props);
+    const ecsWidget = AwsEcsInfoView.fromJson(props);
     const renderedWidget = ecsWidget.render();
     render(renderedWidget);
   });

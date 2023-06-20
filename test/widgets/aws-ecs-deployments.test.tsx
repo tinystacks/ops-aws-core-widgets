@@ -1,6 +1,8 @@
 import { render, screen, cleanup } from '@testing-library/react';
-import { AwsEcsDeployments } from '../../src/aws-widgets/aws-ecs-deployments.js'
+import { AwsEcsDeployments } from '../../src/controllers/aws-ecs-deployments.js'
+import { AwsEcsDeployments as AwsEcsDeploymentsViews } from '../../src/views/aws-ecs-deployments.js'
 import '@testing-library/jest-dom/extend-expect';
+import { Deployment } from '../../src/models/aws-ecs-deployments.js';
 
 describe('AwsEcsDeployments', () => {
   afterEach(cleanup);
@@ -99,20 +101,19 @@ describe('AwsEcsDeployments getData function', () => {
 
 
 describe('AwsEcsDeployments render', () => {
-  const deployments = [
+  const deployments: Deployment[] = [
     {
       deploymentId: '123',
       status: 'RUNNING',
-      startedAt: new Date('2022-01-01T00:00:00Z'),
-      desiredCount: 2,
+      startTime: new Date('2022-01-01T00:00:00Z'),
       runningCount: 1,
       pendingCount: 0,
+      desiredCount: 2,
       taskDefinition: {
         tasks: [
           {
             taskId: 'task-1',
             startTime: new Date('2022-01-01T00:00:00Z'),
-            stopTime: null,
             status: 'RUNNING'
           },
           {
@@ -137,7 +138,7 @@ describe('AwsEcsDeployments render', () => {
       deployments
     };
 
-    const ecsWidget = AwsEcsDeployments.fromJson(props);
+    const ecsWidget = AwsEcsDeploymentsViews.fromJson(props);
     const renderedWidget = ecsWidget.render();
     render(renderedWidget);
     const deploymentId = screen.getByText('Deployment Id');
@@ -164,7 +165,7 @@ describe('AwsEcsDeployments render', () => {
       deployments
     };
 
-    const ecsWidget = AwsEcsDeployments.fromJson(props);
+    const ecsWidget = AwsEcsDeploymentsViews.fromJson(props);
     const renderedWidget = ecsWidget.render(undefined, mockOverridesCallback);
     render(renderedWidget);
     const killTaskBtn = screen.getAllByText('Kill task')[0];

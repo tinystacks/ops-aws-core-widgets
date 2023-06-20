@@ -1,14 +1,27 @@
-import { ECS, Task, TaskDefinition, ContainerDefinition, PortMapping, KeyValuePair, Secret, Volume, DescribeServicesCommandOutput, DescribeClustersCommandOutput, ListTasksCommandOutput } from '@aws-sdk/client-ecs';
+// import { jest } from '@jest/globals';
+import { ECS, Task, TaskDefinition, ContainerDefinition } from '@aws-sdk/client-ecs';
 import { getCoreEcsData, getTasksForTaskDefinition, hydrateImages } from '../../src/utils/aws-ecs-utils';
 
+const mockDescribeServices: jest.Mock<any> = jest.fn();
+const mockDescribeClusters: jest.Mock<any> = jest.fn();
+const mockListTasks: jest.Mock<any> = jest.fn();
+
+const ecsClient = {
+  describeServices: mockDescribeServices,
+  describeClusters: mockDescribeClusters,
+  listTasks: mockListTasks
+} as unknown as ECS;
+
 describe('getCoreEcsData', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+    jest.restoreAllMocks();
+  });
   test('should return service, cluster, and taskArns', async () => {
     // Mock the ECS client methods
-    const ecsClient = {
-      describeServices: jest.fn().mockResolvedValue({ services: [{}] }),
-      describeClusters: jest.fn().mockResolvedValue({ clusters: [{}] }),
-      listTasks: jest.fn().mockResolvedValue({ taskArns: ['taskArn1', 'taskArn2'] })
-    } as unknown as ECS;
+    mockDescribeServices.mockResolvedValue({ services: [{}] });
+    mockDescribeClusters.mockResolvedValue({ clusters: [{}] });
+    mockListTasks.mockResolvedValue({ taskArns: ['taskArn1', 'taskArn2'] });
     const clusterName = 'myCluster';
     const serviceName = 'myService';
 
@@ -36,11 +49,9 @@ describe('getCoreEcsData', () => {
 
   test('should handle errors', async () => {
     // Mock the ECS client methods to throw errors
-    const ecsClient = {
-      describeServices: jest.fn().mockRejectedValue(new Error('describeServices error')),
-      describeClusters: jest.fn().mockResolvedValue({ clusters: [{}] }),
-      listTasks: jest.fn().mockResolvedValue({ taskArns: ['taskArn1', 'taskArn2'] })
-    } as unknown as ECS;
+    mockDescribeServices.mockRejectedValue(new Error('describeServices error'));
+    mockDescribeClusters.mockResolvedValue({ clusters: [{}] });
+    mockListTasks.mockResolvedValue({ taskArns: ['taskArn1', 'taskArn2'] });
     const clusterName = 'myCluster';
     const serviceName = 'myService';
 

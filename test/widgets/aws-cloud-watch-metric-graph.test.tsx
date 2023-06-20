@@ -1,4 +1,4 @@
-import { AwsCloudWatchMetricGraph, Metric } from '../../src/aws-widgets/aws-cloud-watch-metric-graph.js'
+import { AwsCloudWatchMetricGraph } from '../../src/controllers/aws-cloud-watch-metric-graph.js'
 import { TimeUnit } from '../../src/ops-types.js';
 import { cleanup, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';

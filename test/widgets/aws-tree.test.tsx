@@ -1,5 +1,6 @@
+// import { jest } from '@jest/globals';
 import { cleanup } from '@testing-library/react';
-import { AwsJsonTree } from '../../src/aws-widgets/aws-json-tree.js'
+import { AwsJsonTree } from '../../src/controllers/aws-json-tree.js'
 
 describe('AwsJsonTree', () => {
   afterEach(cleanup);
@@ -53,7 +54,7 @@ jest.mock('@aws-sdk/credential-provider-sso', () => ({
       {
         type: 'AwsCredentialsProvider',
         id: 'test-provider',
-        getCredentials: jest.fn().mockResolvedValue({
+        getCredentials: () => ({
           accessKeyId: 'accessKeyId',
           secretAccessKey: 'secretAccessKey',
           sessionToken: 'sessionToken'
@@ -80,7 +81,7 @@ jest.mock('@aws-sdk/credential-provider-sso', () => ({
     mockCloudControlClient.listResources.mockReturnValue(mockListResources);
     
     mockAwsCredentialsProvider = {
-      getCredentials: jest.fn().mockResolvedValue('mocked credentials'),
+      getCredentials: () => 'mocked credentials',
     };
 
   });

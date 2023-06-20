@@ -1,10 +1,10 @@
+import AWS from 'aws-sdk';
+import { TinyStacksError } from '@tinystacks/ops-core';
 import { AwsCredentialsType, AwsSdkVersionEnum } from './aws-credentials-type.js';
 import {
   AwsCredentials as AwsCredentialsConfig,
   LocalAwsProfile as LocalAwsProfileConfig
 } from '../../ops-types.js';
-import { TinyStacksError } from '@tinystacks/ops-core';
-import AWS from 'aws-sdk';
 
 
 

@@ -87,6 +87,8 @@
     ],
     "import/no-cycle": "error",
     "no-shadow": "off",
-    "@typescript-eslint/no-shadow": ["error"]
+    "@typescript-eslint/no-shadow": [
+      "error"
+    ]
   }
 }
