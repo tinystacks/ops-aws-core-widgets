@@ -1,7 +1,5 @@
 import { AwsCredentialsProvider } from "../../../src/aws-provider/aws-credentials-provider.js";
 
-
-
 describe('AwsCredentialsProvider', () => {
   describe('getCredentials', () => {
     it('should return credentials when using AwsKeys', async () => {

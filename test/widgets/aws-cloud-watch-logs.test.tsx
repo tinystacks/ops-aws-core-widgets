@@ -1,7 +1,6 @@
 import { AwsCloudWatchLogs } from '../../src/controllers/aws-cloud-watch-logs.js'
 import { AwsCloudWatchLogs as AwsCloudWatchLogsView } from '../../src/views/aws-cloud-watch-logs.js'
 import { TimeUnit } from '../../src/ops-types.js';
-// import { jest, describe, test, expect } from '@jest/globals';
 import { render, cleanup, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 

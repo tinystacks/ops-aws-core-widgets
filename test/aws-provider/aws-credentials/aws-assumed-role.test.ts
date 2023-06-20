@@ -41,6 +41,7 @@ const mockV3Credentials = {
 
 describe('AwsAssumedRole', () => {
   beforeEach(() => {
+    jest.spyOn(global.console, 'log').mockImplementation(jest.fn());
     mockSts.mockReturnValue({
       assumeRole: mockAssumeRole
     });

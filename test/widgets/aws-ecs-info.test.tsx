@@ -1,7 +1,8 @@
-import { AwsEcsInfo } from '../../src/controllers/aws-ecs-info.js'
-import { AwsEcsInfo as AwsEcsInfoView } from '../../src/views/aws-ecs-info.js'
 import { render, screen, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
+
+const { AwsEcsInfo } = await import('../../src/controllers/aws-ecs-info.js');
+const { AwsEcsInfo: AwsEcsInfoView } = await import('../../src/views/aws-ecs-info.js');
 
 describe('AwsEcsInfo', () => {
   afterEach(cleanup);
