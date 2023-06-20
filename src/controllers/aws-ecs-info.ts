@@ -5,9 +5,11 @@ import {
   DescribeCapacityProvidersCommandOutput
 } from '@aws-sdk/client-ecs';
 import { STS } from '@aws-sdk/client-sts';
+import { AutoScaling } from '@aws-sdk/client-auto-scaling';
 import { Controllers, Provider, TinyStacksError } from '@tinystacks/ops-core';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { getCoreEcsData, hydrateImages } from '../utils/aws-ecs-utils.js';
+import { getAsgNameFromArn } from '../utils/arn-utils.js';
 import { AwsEcsInfo as AwsEcsInfoModel, AwsEcsInfoType } from '../models/aws-ecs-info.js';
 
 import Widget = Controllers.Widget;
@@ -21,13 +23,16 @@ export class AwsEcsInfo extends AwsEcsInfoModel implements Widget {
     awsEcsInfo.desiredCount = object.desiredCount;
     awsEcsInfo.capacity = object.capacity;
     awsEcsInfo.asgArn = object.asgArn;
+    awsEcsInfo.asgName = object.asgName;
     awsEcsInfo.memory = object.memory;
     awsEcsInfo.cpu = object.cpu;
     awsEcsInfo.taskDefinitionArn = object.taskDefinitionArn;
+    awsEcsInfo.taskDefinitionVersion = object.taskDefinitionVersion;
     awsEcsInfo.status = object.status;
     awsEcsInfo.roleArn = object.roleArn;
     awsEcsInfo.execRoleArn = object.execRoleArn;
     awsEcsInfo.images = object.images;
+    awsEcsInfo.capacityType = object.capacityType;
     return awsEcsInfo;
   }
 
@@ -41,6 +46,10 @@ export class AwsEcsInfo extends AwsEcsInfoModel implements Widget {
       });
       const accountId = await stsClient.getCallerIdentity({}).then(res => res.Account).catch(e => console.error(e)) || '';
       const ecsClient = new ECS({
+        credentials,
+        region: this.region
+      });
+      const autoscalingClient = new AutoScaling({
         credentials,
         region: this.region
       });
@@ -78,14 +87,24 @@ export class AwsEcsInfo extends AwsEcsInfoModel implements Widget {
       const describeCapacityProvidersRes = secondarySettledPromises[1] as DescribeCapacityProvidersCommandOutput;
 
       const taskDefinition = describeTaskDefinitionRes?.taskDefinition;
+      this.taskDefinitionVersion = taskDefinition?.revision || 1;
       this.memory = taskDefinition?.memory;
       this.cpu = taskDefinition?.cpu;
       this.execRoleArn = taskDefinition?.executionRoleArn;
 
       const capacityProvider = get(describeCapacityProvidersRes, 'capacityProviders[0]');
       this.asgArn = capacityProvider?.autoScalingGroupProvider?.autoScalingGroupArn;
-      this.capacity = capacityProvider?.autoScalingGroupProvider?.managedScaling?.targetCapacity | this.desiredCount;
-      this.capacityType = capacityProvider?.autoScalingGroupProvider ? 'EC2' : 'Fargate';
+      if (this.asgArn) {
+        this.asgName = getAsgNameFromArn(this.asgArn);
+        const describeAutoScalingGroupsRes = await autoscalingClient.describeAutoScalingGroups({
+          AutoScalingGroupNames: [this.asgName]
+        });
+        this.capacity = get(describeAutoScalingGroupsRes, 'AutoScalingGroups[0].DesiredCapacity', 0);
+        this.capacityType = 'EC2';
+      } else {
+        this.capacity = primaryDeployment?.desiredCount;
+        this.capacityType = 'Fargate';
+      }
 
       this.images = hydrateImages(taskDefinition, accountId);
     } catch (e: any) {
