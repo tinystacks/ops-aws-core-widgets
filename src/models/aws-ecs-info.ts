@@ -5,6 +5,8 @@ import { Image } from '../utils/aws-ecs-utils.js';
 import Widget = Models.Widget;
 
 type AwsEcsInfoType = AwsEcsInfoProps & {
+  clusterArn?: string;
+  serviceArn?: string;
   runningCount?: number;
   desiredCount?: number;
   capacity?: number;
