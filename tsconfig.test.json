@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
+    "module": "ES2022",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "declaration": true,
     "strict": true,
     "noImplicitAny": false,
@@ -18,8 +23,17 @@
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "typeRoots": ["./node_modules/@types"],
-    "outDir": "./test-dist"
+    "importHelpers": true,
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "outDir": "./test-dist",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "allowJs": true
   },
-  "include": ["test", "src/test/"]
+  "include": [
+    "test"
+  ]
 }

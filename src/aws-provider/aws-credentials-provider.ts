@@ -1,4 +1,4 @@
-import { BaseProvider } from '@tinystacks/ops-core';
+import { Provider } from '@tinystacks/ops-core';
 import { AwsAssumedRole } from './aws-credentials/aws-assumed-role.js';
 import { AwsKeys } from './aws-credentials/aws-keys.js';
 import { LocalAwsProfile } from './aws-credentials/local-aws-profile.js';
@@ -13,7 +13,7 @@ import {
   LocalAwsProfile as LocalAwsProfileConfig
 } from '../ops-types.js';
 
-export class AwsCredentialsProvider extends BaseProvider implements CliEnvironmentProvider {
+export class AwsCredentialsProvider extends Provider implements CliEnvironmentProvider {
   static type = 'AwsCredentialsProvider';
   credentials: AwsCredentialsConfig;
   accountId?: string;

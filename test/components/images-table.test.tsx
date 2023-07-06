@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import ImagesTable from '../../src/components/images-table.js';
+import ImagesTable from '../../src/views/components/images-table.js';
 import '@testing-library/jest-dom/extend-expect';
 
 const mockImages = [

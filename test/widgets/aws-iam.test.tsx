@@ -1,5 +1,5 @@
 import { cleanup } from '@testing-library/react';
-import { AwsIamJson } from '../../src/aws-widgets/aws-iam-json.js'
+import { AwsIamJson } from '../../src/controllers/aws-iam-json.js'
 
 describe('AwsIamJson', () => {
   afterEach(cleanup);

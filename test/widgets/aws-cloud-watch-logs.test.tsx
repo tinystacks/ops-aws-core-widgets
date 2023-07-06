@@ -1,6 +1,7 @@
-import { cleanup, render, screen } from '@testing-library/react';
-import { AwsCloudWatchLogs } from '../../src/aws-widgets/aws-cloud-watch-logs.js'
+import { AwsCloudWatchLogs } from '../../src/controllers/aws-cloud-watch-logs.js'
+import { AwsCloudWatchLogs as AwsCloudWatchLogsView } from '../../src/views/aws-cloud-watch-logs.js'
 import { TimeUnit } from '../../src/ops-types.js';
+import { render, cleanup, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
 describe('AwsCloudWatchLogs', () => {
@@ -46,7 +47,7 @@ describe('AwsCloudWatchLogs getData function', () => {
     mockProviders = [
       {
         type: 'AwsCredentialsProvider',
-        getCredentials: jest.fn().mockResolvedValue({
+        getCredentials: () => ({
           accessKeyId: 'accessKeyId',
           secretAccessKey: 'secretAccessKey',
           sessionToken: 'sessionToken'
@@ -129,7 +130,7 @@ describe('AwsCloudWatchLogs render', () => {
       }]
     };
 
-    const cwWidget = AwsCloudWatchLogs.fromJson(props);
+    const cwWidget = AwsCloudWatchLogsView.fromJson(props);
     const renderedWidget = cwWidget.render();
     render(renderedWidget);
 
@@ -152,7 +153,7 @@ describe('AwsCloudWatchLogs render', () => {
       events: []
     };
 
-    const cwWidget = AwsCloudWatchLogs.fromJson(props);
+    const cwWidget = AwsCloudWatchLogsView.fromJson(props);
     const renderedWidget = cwWidget.render();
     render(renderedWidget);
 

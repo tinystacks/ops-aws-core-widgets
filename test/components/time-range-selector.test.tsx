@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
-import { TimeRangeSelector } from '../../src/components/time-range-selector.js';
+import { TimeRangeSelector } from '../../src/views/components/time-range-selector.js';
 
 
 describe('TimeRangeSelector', () => {

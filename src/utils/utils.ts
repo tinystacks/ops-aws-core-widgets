@@ -1,11 +1,11 @@
 import isEmpty from 'lodash.isempty';
 import get from 'lodash.get';
-import { BaseProvider, TinyStacksError } from '@tinystacks/ops-core';
+import { Provider, TinyStacksError } from '@tinystacks/ops-core';
 import dayjs, { ManipulateType } from 'dayjs';
 import { AwsCredentialsProvider } from '../aws-provider/aws-credentials-provider.js';
 import { AbsoluteTimeRange, RelativeTime, TimeRange } from '../ops-types.js';
 
-export function getAwsCredentialsProvider (providers?: BaseProvider[]): AwsCredentialsProvider {
+export function getAwsCredentialsProvider (providers?: Provider[]): AwsCredentialsProvider {
   if (!providers || isEmpty(providers)) {
     throw TinyStacksError.fromJson({
       message: 'No AwsCredentialsProvider provided',
@@ -24,7 +24,7 @@ export function getAwsCredentialsProvider (providers?: BaseProvider[]): AwsCrede
   return provider as AwsCredentialsProvider;
 }
 
-export function findProvider<T extends BaseProvider> (providers: BaseProvider[] = [], providerType: string): T {
+export function findProvider<T extends Provider> (providers: Provider[] = [], providerType: string): T {
   if (!providers || isEmpty(providers)) {
     throw TinyStacksError.fromJson({
       message: 'No providers are available!',

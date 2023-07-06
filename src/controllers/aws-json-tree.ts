@@ -1,30 +1,14 @@
-import React from 'react';
 import isEmpty from 'lodash.isempty';
-import { BaseProvider, BaseWidget, TinyStacksError } from '@tinystacks/ops-core';
-import CloudControl, { ResourceDescription } from 'aws-sdk/clients/cloudcontrol';
+import { Controllers, Provider, TinyStacksError } from '@tinystacks/ops-core';
+import CloudControl from 'aws-sdk/clients/cloudcontrol';
 import { AwsSdkVersionEnum } from '../aws-provider/aws-credentials/aws-credentials-type.js';
 import { getAwsCredentialsProvider } from '../utils/utils.js';
 import { AwsJsonTree as AwsJsonTreeProps } from '../ops-types.js';
+import { AwsJsonTree as AwsJsonTreeModel } from '../models/aws-json-tree.js';
 
-export class AwsJsonTree extends BaseWidget {
-  static type = 'AwsJsonTree';
-  region: string;
-  cloudControlType: string;
-  resourceModel?: string;
-  paths?: string[];
-  private _resourceDescriptions: ResourceDescription[]; 
+import Widget = Controllers.Widget;
 
-  
-  constructor (props: AwsJsonTreeProps) {
-    super (props);
-    this.region = props.region;
-    this.cloudControlType = props.cloudControlType; 
-    this.resourceModel = props.resourceModel;
-    this.paths = props.paths;
-    this._resourceDescriptions =[];
-
-  }
-
+export class AwsJsonTree extends AwsJsonTreeModel implements Widget {
   static fromJson (object: AwsJsonTreeProps): AwsJsonTree {
 
     //TO-DO validate cloudControlType
@@ -32,21 +16,8 @@ export class AwsJsonTree extends BaseWidget {
     //Pattern: [A-Za-z0-9]{2,64}::[A-Za-z0-9]{2,64}::[A-Za-z0-9]{2,64}
     return new AwsJsonTree(object);
   }
-  
-  
 
-  toJson (): AwsJsonTreeProps {
-
-    return { 
-      ...super.toJson(),  
-      region: this.region,
-      cloudControlType: this.cloudControlType,
-      resourceModel: this.resourceModel,
-      paths: this.paths };
-  }
-
-  
-  async getData (providers?: BaseProvider[]): Promise<void> {
+  async getData (providers?: Provider[]): Promise<void> {
     if (!providers || isEmpty(providers) || providers[0].type !== 'AwsCredentialsProvider') {
       throw TinyStacksError.fromJson({
         message: 'An AwsCredentialsProvider was expected, but was not given',
@@ -82,11 +53,4 @@ export class AwsJsonTree extends BaseWidget {
     }
     
   }
-
-  get resourceDesciptions () {
-    return this._resourceDescriptions;
-  }
-
-  render (): JSX.Element { return <>TODO</>;  }
-
 }
