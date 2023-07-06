@@ -74,31 +74,29 @@
     "ts-jest-resolver": "^2.0.0",
     "typescript": "^5.1.3"
   },
-  "dependencies": {
-    "@aws-sdk/client-auto-scaling": "^3.350.0",
-    "@aws-sdk/client-cloudwatch": "^3.347.1",
-    "@aws-sdk/client-cloudwatch-logs": "^3.347.1",
-    "@aws-sdk/client-codepipeline": "^3.347.1",
-    "@aws-sdk/client-ecs": "^3.347.1",
-    "@aws-sdk/client-iam": "^3.347.1",
-    "@aws-sdk/client-sts": "^3.347.1",
-    "@aws-sdk/types": "^3.257.0",
-    "@chakra-ui/icons": "^2.0.17",
-    "aws-sdk": "^2.1307.0",
-    "chart.js": "^4.2.1",
-    "dayjs": "^1.11.7",
-    "react-chartjs-2": "^5.2.0",
-    "rsuite": "^5.28.1"
-  },
   "peerDependencies": {
+    "@aws-sdk/client-auto-scaling": "3.x",
+    "@aws-sdk/client-cloudwatch": "3.x",
+    "@aws-sdk/client-cloudwatch-logs": "3.x",
+    "@aws-sdk/client-codepipeline": "3.x",
+    "@aws-sdk/client-ecs": "3.x",
+    "@aws-sdk/client-iam": "3.x",
+    "@aws-sdk/client-sts": "3.x",
+    "@aws-sdk/types": "3.x",
     "@chakra-ui/react": "2.x",
-    "@tinystacks/ops-core": "file:../ops-core/tinystacks-ops-core-0.4.0.tgz",
-    "@tinystacks/ops-core-widgets": "file:../ops-core-widgets/tinystacks-ops-core-widgets-0.0.16.tgz",
+    "@tinystacks/ops-core": "/Users/calebcourier/Projects/ops/ops-core/tinystacks-ops-core-0.4.0.tgz",
+    "@tinystacks/ops-core-widgets": "/Users/calebcourier/Projects/ops/ops-core-widgets/tinystacks-ops-core-widgets-0.0.16.tgz",
     "@tinystacks/ops-model": "0.x",
+    "@chakra-ui/icons": "2.x",
+    "aws-sdk": "2.x",
+    "chart.js": "4.x",
+    "dayjs": "1.x",
     "lodash.get": "4.x",
     "lodash.isempty": "4.x",
     "lodash.isnil": "4.x",
     "lodash.sortby": "4.x",
-    "react": "18.x"
+    "react": "18.x",
+    "react-chartjs-2": "5.x",
+    "rsuite": "5.x"
   }
 }
